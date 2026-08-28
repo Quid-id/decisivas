@@ -24,7 +24,7 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "decisivas"
-database_id = "PREENCHER-APOS-CRIAR-O-BANCO"
+database_id = "adaab799-bffa-4f43-88eb-1cf9607e732c"
 
 # Variáveis de ambiente NÃO secretas. Segredos (OPENROUTER_API_KEY etc.)
 # nunca entram aqui: local em .dev.vars, produção no painel do Cloudflare.
