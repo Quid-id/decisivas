@@ -15,6 +15,11 @@ TURNSTILE_SECRET_KEY=
 # Fica fora do repositório, separada por vírgula.
 BLOCKED_TERMS=
 
+# Modo de simulação: com "true", o Worker não chama o OpenRouter e gera a
+# resposta a partir dos próprios trechos. Para desenvolver e testar o fluxo
+# inteiro sem rede e sem custo. Nunca ligar em produção.
+SIMULAR_MODELO=
+
 # As variáveis abaixo têm valores padrão no wrangler.toml e podem ser
 # sobrescritas aqui durante o desenvolvimento:
 # AGENT_ENABLED=true

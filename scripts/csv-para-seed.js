@@ -86,7 +86,9 @@ function lerCsv(caminho) {
     const obj = { _linha: n + 2 };
     cabecalho.forEach((coluna, i) => {
       if (coluna.includes("motivo")) return; // campo interno: fica de fora
-      obj[coluna] = (valores[i] ?? "").trim();
+      const valor = (valores[i] ?? "").trim();
+      // Convenção da planilha: "-" significa "não se aplica" → campo vazio.
+      obj[coluna] = valor === "-" ? "" : valor;
     });
     return obj;
   });
@@ -202,9 +204,9 @@ function main() {
   linhas.push("");
   for (const t of aceitos) {
     linhas.push(
-      `INSERT INTO trechos (id, texto, publico, macronarrativa, pauta, tipo, forca, base, despersonalizado, pagina, id_documento) VALUES (` +
+      `INSERT INTO trechos (id, texto, publico, macronarrativa, pauta, tipo, forca, base, despersonalizado, link, pagina, id_documento) VALUES (` +
       [t.id, t.texto, t.publico, t.macronarrativa, t.pauta, t.tipo, t.forca,
-       t.base, t.despersonalizado || "nao", t.pagina, t.id_documento].map(sql).join(", ") + `);`
+       t.base, t.despersonalizado || "nao", t.link, t.pagina, t.id_documento].map(sql).join(", ") + `);`
     );
   }
   linhas.push("");
