@@ -37,3 +37,7 @@ Cole um por vez, confira o resultado, siga para o próximo. Cada comando assume 
 ## 9. Antes de publicar
 
 > Faça uma revisão final do repositório procurando: qualquer chave ou segredo em código, qualquer URL escrita pelo modelo em vez de vinda da tabela recursos, qualquer texto de interface fora de brand/tokens.css, e qualquer caminho em que uma entrada do usuário chegue ao modelo como texto livre. Liste o que encontrar sem corrigir ainda.
+
+## 10. Conteúdo fixo e registro de alterações
+
+> Crie a pasta content/ com os arquivos markdown das páginas Sobre, Metodologia e Transparência (texto placeholder marcado como A REDIGIR) e o passo de build que converte cada um em página usando os tokens de brand/. Depois crie a página pública /registro-de-alteracoes, gerada automaticamente no build a partir do histórico do Git: data e mensagem de cada commit que alterou content/ ou data/, em lista simples, mais recente primeiro. Nenhuma edição manual nessa página.

@@ -43,9 +43,15 @@ Não é ferramenta eleitoral. Não menciona candidaturas. É um acervo de pesqui
 - `docs/03-regras-do-agente.md` — prompt de sistema, recusas, log
 - `docs/04-conformidade.md` — linhas vermelhas legais do projeto
 - `docs/05-comandos-claude-code.md` — sequência de tarefas planejada
+- `docs/07-mapa-de-recuperacao.md` — qual consulta alimenta cada bloco da página
+- `content/` — textos das páginas fixas em markdown; editar e fazer push é o fluxo de atualização, sem CMS
 - `brand/` — tokens de design, logotipo e guia (entregues pela equipe de identidade)
 - `data/amostra.csv` — amostra real do acervo para desenvolvimento
 
 ## Estado atual dos dados
 
-A amostra em `data/` vem do documento D01, extraída e ainda **pendente de revisão humana**. Serve para desenvolver, não para publicar. A carga oficial só acontece com linhas de decisão `aceitar` ou `corrigir e aceitar`.
+A amostra em `data/amostra.csv` são 273 linhas provisórias, consolidadas dos 12 documentos extraídos, cobrindo os 10 cruzamentos com mais material. Ela já passou por um filtro automático que removeu linhas com alerta VETO ou CONFERIR e linhas com público ou macronarrativa fora do vocabulário fechado.
+
+**Ela é material de desenvolvimento e não pode ser publicada.** Nenhuma dessas linhas passou por revisão humana. A carga oficial acontece só depois das etapas de auditoria, consolidação e revisão, e só com linhas de decisão `aceitar` ou `corrigir e aceitar`.
+
+Duas ausências conhecidas nesta amostra, que o código deve tratar como lacuna e não como erro: não há linhas de pauta `consumo de mídia` (o bloco de hábitos de mídia sairá vazio), e há poucos trechos de tipo `exemplo` com link.
