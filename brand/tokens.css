@@ -1,0 +1,108 @@
+/* ============================================================
+   DECISIVAS — tokens de design
+   VERSÃO PROVISÓRIA, para desenvolvimento.
+
+   Substituição: quando a equipe de identidade entregar o
+   tokens.css definitivo, troque APENAS os VALORES abaixo.
+   Os NOMES das variáveis são contrato com as telas e não
+   devem mudar. Nenhum arquivo de interface deve conter cor,
+   fonte, espaçamento ou raio fora daqui.
+   ============================================================ */
+
+:root {
+
+  /* ---------- Superfícies ---------- */
+  --cor-fundo:            #F5F3EE;  /* fundo da página */
+  --cor-superficie:       #FFFFFF;  /* cartões e blocos sobre o fundo */
+  --cor-superficie-alt:   #EDEBE4;  /* blocos secundários, estados de repouso */
+
+  /* ---------- Texto ---------- */
+  --cor-texto:            #1A1A18;  /* texto principal */
+  --cor-texto-secundario: #5F5E5A;  /* apoio, legendas, descrições */
+  --cor-texto-suave:      #86847E;  /* metadados, contagens, datas */
+  --cor-texto-invertido:  #FFFFFF;  /* sobre fundos escuros ou de destaque */
+
+  /* ---------- Destaque (cor da marca) ---------- */
+  --cor-destaque:         #1B3A5C;  /* ações, títulos, tags selecionadas */
+  --cor-destaque-forte:   #14293F;  /* estado pressionado */
+  --cor-destaque-suave:   #E6EEF6;  /* fundo de tag não selecionada */
+  --cor-destaque-texto:   #1B3A5C;  /* texto sobre destaque-suave */
+
+  /* ---------- Aviso (lacuna declarada, alertas) ---------- */
+  --cor-aviso:            #854F0B;
+  --cor-aviso-fundo:      #FAEEDA;
+
+  /* ---------- Positivo (confirmações) ---------- */
+  --cor-positivo:         #3B6D11;
+  --cor-positivo-fundo:   #E8F0E4;
+
+  /* ---------- Erro (falha de operação) ---------- */
+  --cor-erro:             #A32D2D;
+  --cor-erro-fundo:       #FBEBEB;
+
+  /* ---------- Linhas ---------- */
+  --cor-borda:            #DCDAD2;  /* bordas de cartão */
+  --cor-borda-forte:      #B9B6AC;  /* campos e controles */
+
+  /* ---------- Tipografia ---------- */
+  --fonte-texto:  ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+                  Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-titulo: var(--fonte-texto);
+  --fonte-mono:   ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---------- Escala de texto ---------- */
+  --texto-xs:   0.75rem;   /* 12px — metadados */
+  --texto-sm:   0.8125rem; /* 13px — legendas, rótulos */
+  --texto-base: 0.9375rem; /* 15px — corpo */
+  --texto-md:   1.0625rem; /* 17px — destaque de leitura */
+  --texto-lg:   1.3125rem; /* 21px — títulos de bloco */
+  --texto-xl:   1.75rem;   /* 28px — título de página */
+  --texto-2xl:  2.25rem;   /* 36px — título da home */
+
+  /* ---------- Peso ---------- */
+  --peso-normal:  400;
+  --peso-medio:   500;
+  --peso-forte:   600;
+
+  /* ---------- Entrelinha ---------- */
+  --entrelinha-apertada: 1.25;
+  --entrelinha-normal:   1.6;
+  --entrelinha-solta:    1.75;
+
+  /* ---------- Espaçamento ---------- */
+  --esp-1:  0.25rem;
+  --esp-2:  0.5rem;
+  --esp-3:  0.75rem;
+  --esp-4:  1rem;
+  --esp-5:  1.5rem;
+  --esp-6:  2rem;
+  --esp-7:  3rem;
+  --esp-8:  4rem;
+
+  /* ---------- Raios ---------- */
+  --raio-sm:   6px;    /* controles pequenos */
+  --raio-md:   10px;   /* cartões */
+  --raio-lg:   14px;   /* blocos grandes */
+  --raio-tag:  999px;  /* tags e botões-pílula */
+
+  /* ---------- Sombra ---------- */
+  /* A identidade provisória não usa sombra: a hierarquia vem
+     de superfície e borda. Mantido como token para o caso de
+     a identidade final usar. */
+  --sombra-nenhuma: none;
+  --sombra-sutil:   0 1px 2px rgba(26, 26, 24, 0.06);
+
+  /* ---------- Layout ---------- */
+  --largura-conteudo: 60rem;  /* largura máxima do miolo */
+  --largura-texto:    42rem;  /* largura de leitura confortável */
+
+  /* ---------- Foco (acessibilidade) ---------- */
+  --foco-cor:      var(--cor-destaque);
+  --foco-espessura: 2px;
+  --foco-offset:    2px;
+}
+
+/* Preferência por menos movimento: respeitada em toda a interface. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
