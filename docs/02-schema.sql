@@ -24,6 +24,7 @@ CREATE TABLE trechos (
   forca            TEXT CHECK (forca IN ('forte','indício')),
   base             TEXT NOT NULL CHECK (base IN ('geral','restrita')),
   despersonalizado TEXT DEFAULT 'nao',
+  link             TEXT,                    -- somente tipo 'exemplo'; URL vinda do documento ou da curadoria, nunca gerada
   pagina           TEXT,
   id_documento     TEXT NOT NULL REFERENCES documentos(id_documento)
 );
