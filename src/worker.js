@@ -108,7 +108,7 @@ export default {
 
     try {
       if (url.pathname === "/api/match") return await rotaMatch(corpo, env, request);
-      if (url.pathname === "/api/formato") return rotaFormato(corpo, env);
+      if (url.pathname === "/api/formato") return await rotaFormato(corpo, env, request);
     } catch (e) {
       console.error("erro na rota", url.pathname, e.message);
       return respostaIndisponivel();
@@ -287,7 +287,7 @@ async function rotaMatch(corpo, env, request) {
 async function geraComValidacao(env, publico, macronarrativa, subconjunto) {
   const usuario = montaMensagemUsuario(publico, macronarrativa, subconjunto);
   for (let tentativa = 0; tentativa < 2; tentativa++) {
-    const texto = await chamaModelo(env, PROMPT_SISTEMA, usuario, subconjunto);
+    const texto = await chamaModelo(env, PROMPT_SISTEMA, usuario, () => simulaModelo(subconjunto));
     const json = extraiJson(texto);
     if (json && formatoValido(json)) return json;
     console.error(`resposta fora do formato (tentativa ${tentativa + 1})`);
@@ -295,12 +295,13 @@ async function geraComValidacao(env, publico, macronarrativa, subconjunto) {
   return null;
 }
 
-// ÚNICO ponto de contato com o modelo. Com SIMULAR_MODELO=true (variável de
-// ambiente, para desenvolvimento sem rede), devolve uma resposta determinística
-// construída a partir dos próprios trechos — o restante do fluxo não muda.
-async function chamaModelo(env, sistema, usuario, subconjunto) {
+// ÚNICO ponto de contato com o modelo, para todas as rotas. Com
+// SIMULAR_MODELO=true (variável de ambiente, para desenvolvimento sem rede),
+// devolve a resposta determinística do simulador da rota — o restante do
+// fluxo (validação, termos bloqueados, registro) não muda.
+async function chamaModelo(env, sistema, usuario, simulador) {
   if (env.SIMULAR_MODELO === "true") {
-    return simulaModelo(subconjunto);
+    return simulador();
   }
   const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -494,19 +495,185 @@ async function consulta(env, sqlTexto, parametros = []) {
 }
 
 // ---------------------------------------------------------------------------
-// Rota /api/formato — implementação real na tarefa 5 (docs/05)
+// Rota /api/formato (docs/01, seção Formatos; docs/03, seção /api/formato)
+//
+// Entrada: a página já gerada por /api/match + formato da lista fechada.
+// O acervo NÃO é reconsultado; o modelo recebe só a página. Nenhum texto
+// livre do usuário chega ao modelo: da entrada só sobrevivem os campos
+// conhecidos da página, com tipo e tamanho validados, URLs removidas e o
+// restante descartado.
 // ---------------------------------------------------------------------------
 
-function rotaFormato(corpo, env) {
-  const { formato } = corpo ?? {};
-  if (!FORMATOS.includes(formato)) {
+// Regras 2, 3 e 8 de docs/03, presentes em todo prompt de formato.
+const REGRAS_FORMATO = `Regras absolutas:
+1. Use somente o conteúdo da página fornecida. Não acrescente fatos, números
+   ou exemplos de conhecimento próprio.
+2. Nunca mencione, avalie ou aluda a candidaturas, partidos, coligações,
+   políticos ou eleições. Nunca peça voto nem sugira direção ou rejeição de voto.
+3. Nunca escreva URLs, nomes de sites ou referências a links.
+4. Responda apenas com o JSON no formato indicado, sem nenhum texto fora dele.`;
+
+// Prompts fixos por formato. Nada do usuário entra aqui.
+const PROMPTS_FORMATO = {
+  whatsapp: {
+    sistema: `Você adapta uma página de apoio à comunicação para uma mensagem curta de WhatsApp, em português do Brasil, com tom pessoal e direto, no máximo 900 caracteres, sem emojis em excesso.
+${REGRAS_FORMATO}
+
+Formato: {"mensagem": "..."}`,
+    valida: (j) => typeof j?.mensagem === "string" && j.mensagem.length > 0,
+  },
+  carrossel: {
+    sistema: `Você adapta uma página de apoio à comunicação para um carrossel de 5 a 7 cartões, em português do Brasil. Cada cartão tem um título curto (até 40 caracteres) e um texto de apoio (até 200 caracteres). O primeiro cartão apresenta o tema; o último resume.
+${REGRAS_FORMATO}
+
+Formato: {"cartoes": [{"titulo": "...", "texto": "..."}]}`,
+    valida: (j) =>
+      Array.isArray(j?.cartoes) && j.cartoes.length >= 3 && j.cartoes.length <= 8 &&
+      j.cartoes.every((c) => typeof c?.titulo === "string" && typeof c?.texto === "string"),
+  },
+  roteiro: {
+    sistema: `Você adapta uma página de apoio à comunicação para um roteiro de vídeo curto (até 60 segundos), em português do Brasil. Divida em cenas; cada cena tem uma descrição visual breve e a fala correspondente, em linguagem falada.
+${REGRAS_FORMATO}
+
+Formato: {"cenas": [{"descricao": "...", "fala": "..."}]}`,
+    valida: (j) =>
+      Array.isArray(j?.cenas) && j.cenas.length >= 2 &&
+      j.cenas.every((c) => typeof c?.descricao === "string" && typeof c?.fala === "string"),
+  },
+};
+
+const TAMANHO_MAXIMO_CAMPO = 4000;
+
+async function rotaFormato(corpo, env, request) {
+  const { formato, pagina } = corpo ?? {};
+
+  if (!(await verificaTurnstile(corpo, env, request))) {
+    return respostaJson({ erro: "Verificação anti-abuso falhou." }, 403);
+  }
+  if (!(await limitePorIpOk(env, request, "formato"))) {
+    return respostaJson({ erro: "Limite de requisições atingido. Tente mais tarde." }, 429);
+  }
+
+  // Lista fechada de formatos → 400 sem chamar o modelo.
+  if (!PROMPTS_FORMATO[formato]) {
     return respostaJson({ erro: "Formato fora da lista disponível." }, 400);
   }
-  return respostaJson({
-    exemplo: true,
+
+  const canonica = paginaCanonica(pagina);
+  if (!canonica) {
+    return respostaJson({ erro: "Página ausente ou fora do formato entregue pela plataforma." }, 400);
+  }
+
+  const { sistema, valida } = PROMPTS_FORMATO[formato];
+  const usuario = `Página a adaptar:\n\n${canonica.texto}`;
+
+  let gerado = null;
+  for (let tentativa = 0; tentativa < 2 && gerado === null; tentativa++) {
+    const texto = await chamaModelo(env, sistema, usuario, () => simulaFormato(formato, canonica));
+    const json = extraiJson(texto);
+    if (json && valida(json)) gerado = json;
+    else console.error(`formato ${formato}: resposta fora do formato (tentativa ${tentativa + 1})`);
+  }
+  if (gerado === null) return respostaIndisponivel();
+
+  // Mesma verificação de saída da rota match.
+  if (contemTermoBloqueado(JSON.stringify(gerado), env)) {
+    console.error("resposta de formato descartada por termo bloqueado");
+    return respostaIndisponivel();
+  }
+
+  const modeloUsado = env.SIMULAR_MODELO === "true" ? "simulacao" : env.MODEL_ID;
+  const resposta = {
     formato,
-    conteudo: "LACUNA",
+    match: canonica.match,
+    conteudo: gerado,
     rotulo_ia: ROTULO_IA,
-    modelo: env.MODEL_ID ?? null,
+  };
+
+  // Gravação em registros antes de devolver. Sem IP, sem identidade.
+  await env.DB.prepare(
+    "INSERT INTO registros (rota, publico, macronarrativa, formato, ids_trechos, modelo, resposta) VALUES ('formato', ?1, ?2, ?3, ?4, ?5, ?6)"
+  )
+    .bind(
+      canonica.match.publico,
+      canonica.match.macronarrativa,
+      formato,
+      canonica.ids.join(","),
+      modeloUsado,
+      JSON.stringify(resposta)
+    )
+    .run();
+
+  return respostaJson(resposta);
+}
+
+// Reduz a página recebida à forma canônica: só os campos conhecidos, só
+// strings, tamanho limitado, URLs removidas. Qualquer outra coisa no corpo
+// é descartada — é isso que garante que texto livre não chega ao modelo.
+function paginaCanonica(pagina) {
+  if (typeof pagina !== "object" || pagina === null) return null;
+  const publico = pagina.match?.publico;
+  const macronarrativa = pagina.match?.macronarrativa;
+  if (!PUBLICOS.includes(publico) || !MACRONARRATIVAS.includes(macronarrativa)) return null;
+
+  const texto = (valor) =>
+    typeof valor === "string" ? limpaTexto(valor) : null;
+  const campoTexto = (campo) =>
+    pagina[campo]?.lacuna === false ? texto(pagina[campo].texto) : null;
+  const campoItens = (campo) =>
+    pagina[campo]?.lacuna === false && Array.isArray(pagina[campo].itens)
+      ? pagina[campo].itens.map(texto).filter(Boolean)
+      : [];
+  const idsDe = (campo) =>
+    Array.isArray(pagina[campo]?.ids)
+      ? pagina[campo].ids.filter((id) => typeof id === "string" && /^[A-Za-z0-9-]{1,40}$/.test(id))
+      : [];
+
+  const partes = [];
+  partes.push(`Público: ${publico}. Tema: ${macronarrativa}.`);
+  const importa = campoTexto("importa");
+  const pesquisa = campoTexto("pesquisa");
+  const sintese = campoTexto("sintese");
+  const funciona = campoItens("funciona");
+  const afasta = campoItens("afasta");
+  if (importa) partes.push(`Por que isso importa: ${importa}`);
+  if (pesquisa) partes.push(`O que a pesquisa mostra: ${pesquisa}`);
+  if (funciona.length) partes.push(`O que costuma funcionar:\n- ${funciona.join("\n- ")}`);
+  if (afasta.length) partes.push(`O que costuma afastar:\n- ${afasta.join("\n- ")}`);
+  if (sintese) partes.push(`Síntese: ${sintese}`);
+
+  // Sem nenhum campo substantivo não há o que adaptar.
+  if (partes.length < 2) return null;
+
+  const ids = [...new Set(["importa", "pesquisa", "funciona", "afasta", "sintese"].flatMap(idsDe))];
+  return { match: { publico, macronarrativa }, texto: partes.join("\n\n"), ids };
+}
+
+// Corta no tamanho máximo e remove qualquer URL: o modelo nunca vê links.
+function limpaTexto(valor) {
+  const semUrl = valor
+    .replace(/\bhttps?:\/\/\S+/gi, "")
+    .replace(/\bwww\.\S+/gi, "");
+  const aparado = semUrl.replace(/\s+/g, " ").trim().slice(0, TAMANHO_MAXIMO_CAMPO);
+  return aparado.length ? aparado : null;
+}
+
+// Simulador da rota formato: adaptação determinística da página canônica.
+function simulaFormato(formato, canonica) {
+  const linhas = canonica.texto.split("\n").filter((l) => l.trim());
+  const corte = (s, n) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+  if (formato === "whatsapp") {
+    return JSON.stringify({ mensagem: corte(linhas.join(" "), 900) });
+  }
+  if (formato === "carrossel") {
+    const cartoes = linhas.slice(0, 7).map((l, i) => ({
+      titulo: corte(i === 0 ? "Para começar" : `Cartão ${i + 1}`, 40),
+      texto: corte(l, 200),
+    }));
+    while (cartoes.length < 3) cartoes.push({ titulo: `Cartão ${cartoes.length + 1}`, texto: "…" });
+    return JSON.stringify({ cartoes });
+  }
+  return JSON.stringify({
+    cenas: linhas.slice(0, 4).map((l) => ({ descricao: "Pessoa falando à câmera.", fala: corte(l, 240) })),
   });
 }
