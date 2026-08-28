@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DECISIVAS — referência visual dos tokens</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* Esta página usa SOMENTE variáveis de tokens.css. Nenhum valor literal de cor,
+   fonte, espaçamento ou raio. É a prova de que os tokens bastam. */
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--cor-fundo); color: var(--cor-texto);
+  font-family: var(--fonte-texto); font-size: var(--texto-m);
+  line-height: var(--entrelinha-normal);
+}
+.wrap { max-width: var(--largura-conteudo); margin: 0 auto; padding: var(--espaco-5) var(--espaco-4) var(--espaco-6); }
+h1 { font-size: var(--texto-gg); font-weight: var(--peso-forte); color: var(--cor-marca); margin: 0 0 var(--espaco-2); }
+h2 { font-size: var(--texto-g); font-weight: var(--peso-forte); color: var(--cor-marca); margin: var(--espaco-5) 0 var(--espaco-3); }
+.sub { color: var(--cor-texto-suave); margin: 0 0 var(--espaco-5); max-width: var(--largura-texto); }
+.rotulo { font-size: var(--texto-p); font-weight: var(--peso-forte); color: var(--cor-texto-suave);
+          text-transform: uppercase; letter-spacing: .06em; margin: 0 0 var(--espaco-2); }
+.meta { font-size: var(--texto-pp); color: var(--cor-texto-suave); }
+.card { background: var(--cor-superficie); border: 1px solid var(--cor-borda);
+        border-radius: var(--raio-m); padding: var(--espaco-4); margin-bottom: var(--espaco-3); }
+.card p:last-child { margin-bottom: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: var(--espaco-3); }
+.tags { display: flex; flex-wrap: wrap; gap: var(--espaco-2); }
+.tag { border: none; font: inherit; font-size: var(--texto-p); padding: var(--espaco-2) var(--espaco-3);
+       border-radius: var(--raio-g); background: var(--cor-destaque);
+       color: var(--cor-marca); cursor: pointer; min-height: 44px; }
+.tag[aria-pressed="true"] { background: var(--cor-marca); color: var(--cor-marca-contraste);
+       font-weight: var(--peso-forte); }
+.btn { border: none; font: inherit; font-size: var(--texto-m); font-weight: var(--peso-medio);
+       padding: var(--espaco-2) var(--espaco-4); border-radius: var(--raio-g);
+       background: var(--cor-marca); color: var(--cor-marca-contraste); cursor: pointer; min-height: 44px; }
+.btn:hover { background: var(--cor-marca-forte); }
+.btn-sec { background: var(--cor-superficie); color: var(--cor-texto);
+       border: 1px solid var(--cor-borda-forte); }
+:focus-visible { outline: var(--foco-espessura) solid var(--foco-cor); outline-offset: var(--foco-offset); }
+.aviso { background: var(--cor-aviso-fundo); color: var(--cor-aviso-texto);
+         border: 1px solid var(--cor-aviso-borda); border-radius: var(--raio-m);
+         padding: var(--espaco-3); font-size: var(--texto-p); }
+.positivo { background: var(--cor-positivo-fundo); color: var(--cor-positivo); border-radius: var(--raio-m);
+         padding: var(--espaco-3); font-size: var(--texto-p); }
+.erro { background: var(--cor-erro-fundo); color: var(--cor-erro); border-radius: var(--raio-m);
+         padding: var(--espaco-3); font-size: var(--texto-p); }
+.sintese { background: var(--cor-marca); color: var(--cor-marca-contraste);
+         border-radius: var(--raio-m); padding: var(--espaco-4); }
+.sintese p { font-size: var(--texto-g); margin: var(--espaco-2) 0 0; }
+.fonte { display: inline-block; font-size: var(--texto-pp); color: var(--cor-texto-suave);
+         border: 1px solid var(--cor-borda); border-radius: var(--raio-g);
+         padding: var(--espaco-1) var(--espaco-3); margin-right: var(--espaco-2); }
+.amostras { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--espaco-3); }
+.amostra { border: 1px solid var(--cor-borda); border-radius: var(--raio-s); overflow: hidden; }
+.amostra .chip { height: 3.5rem; }
+.amostra .nome { padding: var(--espaco-2) var(--espaco-3); font-size: var(--texto-pp);
+                 font-family: var(--fonte-mono); color: var(--cor-texto-suave);
+                 background: var(--cor-superficie); }
+ul { padding-left: var(--espaco-4); margin: 0; }
+li { margin-bottom: var(--espaco-2); }
+.logo { color: var(--cor-marca); }
+.logo svg { display: block; height: 2rem; width: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo" style="margin-bottom: var(--espaco-4);">
+    <svg viewBox="0 0 260 32" role="img" aria-label="DECISIVAS"><title>DECISIVAS</title>
+      <text x="0" y="24" font-family="var(--fonte-texto)" font-size="26" font-weight="600"
+            letter-spacing="1.5" fill="currentColor">DECISIVAS</text></svg>
+  </div>
+
+  <h1>Referência visual dos tokens</h1>
+  <p class="sub">Identidade provisória, para desenvolvimento. Esta página usa apenas variáveis de
+  <code>tokens.css</code>: nenhum valor literal de cor, fonte, espaçamento ou raio. Ao trocar os
+  valores dos tokens, tudo aqui muda junto, e é assim que a substituição pela identidade
+  definitiva não exige tocar em nenhuma tela.</p>
+
+  <h2>Cores</h2>
+  <div class="amostras">
+    <div class="amostra"><div class="chip" style="background:var(--cor-fundo)"></div><div class="nome">--cor-fundo</div></div>
+    <div class="amostra"><div class="chip" style="background:var(--cor-superficie)"></div><div class="nome">--cor-superficie</div></div>
+    <div class="amostra"><div class="chip" style="background:var(--cor-superficie-alt)"></div><div class="nome">--cor-superficie-alt</div></div>
+    <div class="amostra"><div class="chip" style="background:var(--cor-marca)"></div><div class="nome">--cor-marca</div></div>
+    <div class="amostra"><div class="chip" style="background:var(--cor-destaque)"></div><div class="nome">--cor-destaque</div></div>
+    <div class="amostra"><div class="chip" style="background:var(--cor-aviso-fundo)"></div><div class="nome">--cor-aviso-fundo</div></div>
+    <div class="amostra"><div class="chip" style="background:var(--cor-positivo-fundo)"></div><div class="nome">--cor-positivo-fundo</div></div>
+    <div class="amostra"><div class="chip" style="background:var(--cor-erro-fundo)"></div><div class="nome">--cor-erro-fundo</div></div>
+  </div>
+
+  <h2>Tipografia</h2>
+  <div class="card">
+    <p style="font-size:var(--texto-titulo);font-weight:var(--peso-forte);line-height:var(--entrelinha-apertada);margin:0 0 var(--espaco-3)">Com quem você quer falar?</p>
+    <p style="font-size:var(--texto-g);font-weight:var(--peso-forte);margin:0 0 var(--espaco-3)">Título de bloco</p>
+    <p style="max-width:var(--largura-texto)">Corpo de texto em <code>--texto-m</code>. O tamanho começa em 15px
+    porque parte do público tem mais de 70 anos, e a largura é limitada para leitura confortável.</p>
+    <p class="rotulo" style="margin-top:var(--espaco-3)">Rótulo de campo</p>
+    <p class="meta">Metadado: 14 fontes qualitativas · atualizado em 25/08</p>
+  </div>
+
+  <h2>Tags de seleção</h2>
+  <div class="card">
+    <p class="rotulo">Públicos</p>
+    <div class="tags" style="margin-bottom:var(--espaco-3)">
+      <button class="tag" aria-pressed="false">Idosos</button>
+      <button class="tag" aria-pressed="false">Jovens</button>
+      <button class="tag" aria-pressed="true">Mulheres de 2 a 5 salários</button>
+      <button class="tag" aria-pressed="false">Mulheres beneficiárias</button>
+      <button class="tag" aria-pressed="false">Trabalhadoras informais</button>
+    </div>
+    <p class="rotulo">Temas</p>
+    <div class="tags">
+      <button class="tag" aria-pressed="true">Dinheiro no bolso</button>
+      <button class="tag" aria-pressed="false">Proteção do trabalhador</button>
+      <button class="tag" aria-pressed="false">Proteção da família</button>
+      <button class="tag" aria-pressed="false">Brasil soberano</button>
+      <button class="tag" aria-pressed="false">Engajamento cívico</button>
+    </div>
+  </div>
+
+  <h2>Blocos da página de resultado</h2>
+  <div class="card">
+    <p class="rotulo">O que a pesquisa mostra</p>
+    <p>Preço de mercado é o indicador que ancora a avaliação de renda, acima de emprego e de salário.</p>
+    <p style="margin-bottom:0">
+      <span class="fonte">Grupos qualitativos 2026</span>
+      <span class="fonte">Escuta em profundidade</span>
+    </p>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <p class="rotulo">O que costuma funcionar</p>
+      <ul><li>Falar do mês, não do ano</li><li>Comparar antes e depois</li><li>Nomear o gasto concreto</li></ul>
+    </div>
+    <div class="card">
+      <p class="rotulo">O que costuma afastar</p>
+      <ul><li>Termos de macroeconomia</li><li>Tom de promessa</li><li>Colocar o público como vítima</li></ul>
+    </div>
+  </div>
+
+  <div class="sintese" style="margin-bottom:var(--espaco-3)">
+    <p class="rotulo" style="color:var(--cor-destaque);margin:0">Síntese do tema</p>
+    <p>O que pesa não é o salário do ano, é a conta desta semana.</p>
+  </div>
+
+  <h2>Estados de mensagem</h2>
+  <div class="card" style="border:none;background:transparent;padding:0">
+    <p class="aviso" style="margin-bottom:var(--espaco-3)">Evidência insuficiente no acervo para este item.</p>
+    <p class="positivo" style="margin-bottom:var(--espaco-3)">Conteúdo copiado.</p>
+    <p class="erro" style="margin:0">Não foi possível completar a consulta. Tente novamente.</p>
+  </div>
+
+  <h2>Botões</h2>
+  <div class="card">
+    <div class="tags">
+      <button class="btn">Ver o que sabemos</button>
+      <button class="btn btn-sec">WhatsApp</button>
+      <button class="btn btn-sec">Carrossel</button>
+      <button class="btn btn-sec">Copiar</button>
+    </div>
+    <p class="meta" style="margin:var(--espaco-3) 0 0">Navegue com Tab para conferir o contorno de foco.</p>
+  </div>
+
+</div>
+</body>
+</html>

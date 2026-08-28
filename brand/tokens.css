@@ -1,37 +1,78 @@
-/* DECISIVAS — tokens de design PROVISÓRIOS (neutros).
-   A entrega da equipe de identidade substitui este arquivo SEM mudar
-   nenhum nome de variável (brand/LEIA-ME.md). Toda a interface usa
-   exclusivamente estes tokens: nenhuma cor, fonte, espaçamento, raio ou
-   sombra pode ser declarado fora daqui (CLAUDE.md, regra 8).
-   Após alterar: copiar para public/tokens.css (cp brand/tokens.css public/tokens.css). */
+/* ============================================================
+   DECISIVAS — tokens de design
+   VERSÃO PROVISÓRIA, para desenvolvimento.
+
+   Substituição: quando a equipe de identidade entregar o
+   tokens.css definitivo, troque APENAS os VALORES abaixo.
+   Os NOMES das variáveis são contrato com as telas e não
+   devem mudar. Nenhum arquivo de interface deve conter cor,
+   fonte, espaçamento ou raio fora daqui.
+
+   Após alterar: copiar para public/tokens.css
+   (cp brand/tokens.css public/tokens.css).
+   ============================================================ */
 
 :root {
-  /* Cores — nomes semânticos */
-  --cor-fundo: #f6f5f2;
-  --cor-superficie: #ffffff;
-  --cor-texto: #1d1c1a;
-  --cor-texto-suave: #5c594f;
-  --cor-marca: #23413a;
-  --cor-marca-contraste: #ffffff;
-  --cor-destaque: #d8e5df;
-  --cor-borda: #d9d5cc;
-  --cor-aviso-fundo: #faf3e3;
-  --cor-aviso-borda: #e3d3a3;
-  --cor-aviso-texto: #6b5a20;
 
-  /* Tipografia */
-  --fonte-titulo: Georgia, "Times New Roman", serif;
-  --fonte-texto: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* ---------- Superfícies ---------- */
+  --cor-fundo:            #F5F3EE;  /* fundo da página */
+  --cor-superficie:       #FFFFFF;  /* cartões e blocos sobre o fundo */
+  --cor-superficie-alt:   #EDEBE4;  /* blocos secundários, estados de repouso */
 
-  /* Escala de texto */
-  --texto-pp: 0.8rem;
-  --texto-p: 0.9rem;
-  --texto-m: 1rem;
-  --texto-g: 1.25rem;
-  --texto-gg: 1.6rem;
-  --texto-titulo: 2.1rem;
+  /* ---------- Texto ---------- */
+  --cor-texto:            #1A1A18;  /* texto principal */
+  --cor-texto-suave:      #5F5E5A;  /* apoio, legendas, metadados, datas */
 
-  /* Espaçamentos */
+  /* ---------- Marca (cor principal) ---------- */
+  --cor-marca:            #1B3A5C;  /* ações, títulos, tags selecionadas */
+  --cor-marca-forte:      #14293F;  /* estado pressionado */
+  --cor-marca-contraste:  #FFFFFF;  /* texto sobre a cor da marca */
+  --cor-destaque:         #E6EEF6;  /* fundo suave de destaque: tag não
+                                       selecionada, etiquetas do match;
+                                       texto por cima usa --cor-marca */
+
+  /* ---------- Aviso (lacuna declarada, alertas) ---------- */
+  --cor-aviso-texto:      #854F0B;
+  --cor-aviso-fundo:      #FAEEDA;
+  --cor-aviso-borda:      #EAD9B4;
+
+  /* ---------- Positivo (confirmações discretas) ---------- */
+  --cor-positivo:         #3B6D11;
+  --cor-positivo-fundo:   #E8F0E4;
+
+  /* ---------- Erro (falha de operação, nunca lacuna) ---------- */
+  --cor-erro:             #A32D2D;
+  --cor-erro-fundo:       #FBEBEB;
+
+  /* ---------- Linhas ---------- */
+  --cor-borda:            #DCDAD2;  /* bordas de cartão */
+  --cor-borda-forte:      #B9B6AC;  /* campos e controles */
+
+  /* ---------- Tipografia ---------- */
+  --fonte-texto:  ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+                  Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fonte-titulo: var(--fonte-texto);
+  --fonte-mono:   ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---------- Escala de texto ---------- */
+  --texto-pp:     0.75rem;   /* 12px — metadados */
+  --texto-p:      0.8125rem; /* 13px — legendas, rótulos */
+  --texto-m:      0.9375rem; /* 15px — corpo */
+  --texto-g:      1.3125rem; /* 21px — títulos de bloco, leitura em destaque */
+  --texto-gg:     1.75rem;   /* 28px — título de página */
+  --texto-titulo: 2.25rem;   /* 36px — título da home */
+
+  /* ---------- Peso ---------- */
+  --peso-normal:  400;
+  --peso-medio:   500;
+  --peso-forte:   600;
+
+  /* ---------- Entrelinha ---------- */
+  --entrelinha-apertada: 1.25;
+  --entrelinha-normal:   1.6;
+  --entrelinha-solta:    1.75;
+
+  /* ---------- Espaçamento ---------- */
   --espaco-1: 0.25rem;
   --espaco-2: 0.5rem;
   --espaco-3: 1rem;
@@ -39,12 +80,28 @@
   --espaco-5: 2.5rem;
   --espaco-6: 4rem;
 
-  /* Raios */
-  --raio-s: 4px;
-  --raio-m: 10px;
-  --raio-g: 22px;
+  /* ---------- Raios ---------- */
+  --raio-s:   6px;    /* controles pequenos */
+  --raio-m:   10px;   /* cartões */
+  --raio-g:   999px;  /* tags e botões-pílula */
 
-  /* Sombras */
-  --sombra-1: 0 1px 3px rgba(29, 28, 26, 0.08);
-  --sombra-2: 0 4px 16px rgba(29, 28, 26, 0.12);
+  /* ---------- Sombra ---------- */
+  /* A identidade provisória quase não usa sombra: a hierarquia vem
+     de superfície e borda. Tokens mantidos para a identidade final. */
+  --sombra-1: 0 1px 2px rgba(26, 26, 24, 0.06);
+  --sombra-2: 0 1px 2px rgba(26, 26, 24, 0.06);
+
+  /* ---------- Layout ---------- */
+  --largura-conteudo: 60rem;  /* largura máxima do miolo */
+  --largura-texto:    42rem;  /* largura de leitura confortável */
+
+  /* ---------- Foco (acessibilidade) ---------- */
+  --foco-cor:       var(--cor-marca);
+  --foco-espessura: 2px;
+  --foco-offset:    2px;
+}
+
+/* Preferência por menos movimento: respeitada em toda a interface. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

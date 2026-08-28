@@ -46,9 +46,15 @@ body {
 /* ---------- Estrutura ---------- */
 
 main {
-  max-width: 52rem;
+  max-width: var(--largura-conteudo);
   margin: 0 auto;
   padding: var(--espaco-5) var(--espaco-4) var(--espaco-6);
+}
+
+/* Foco visível em todo elemento interativo (brand/guia.md). */
+:focus-visible {
+  outline: var(--foco-espessura) solid var(--foco-cor);
+  outline-offset: var(--foco-offset);
 }
 
 h1 {
@@ -85,6 +91,7 @@ h2 {
   padding: var(--espaco-2) var(--espaco-3);
   border-radius: var(--raio-g);
   cursor: pointer;
+  min-height: 44px; /* alvo de toque mínimo (brand/guia.md) */
 }
 
 .tag:hover { border-color: var(--cor-marca); }
@@ -119,10 +126,18 @@ h2 {
   background: var(--cor-marca);
   color: var(--cor-marca-contraste);
   border: 1px solid var(--cor-marca);
-  border-radius: var(--raio-m);
+  border-radius: var(--raio-g);
   padding: var(--espaco-2) var(--espaco-4);
   cursor: pointer;
+  min-height: 44px; /* alvo de toque mínimo (brand/guia.md) */
 }
+
+.botao:not(:disabled):not(.botao-secundario):hover {
+  background: var(--cor-marca-forte);
+  border-color: var(--cor-marca-forte);
+}
+
+.botao-secundario:not(:disabled):hover { background: var(--cor-destaque); }
 
 .botao:disabled {
   background: var(--cor-borda);
