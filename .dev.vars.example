@@ -13,6 +13,13 @@ TURNSTILE_SECRET_KEY=
 
 # Lista de termos bloqueados na verificação de saída (docs/03-regras-do-agente.md).
 # Fica fora do repositório, separada por vírgula.
+#
+# SOMENTE nomes próprios: sobrenomes de figuras políticas, nomes e siglas de
+# partidos, nomes de coligações. NÃO incluir palavras temáticas como "voto",
+# "eleição" ou "candidato" — são vocabulário legítimo do acervo de pesquisa e
+# bloqueá-las vetaria conteúdo revisado por humanos.
+# A comparação ignora maiúsculas e acentos e casa palavras inteiras (uma
+# sigla como "pt" não dispara dentro de outra palavra).
 BLOCKED_TERMS=
 
 # Modo de simulação: com "true", o Worker não chama o OpenRouter e gera a

@@ -379,11 +379,25 @@ function formatoValido(json) {
   );
 }
 
+// BLOCKED_TERMS traz SOMENTE nomes próprios: sobrenomes de figuras políticas,
+// nomes e siglas de partidos, nomes de coligações. Nunca palavras temáticas
+// ("voto", "eleição", "candidato"): são vocabulário legítimo do acervo e
+// bloqueá-las vetaria conteúdo revisado por humanos.
+// A comparação ignora maiúsculas e acentos e casa palavras inteiras, para que
+// uma sigla curta não dispare dentro de outra palavra.
 function contemTermoBloqueado(texto, env) {
   const termos = (env.BLOCKED_TERMS ?? "")
-    .split(",").map((t) => t.trim().toLowerCase()).filter(Boolean);
-  const minusculo = texto.toLowerCase();
-  return termos.some((termo) => minusculo.includes(termo));
+    .split(",").map((t) => normaliza(t)).filter(Boolean);
+  const alvo = normaliza(texto);
+  return termos.some((termo) => {
+    const escapado = termo.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?<![\\p{L}\\p{N}])${escapado}(?![\\p{L}\\p{N}])`, "u").test(alvo);
+  });
+}
+
+// Minúsculas e sem acentos (decomposição Unicode + remoção dos diacríticos).
+function normaliza(texto) {
+  return String(texto).trim().toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 }
 
 // ---------------------------------------------------------------------------
