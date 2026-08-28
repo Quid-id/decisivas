@@ -12,9 +12,9 @@ Sóbrio e editorial. A plataforma é um acervo de pesquisa, não uma peça de ca
 
 **Fundo e superfície.** `--cor-fundo` é a página. `--cor-superficie` é todo cartão que se destaca dela. `--cor-superficie-alt` é para blocos secundários, como um campo em repouso.
 
-**Destaque.** `--cor-destaque` é a cor da marca e deve ser econômica: título de página, botão principal, tag selecionada. Se tudo é destaque, nada é. `--cor-destaque-suave` é o fundo de tag não selecionada, e por isso aparece bastante; ela é discreta de propósito.
+**Marca.** `--cor-marca` é a cor da marca e deve ser econômica: título de página, botão principal, tag selecionada. Se tudo é destaque, nada é. `--cor-destaque` é o fundo suave de destaque — tag não selecionada, etiquetas do match — e por isso aparece bastante; ela é discreta de propósito, e o texto por cima dela usa `--cor-marca`.
 
-**Aviso.** Reservado à lacuna declarada e a alertas de conteúdo. Não use para erro de sistema. É a cor mais importante do produto depois do destaque, porque a lacuna é conteúdo legítimo e precisa ser visível sem parecer falha.
+**Aviso.** Reservado à lacuna declarada e a alertas de conteúdo. Não use para erro de sistema. É a cor mais importante do produto depois da marca, porque a lacuna é conteúdo legítimo e precisa ser visível sem parecer falha.
 
 **Erro.** Só para falha de operação, como requisição que não completou. Nunca para lacuna.
 
@@ -24,13 +24,13 @@ Sóbrio e editorial. A plataforma é um acervo de pesquisa, não uma peça de ca
 
 Uma família só, do sistema, o que garante carregamento instantâneo e boa leitura em qualquer aparelho. A distinção entre elementos vem de tamanho e peso, não de troca de fonte.
 
-Corpo em `--texto-base` com `--entrelinha-normal`. Títulos de bloco em `--texto-lg` e `--peso-forte`. Rótulos de campo em `--texto-sm`, `--peso-forte` e `--cor-texto-secundario`. Metadados como fontes e datas em `--texto-xs` e `--cor-texto-suave`.
+Corpo em `--texto-m` com `--entrelinha-normal`. Títulos de bloco em `--texto-g` e `--peso-forte`. Rótulos de campo em `--texto-p`, `--peso-forte` e `--cor-texto-suave`. Metadados como fontes e datas em `--texto-pp` e `--cor-texto-suave`.
 
 Texto corrido não passa de `--largura-texto`. Linha longa demais cansa e prejudica quem tem dificuldade de leitura.
 
 ## Tags
 
-As nuvens de público e tema são o principal elemento da home. Tag não selecionada usa `--cor-destaque-suave` com texto `--cor-destaque-texto`. Selecionada inverte: fundo `--cor-destaque` e texto `--cor-texto-invertido`. Raio sempre `--raio-tag`.
+As nuvens de público e tema são o principal elemento da home. Tag não selecionada usa `--cor-destaque` com texto `--cor-marca`. Selecionada inverte: fundo `--cor-marca` e texto `--cor-marca-contraste`. Raio sempre `--raio-g`.
 
 A diferença entre selecionada e não selecionada precisa ser perceptível sem depender de cor, porque nem todo mundo distingue. Use também peso de texto.
 

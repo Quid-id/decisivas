@@ -9,6 +9,9 @@
 node_modules/
 .wrangler/
 
+# Gerado por scripts/csv-para-seed.js — regenerar a partir do CSV
+seed.sql
+
 # Sistema operacional
 .DS_Store
 Thumbs.db
