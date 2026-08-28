@@ -8,8 +8,9 @@
    devem mudar. Nenhum arquivo de interface deve conter cor,
    fonte, espaçamento ou raio fora daqui.
 
-   Após alterar: copiar para public/tokens.css
-   (cp brand/tokens.css public/tokens.css).
+   Este arquivo é a ORIGEM ÚNICA: o build gera public/tokens.css
+   a partir dele (scripts/sincroniza-tokens.js, [build] no
+   wrangler.toml). Não edite a cópia em public/.
    ============================================================ */
 
 :root {
