@@ -1,0 +1,26 @@
+{
+  "name": "decisivas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quid-id/decisivas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Quid-id/decisivas/issues"
+  },
+  "homepage": "https://github.com/Quid-id/decisivas#readme",
+  "devDependencies": {
+    "wrangler": "^4.127.1"
+  }
+}
