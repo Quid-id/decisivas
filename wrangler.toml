@@ -1,0 +1,31 @@
+# DECISIVAS — configuração do Cloudflare Workers
+# Serve o site estático de public/ e o Worker na rota /api/*.
+
+name = "decisivas"
+main = "src/worker.js"
+compatibility_date = "2026-08-28"
+
+# Site estático. run_worker_first garante que /api/* sempre passa pelo
+# Worker (e portanto pela checagem de AGENT_ENABLED) antes dos assets.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# Banco D1 com o acervo etiquetado (schema em docs/02-schema.sql).
+# O database_id é preenchido depois de `wrangler d1 create decisivas`
+# (tarefa 3 de docs/05-comandos-claude-code.md).
+[[d1_databases]]
+binding = "DB"
+database_name = "decisivas"
+database_id = "PREENCHER-APOS-CRIAR-O-BANCO"
+
+# Variáveis de ambiente NÃO secretas. Segredos (OPENROUTER_API_KEY etc.)
+# nunca entram aqui: local em .dev.vars, produção no painel do Cloudflare.
+[vars]
+# Interruptor de desligamento: "false" derruba toda rota do agente para a
+# resposta estática de indisponibilidade.
+AGENT_ENABLED = "true"
+# Modelo chamado via OpenRouter. Valor provisório até o teste comparativo
+# de modelos (tarefa 2 de docs/05-comandos-claude-code.md).
+MODEL_ID = "openrouter/auto"

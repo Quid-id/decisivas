@@ -1,0 +1,14 @@
+# Segredos locais — nunca versionar (regra 1 do CLAUDE.md)
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+
+# Dependências e artefatos de build
+node_modules/
+.wrangler/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

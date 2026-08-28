@@ -1,0 +1,21 @@
+# DECISIVAS — variáveis locais de desenvolvimento
+#
+# Copie este arquivo para .dev.vars (que está no .gitignore) e preencha os
+# valores. NUNCA coloque valores reais neste arquivo nem em qualquer arquivo
+# versionado. Em produção, os segredos são cadastrados no painel do
+# Cloudflare (ou via `wrangler secret put`), nunca no código.
+
+# Chave da API do OpenRouter. Segredo — só o Worker a usa.
+OPENROUTER_API_KEY=
+
+# Chave secreta do Cloudflare Turnstile (verificação anti-abuso nas rotas).
+TURNSTILE_SECRET_KEY=
+
+# Lista de termos bloqueados na verificação de saída (docs/03-regras-do-agente.md).
+# Fica fora do repositório, separada por vírgula.
+BLOCKED_TERMS=
+
+# As variáveis abaixo têm valores padrão no wrangler.toml e podem ser
+# sobrescritas aqui durante o desenvolvimento:
+# AGENT_ENABLED=true
+# MODEL_ID=openrouter/auto
