@@ -70,6 +70,19 @@ npx wrangler d1 execute decisivas --local --file=seed.sql
 npx wrangler d1 execute decisivas --remote --file=seed.sql
 ```
 
+### Sem terminal: pelo painel do Cloudflare
+
+O painel tem um console SQL que dispensa o wrangler:
+
+1. dash.cloudflare.com → **Storage & Databases → D1 SQL Database → decisivas** → aba **Console**.
+2. Cole o conteúdo de `docs/02-schema.sql` e execute (uma vez só, em banco vazio).
+3. Cole o `seed.sql` em partes (o console não aceita arquivos grandes de uma
+   vez; use blocos de ±60 comandos) e execute as partes **na ordem**. A parte 1
+   começa com os `DELETE`, então recomeçar do zero é executar de novo a partir
+   da parte 1 — nunca reexecutar uma parte do meio isolada, porque os INSERTs
+   duplicados falham por chave primária.
+4. Confira com `SELECT COUNT(*) FROM trechos;`.
+
 ### Conferir a carga
 
 ```sh
