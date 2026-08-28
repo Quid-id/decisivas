@@ -266,6 +266,9 @@ async function rotaMatch(corpo, env, request) {
     ? NOTA_BASE_RESTRITA
     : null;
   pagina.fontes = new Set(trechosVisiveis.map((t) => t.id_documento)).size;
+  // Data da última atualização do acervo: definida na carga, via variável
+  // de ambiente (ex.: ACERVO_ATUALIZADO_EM="08/2026").
+  pagina.atualizado_em = env.ACERVO_ATUALIZADO_EM ?? null;
   pagina.rotulo_ia = ROTULO_IA;
 
   // 7. Gravação em registros antes de devolver. Sem IP, sem identidade.

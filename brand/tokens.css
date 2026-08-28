@@ -1,0 +1,50 @@
+/* DECISIVAS — tokens de design PROVISÓRIOS (neutros).
+   A entrega da equipe de identidade substitui este arquivo SEM mudar
+   nenhum nome de variável (brand/LEIA-ME.md). Toda a interface usa
+   exclusivamente estes tokens: nenhuma cor, fonte, espaçamento, raio ou
+   sombra pode ser declarado fora daqui (CLAUDE.md, regra 8).
+   Após alterar: copiar para public/tokens.css (cp brand/tokens.css public/tokens.css). */
+
+:root {
+  /* Cores — nomes semânticos */
+  --cor-fundo: #f6f5f2;
+  --cor-superficie: #ffffff;
+  --cor-texto: #1d1c1a;
+  --cor-texto-suave: #5c594f;
+  --cor-marca: #23413a;
+  --cor-marca-contraste: #ffffff;
+  --cor-destaque: #d8e5df;
+  --cor-borda: #d9d5cc;
+  --cor-aviso-fundo: #faf3e3;
+  --cor-aviso-borda: #e3d3a3;
+  --cor-aviso-texto: #6b5a20;
+
+  /* Tipografia */
+  --fonte-titulo: Georgia, "Times New Roman", serif;
+  --fonte-texto: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Escala de texto */
+  --texto-pp: 0.8rem;
+  --texto-p: 0.9rem;
+  --texto-m: 1rem;
+  --texto-g: 1.25rem;
+  --texto-gg: 1.6rem;
+  --texto-titulo: 2.1rem;
+
+  /* Espaçamentos */
+  --espaco-1: 0.25rem;
+  --espaco-2: 0.5rem;
+  --espaco-3: 1rem;
+  --espaco-4: 1.5rem;
+  --espaco-5: 2.5rem;
+  --espaco-6: 4rem;
+
+  /* Raios */
+  --raio-s: 4px;
+  --raio-m: 10px;
+  --raio-g: 22px;
+
+  /* Sombras */
+  --sombra-1: 0 1px 3px rgba(29, 28, 26, 0.08);
+  --sombra-2: 0 4px 16px rgba(29, 28, 26, 0.12);
+}

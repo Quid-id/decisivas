@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DECISIVAS — O que sabemos</title>
+  <link rel="stylesheet" href="/tokens.css">
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <header class="barra-topo">
+    <a class="marca" href="/">DECISIVAS</a>
+    <nav>
+      <a href="/sobre.html">Sobre</a>
+      <a href="/metodologia.html">Metodologia</a>
+      <a href="/transparencia.html">Transparência</a>
+    </nav>
+  </header>
+
+  <main>
+    <p id="carregando">Consultando o acervo…</p>
+    <div id="erro" class="lacuna" hidden></div>
+
+    <article id="cartao" class="cartao" hidden>
+      <!-- 1. Etiquetas do match + contagem de fontes + última atualização -->
+      <div class="etiquetas">
+        <span class="etiqueta" id="etiqueta-publico"></span>
+        <span class="etiqueta" id="etiqueta-tema"></span>
+        <span class="suave" id="info-fontes"></span>
+      </div>
+
+      <!-- 2. Por que isso importa -->
+      <section>
+        <h2>Por que isso importa</h2>
+        <div id="bloco-importa"></div>
+      </section>
+
+      <!-- 3. O que a pesquisa mostra -->
+      <section>
+        <h2>O que a pesquisa mostra</h2>
+        <div id="bloco-pesquisa"></div>
+      </section>
+
+      <!-- 4. Funciona / Afasta -->
+      <section class="colunas">
+        <div>
+          <h2>O que costuma funcionar</h2>
+          <div id="bloco-funciona"></div>
+        </div>
+        <div>
+          <h2>O que costuma afastar</h2>
+          <div id="bloco-afasta"></div>
+        </div>
+      </section>
+
+      <!-- 5. Síntese do tema -->
+      <section id="secao-sintese">
+        <h2>Síntese do tema</h2>
+        <div id="bloco-sintese"></div>
+      </section>
+
+      <!-- 6. Hábitos de mídia -->
+      <section>
+        <h2>Hábitos de mídia</h2>
+        <div id="bloco-midia"></div>
+      </section>
+
+      <!-- Exemplos públicos (docs/07) — links anexados por código, nunca gerados -->
+      <section id="secao-exemplos" hidden>
+        <h2>Exemplos públicos</h2>
+        <div id="bloco-exemplos"></div>
+      </section>
+
+      <!-- 7. Materiais complementares (tabela recursos; omitido se vazio) -->
+      <section id="secao-recursos" hidden>
+        <h2>Materiais complementares</h2>
+        <div id="bloco-recursos"></div>
+      </section>
+
+      <!-- 8. Barra Adaptar formato -->
+      <div class="barra-formatos">
+        <span class="suave">Adaptar formato:</span>
+        <button class="botao botao-secundario" data-formato="whatsapp">WhatsApp</button>
+        <button class="botao botao-secundario" data-formato="carrossel">Carrossel</button>
+        <button class="botao botao-secundario" data-formato="roteiro">Roteiro de vídeo</button>
+        <button class="botao botao-secundario" id="botao-copiar">Copiar</button>
+      </div>
+      <div id="painel-formato" class="painel-formato" hidden></div>
+
+      <!-- 9. Rodapé do cartão: rótulo de IA -->
+      <footer class="rodape-cartao" id="rodape-rotulo"></footer>
+    </article>
+  </main>
+
+  <script>
+    const AVISO_LACUNA = "Evidência insuficiente no acervo para este item.";
+
+    const parametros = new URLSearchParams(window.location.search);
+    const publico = parametros.get("publico");
+    const tema = parametros.get("tema");
+
+    let pagina = null;
+
+    function el(tag, classe, texto) {
+      const n = document.createElement(tag);
+      if (classe) n.className = classe;
+      if (texto !== undefined) n.textContent = texto;
+      return n;
+    }
+
+    function caixaLacuna() {
+      return el("div", "lacuna", AVISO_LACUNA);
+    }
+
+    function chips(campo) {
+      const grupo = el("div", "chips");
+      for (const chip of campo.chips ?? []) {
+        grupo.appendChild(el("span", "chip", `${chip.fonte} · ${chip.metodo} · ${chip.periodo}`));
+      }
+      return grupo;
+    }
+
+    // Lacuna declarada: a caixa de aviso sempre aparece; o campo nunca some.
+    function preencheTexto(idBloco, campo, comChips, comNota) {
+      const bloco = document.getElementById(idBloco);
+      if (!campo || campo.lacuna) { bloco.appendChild(caixaLacuna()); return; }
+      bloco.appendChild(el("p", null, campo.texto));
+      if (comChips) bloco.appendChild(chips(campo));
+      if (comNota && pagina.nota_base_restrita) {
+        bloco.appendChild(el("p", "nota-restrita", pagina.nota_base_restrita));
+      }
+    }
+
+    function preencheItens(idBloco, campo) {
+      const bloco = document.getElementById(idBloco);
+      if (!campo || campo.lacuna) { bloco.appendChild(caixaLacuna()); return; }
+      const lista = el("ul", "lista-limpa");
+      for (const item of campo.itens) lista.appendChild(el("li", null, item));
+      bloco.appendChild(lista);
+    }
+
+    function renderiza(dados) {
+      pagina = dados;
+      document.getElementById("etiqueta-publico").textContent = dados.match.publico;
+      document.getElementById("etiqueta-tema").textContent = dados.match.macronarrativa;
+      const atualizado = dados.atualizado_em ? ` · acervo atualizado em ${dados.atualizado_em}` : "";
+      document.getElementById("info-fontes").textContent =
+        `${dados.fontes} fonte${dados.fontes === 1 ? "" : "s"}${atualizado}`;
+
+      preencheTexto("bloco-importa", dados.importa, true, false);
+      preencheTexto("bloco-pesquisa", dados.pesquisa, true, true);
+      preencheItens("bloco-funciona", dados.funciona);
+      preencheItens("bloco-afasta", dados.afasta);
+
+      // Síntese: omitida quando a pesquisa está em lacuna (docs/07).
+      if (dados.sintese === null) {
+        document.getElementById("secao-sintese").hidden = true;
+      } else if (dados.sintese.lacuna) {
+        document.getElementById("bloco-sintese").appendChild(caixaLacuna());
+      } else {
+        document.getElementById("bloco-sintese").appendChild(el("p", "sintese", dados.sintese.texto));
+      }
+
+      const midia = document.getElementById("bloco-midia");
+      if (dados.habitos_de_midia.lacuna) {
+        midia.appendChild(caixaLacuna());
+      } else {
+        const lista = el("ul", "lista-limpa");
+        for (const item of dados.habitos_de_midia.itens) lista.appendChild(el("li", null, item.texto));
+        midia.appendChild(lista);
+      }
+
+      if (!dados.exemplos.lacuna) {
+        document.getElementById("secao-exemplos").hidden = false;
+        const bloco = document.getElementById("bloco-exemplos");
+        const lista = el("ul", "lista-limpa");
+        for (const item of dados.exemplos.itens) {
+          const li = el("li");
+          li.appendChild(el("p", null, item.texto));
+          const link = el("a", null, "Ver exemplo");
+          link.href = item.link;           // URL vinda do banco, nunca do modelo
+          link.rel = "noopener noreferrer";
+          link.target = "_blank";
+          li.appendChild(link);
+          lista.appendChild(li);
+        }
+        bloco.appendChild(lista);
+      }
+
+      if ((dados.materiais_complementares ?? []).length > 0) {
+        document.getElementById("secao-recursos").hidden = false;
+        const bloco = document.getElementById("bloco-recursos");
+        const lista = el("ul", "lista-limpa");
+        for (const recurso of dados.materiais_complementares) {
+          const li = el("li");
+          const link = el("a", null, recurso.titulo);
+          link.href = recurso.url;         // URL da tabela recursos, anexada por código
+          link.rel = "noopener noreferrer";
+          link.target = "_blank";
+          li.appendChild(link);
+          if (recurso.descricao) li.appendChild(el("p", "suave", recurso.descricao));
+          lista.appendChild(li);
+        }
+        bloco.appendChild(lista);
+      }
+
+      document.getElementById("rodape-rotulo").textContent = dados.rotulo_ia;
+      document.getElementById("carregando").hidden = true;
+      document.getElementById("cartao").hidden = false;
+    }
+
+    function mostraErro(mensagem) {
+      document.getElementById("carregando").hidden = true;
+      const erro = document.getElementById("erro");
+      erro.textContent = mensagem;
+      erro.hidden = false;
+    }
+
+    async function carrega() {
+      if (!publico || !tema) {
+        mostraErro("Escolha um público e um tema na página inicial.");
+        return;
+      }
+      try {
+        const resposta = await fetch("/api/match", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ publico, macronarrativa: tema }),
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) { mostraErro(dados.erro ?? "Não foi possível consultar o acervo."); return; }
+        renderiza(dados);
+      } catch {
+        mostraErro("Não foi possível consultar o acervo. Tente novamente em instantes.");
+      }
+    }
+
+    // ---------- Adaptar formato ----------
+
+    function textoDoFormato(formato, conteudo) {
+      if (formato === "whatsapp") return conteudo.mensagem;
+      if (formato === "carrossel") {
+        return conteudo.cartoes.map((c, i) => `Cartão ${i + 1} — ${c.titulo}\n${c.texto}`).join("\n\n");
+      }
+      return conteudo.cenas.map((c, i) => `Cena ${i + 1} (${c.descricao})\n${c.fala}`).join("\n\n");
+    }
+
+    for (const botao of document.querySelectorAll("[data-formato]")) {
+      botao.addEventListener("click", async () => {
+        const painel = document.getElementById("painel-formato");
+        painel.hidden = false;
+        painel.textContent = "Adaptando…";
+        try {
+          const resposta = await fetch("/api/formato", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ formato: botao.dataset.formato, pagina }),
+          });
+          const dados = await resposta.json();
+          if (!resposta.ok) { painel.textContent = dados.erro ?? "Não foi possível adaptar."; return; }
+          painel.textContent = `${textoDoFormato(dados.formato, dados.conteudo)}\n\n${dados.rotulo_ia}`;
+        } catch {
+          painel.textContent = "Não foi possível adaptar. Tente novamente em instantes.";
+        }
+      });
+    }
+
+    document.getElementById("botao-copiar").addEventListener("click", async () => {
+      const painel = document.getElementById("painel-formato");
+      const texto = !painel.hidden && painel.textContent
+        ? painel.textContent
+        : document.getElementById("cartao").innerText;
+      await navigator.clipboard.writeText(texto);
+    });
+
+    carrega();
+  </script>
+</body>
+</html>

@@ -3,17 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DECISIVAS</title>
-  <!--
-    Página provisória. As telas finais (docs/01-especificacao.md) serão
-    construídas exclusivamente com os tokens de brand/tokens.css.
-  -->
+  <title>DECISIVAS — Com quem você quer falar, e sobre o quê?</title>
+  <link rel="stylesheet" href="/tokens.css">
+  <link rel="stylesheet" href="/estilos.css">
 </head>
 <body>
+  <header class="barra-topo">
+    <a class="marca" href="/">DECISIVAS</a>
+    <nav>
+      <a href="/sobre.html">Sobre</a>
+      <a href="/metodologia.html">Metodologia</a>
+      <a href="/transparencia.html">Transparência</a>
+    </nav>
+  </header>
+
   <main>
-    <h1>DECISIVAS</h1>
-    <p>Plataforma pública e gratuita de apoio à comunicação de temas de interesse público, construída a partir de um acervo de pesquisa qualitativa revisado por humanos.</p>
-    <p>Em construção.</p>
+    <h1>Com quem você quer falar, e sobre o quê?</h1>
+
+    <section class="grupo-tags" aria-labelledby="titulo-publicos">
+      <h2 id="titulo-publicos">Públicos</h2>
+      <div class="nuvem" id="nuvem-publicos" role="group" aria-label="Escolha um público"></div>
+    </section>
+
+    <section class="grupo-tags" aria-labelledby="titulo-temas">
+      <h2 id="titulo-temas">Temas</h2>
+      <div class="nuvem" id="nuvem-temas" role="group" aria-label="Escolha um tema"></div>
+    </section>
+
+    <div class="barra-confirma">
+      <span id="par-selecionado" class="suave">Escolha um público e um tema.</span>
+      <button class="botao" id="botao-ver" disabled>Ver o que sabemos</button>
+    </div>
   </main>
+
+  <script>
+    // Vocabulários fechados (CLAUDE.md). Não criar valores novos.
+    const PUBLICOS = [
+      "idosos",
+      "jovens",
+      "mulheres beneficiárias",
+      "mulheres de 2 a 5 salários mínimos",
+      "trabalhadoras informais",
+      "pequenas empreendedoras",
+      "plataformizadas",
+    ];
+    const TEMAS = [
+      "dinheiro no bolso",
+      "proteção do trabalhador",
+      "proteção da família",
+      "brasil soberano",
+      "engajamento cívico",
+    ];
+
+    const selecao = { publico: null, tema: null };
+
+    function montaNuvem(idNuvem, valores, chave) {
+      const nuvem = document.getElementById(idNuvem);
+      for (const valor of valores) {
+        const tag = document.createElement("button");
+        tag.type = "button";
+        tag.className = "tag";
+        tag.textContent = valor;
+        tag.setAttribute("aria-pressed", "false");
+        tag.addEventListener("click", () => {
+          selecao[chave] = selecao[chave] === valor ? null : valor;
+          for (const irma of nuvem.children) {
+            irma.setAttribute("aria-pressed", String(irma.textContent === selecao[chave]));
+          }
+          atualizaBarra();
+        });
+        nuvem.appendChild(tag);
+      }
+    }
+
+    function atualizaBarra() {
+      const texto = document.getElementById("par-selecionado");
+      const botao = document.getElementById("botao-ver");
+      if (selecao.publico && selecao.tema) {
+        texto.textContent = `${selecao.publico} × ${selecao.tema}`;
+        botao.disabled = false;
+      } else {
+        texto.textContent = "Escolha um público e um tema.";
+        botao.disabled = true;
+      }
+    }
+
+    document.getElementById("botao-ver").addEventListener("click", () => {
+      const parametros = new URLSearchParams({ publico: selecao.publico, tema: selecao.tema });
+      window.location.href = `/resultado.html?${parametros}`;
+    });
+
+    montaNuvem("nuvem-publicos", PUBLICOS, "publico");
+    montaNuvem("nuvem-temas", TEMAS, "tema");
+  </script>
 </body>
 </html>
