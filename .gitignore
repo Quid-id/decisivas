@@ -15,3 +15,6 @@ seed.sql
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Gerado no build a partir de brand/tokens.css (scripts/sincroniza-tokens.js)
+public/tokens.css

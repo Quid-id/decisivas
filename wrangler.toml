@@ -5,6 +5,12 @@ name = "decisivas"
 main = "src/worker.js"
 compatibility_date = "2026-08-28"
 
+# Build: gera public/tokens.css a partir de brand/tokens.css (origem única).
+# Roda antes de `wrangler dev` e `wrangler deploy`, também no deploy por push.
+[build]
+command = "node scripts/sincroniza-tokens.js"
+watch_dir = "brand"
+
 # Site estático. run_worker_first garante que /api/* sempre passa pelo
 # Worker (e portanto pela checagem de AGENT_ENABLED) antes dos assets.
 [assets]
