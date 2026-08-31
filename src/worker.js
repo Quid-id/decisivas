@@ -16,6 +16,11 @@
 // próximo deploy.
 import REGRAS_DE_FORMATO from "../docs/08-regras-de-formato.md";
 
+// Versão do acervo (data/versao-acervo.txt, atualizada a cada carga oficial).
+// Carimba as respostas e valida o cache do navegador (nível 2).
+import VERSAO_ACERVO_BRUTA from "../data/versao-acervo.txt";
+const VERSAO_ACERVO = VERSAO_ACERVO_BRUTA.trim();
+
 // Vocabulários fechados (CLAUDE.md). Qualquer valor fora deles → 400.
 const PUBLICOS = [
   "idosos",
@@ -67,11 +72,13 @@ entrega o material de apoio. Regras absolutas:
 4. Cada campo preenchido deve listar os ids dos trechos usados.
 5. Campo sem trechos suficientes recebe o valor "LACUNA". Nunca preencha por
    aproximação.
-6. Liberdade de forma, fidelidade de substância: você pode reformular e
+6. Campo em lacuna recebe a string "LACUNA" no lugar do objeto inteiro — nunca
+   um objeto com "LACUNA" dentro de "texto" ou "itens".
+7. Liberdade de forma, fidelidade de substância: você pode reformular e
    reordenar, mas toda afirmação deve estar sustentada por um trecho fornecido.
-7. Trechos com base "restrita" que afirmem prevalência mantêm o escopo
+8. Trechos com base "restrita" que afirmem prevalência mantêm o escopo
    "entre os participantes do estudo".
-8. Responda apenas com o JSON no formato abaixo, sem nenhum texto fora dele.
+9. Responda apenas com o JSON no formato abaixo, sem nenhum texto fora dele.
 
 Os campos:
 - "gatilho": o ângulo que mobiliza este público neste tema, em uma ou duas
@@ -191,6 +198,27 @@ async function rotaMatch(corpo, env, request) {
     );
   }
 
+  // 5. Cache nível 1 (docs/06): antes de qualquer chamada ao modelo. A
+  // entrada vale enquanto o conjunto de ids de trechos do cruzamento no
+  // banco for exatamente o conjunto guardado na geração.
+  const cacheLigado = env.CACHE_ENABLED !== "false";
+  const idsAcervo = cacheLigado ? await idsAcervoAtual(env, publico, macronarrativa) : null;
+  if (cacheLigado) {
+    const guardada = await env.DB.prepare(
+      "SELECT resposta, ids_trechos, modelo FROM paginas WHERE publico = ?1 AND macronarrativa = ?2 AND ids_acervo = ?3"
+    ).bind(publico, macronarrativa, idsAcervo).first();
+    if (guardada) {
+      const pagina = JSON.parse(guardada.resposta);
+      pagina.origem = "cache";
+      pagina.versao_acervo = VERSAO_ACERVO;
+      await gravaRegistro(env, {
+        rota: "match", publico, macronarrativa,
+        ids: guardada.ids_trechos, modelo: guardada.modelo, origem: "cache", resposta: pagina,
+      });
+      return respostaJson(pagina);
+    }
+  }
+
   // Consultas fixas (docs/07): o modelo não decide onde buscar.
   const [trechosMatch, trechosMidia, recursos] = await Promise.all([
     consulta(env, "SELECT * FROM trechos WHERE publico = ?1 AND macronarrativa = ?2", [publico, macronarrativa]),
@@ -293,15 +321,49 @@ async function rotaMatch(corpo, env, request) {
   // de ambiente (ex.: ACERVO_ATUALIZADO_EM="08/2026").
   pagina.atualizado_em = env.ACERVO_ATUALIZADO_EM ?? null;
   pagina.rotulo_ia = ROTULO_IA;
+  pagina.versao_acervo = VERSAO_ACERVO;
+  pagina.origem = "geracao";
+  // O front usa esta flag: com o cache desligado, descarta o que guardou.
+  pagina.cache_habilitado = cacheLigado;
 
-  // 7. Gravação em registros antes de devolver. Sem IP, sem identidade.
-  await env.DB.prepare(
-    "INSERT INTO registros (rota, publico, macronarrativa, ids_trechos, modelo, resposta) VALUES ('match', ?1, ?2, ?3, ?4, ?5)"
-  )
-    .bind(publico, macronarrativa, [...idsUsados].join(","), modeloUsado, JSON.stringify(pagina))
-    .run();
+  // 7. Guarda no cache (páginas de lacuna também: não custam nada e a
+  // validade por ids_acervo invalida sozinha quando o acervo mudar).
+  if (cacheLigado) {
+    await env.DB.prepare(
+      "INSERT OR REPLACE INTO paginas (publico, macronarrativa, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))"
+    )
+      .bind(publico, macronarrativa, JSON.stringify(pagina), [...idsUsados].join(","), idsAcervo, modeloUsado)
+      .run();
+  }
+
+  // 8. Gravação em registros antes de devolver. Sem IP, sem identidade.
+  await gravaRegistro(env, {
+    rota: "match", publico, macronarrativa,
+    ids: [...idsUsados].join(","), modelo: modeloUsado, origem: "geracao", resposta: pagina,
+  });
 
   return respostaJson(pagina);
+}
+
+// Conjunto atual de ids de trechos que alimentam a página do cruzamento
+// (match exato + hábitos de mídia), ordenado e serializado. É o mecanismo de
+// validade do cache: comparação literal do conjunto inteiro, sem hash — não
+// há colisão possível e a string guardada é auditável direto no banco.
+async function idsAcervoAtual(env, publico, macronarrativa) {
+  const linhas = await consulta(
+    env,
+    "SELECT id FROM trechos WHERE publico = ?1 AND (macronarrativa = ?2 OR pauta = 'consumo de mídia') ORDER BY id",
+    [publico, macronarrativa]
+  );
+  return linhas.map((l) => l.id).join(",");
+}
+
+async function gravaRegistro(env, { rota, publico, macronarrativa, formato = null, ids, modelo, origem, resposta }) {
+  await env.DB.prepare(
+    "INSERT INTO registros (rota, publico, macronarrativa, formato, ids_trechos, modelo, origem, resposta) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)"
+  )
+    .bind(rota, publico, macronarrativa, formato, ids, modelo, origem, JSON.stringify(resposta))
+    .run();
 }
 
 // ---------------------------------------------------------------------------
@@ -314,11 +376,29 @@ async function geraComValidacao(env, publico, macronarrativa, subconjunto) {
   const usuario = montaMensagemUsuario(publico, macronarrativa, subconjunto);
   for (let tentativa = 0; tentativa < 2; tentativa++) {
     const texto = await chamaModelo(env, PROMPT_SISTEMA, usuario, () => simulaModelo(subconjunto));
-    const json = extraiJson(texto);
+    const json = normalizaLacunas(extraiJson(texto));
     if (json && formatoValido(json)) return json;
     console.error(`resposta fora do formato (tentativa ${tentativa + 1})`);
   }
   return null;
+}
+
+// Lacunas mal codificadas viram lacuna declarada, nunca conteúdo. O teste de
+// modelos (docs/06) registrou {"itens": "LACUNA"}, {"texto": "LACUNA"} e
+// {"itens": ["LACUNA","LACUNA","LACUNA"]} — sem isto, a última passaria na
+// validação e chegaria à página como três itens escritos "LACUNA".
+function normalizaLacunas(json) {
+  if (typeof json !== "object" || json === null) return json;
+  const ehLacuna = (v) =>
+    v === "LACUNA" ||
+    (v && v.texto === "LACUNA") ||
+    (v && v.itens === "LACUNA") ||
+    (v && Array.isArray(v.itens) && v.itens.length > 0 && v.itens.every((i) => i === "LACUNA"));
+  const normalizado = {};
+  for (const [campo, valor] of Object.entries(json)) {
+    normalizado[campo] = ehLacuna(valor) ? "LACUNA" : valor;
+  }
+  return normalizado;
 }
 
 // ÚNICO ponto de contato com o modelo, para todas as rotas. Com
@@ -600,6 +680,29 @@ async function rotaFormato(corpo, env, request) {
     return respostaJson({ erro: "Página ausente ou fora do formato entregue pela plataforma." }, 400);
   }
 
+  // Cache nível 1, mesma validade da rota match: o conjunto de ids do
+  // cruzamento no banco precisa ser exatamente o guardado na geração.
+  const cacheLigado = env.CACHE_ENABLED !== "false";
+  const idsAcervo = cacheLigado
+    ? await idsAcervoAtual(env, canonica.match.publico, canonica.match.macronarrativa)
+    : null;
+  if (cacheLigado) {
+    const guardada = await env.DB.prepare(
+      "SELECT resposta, ids_trechos, modelo FROM formatos WHERE publico = ?1 AND macronarrativa = ?2 AND formato = ?3 AND ids_acervo = ?4"
+    ).bind(canonica.match.publico, canonica.match.macronarrativa, formato, idsAcervo).first();
+    if (guardada) {
+      const respostaCache = JSON.parse(guardada.resposta);
+      respostaCache.origem = "cache";
+      respostaCache.versao_acervo = VERSAO_ACERVO;
+      await gravaRegistro(env, {
+        rota: "formato",
+        publico: canonica.match.publico, macronarrativa: canonica.match.macronarrativa, formato,
+        ids: guardada.ids_trechos, modelo: guardada.modelo, origem: "cache", resposta: respostaCache,
+      });
+      return respostaJson(respostaCache);
+    }
+  }
+
   const sistema = promptFormato(formato);
   const usuario = `Página de apoio:\n\n${canonica.texto}`;
 
@@ -630,21 +733,27 @@ async function rotaFormato(corpo, env, request) {
         ? AVISO_ORIENTACAO_GERAL
         : null,
     rotulo_ia: ROTULO_IA,
+    versao_acervo: VERSAO_ACERVO,
+    origem: "geracao",
   };
 
-  // Gravação em registros antes de devolver. Sem IP, sem identidade.
-  await env.DB.prepare(
-    "INSERT INTO registros (rota, publico, macronarrativa, formato, ids_trechos, modelo, resposta) VALUES ('formato', ?1, ?2, ?3, ?4, ?5, ?6)"
-  )
-    .bind(
-      canonica.match.publico,
-      canonica.match.macronarrativa,
-      formato,
-      canonica.ids.join(","),
-      modeloUsado,
-      JSON.stringify(resposta)
+  if (cacheLigado) {
+    await env.DB.prepare(
+      "INSERT OR REPLACE INTO formatos (publico, macronarrativa, formato, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))"
     )
-    .run();
+      .bind(
+        canonica.match.publico, canonica.match.macronarrativa, formato,
+        JSON.stringify(resposta), canonica.ids.join(","), idsAcervo, modeloUsado
+      )
+      .run();
+  }
+
+  // Gravação em registros antes de devolver. Sem IP, sem identidade.
+  await gravaRegistro(env, {
+    rota: "formato",
+    publico: canonica.match.publico, macronarrativa: canonica.match.macronarrativa, formato,
+    ids: canonica.ids.join(","), modelo: modeloUsado, origem: "geracao", resposta,
+  });
 
   return respostaJson(resposta);
 }

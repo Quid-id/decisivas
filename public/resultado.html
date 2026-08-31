@@ -6,6 +6,7 @@
   <title>DECISIVAS — O que sabemos</title>
   <link rel="stylesheet" href="/tokens.css">
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/versao-acervo.js"></script>
 </head>
 <body>
   <header class="barra-topo">
@@ -209,11 +210,64 @@
       erro.hidden = false;
     }
 
+    // ---------- Cache no navegador (nível 2, docs/06) ----------
+    // Guarda SOMENTE conteúdo de página (a resposta da plataforma), nunca
+    // dado da pessoa. A marca de versão vem de /versao-acervo.js, gerada no
+    // build a partir de data/versao-acervo.txt: versão diferente = acervo
+    // novo, a entrada é descartada e a página buscada de novo.
+    const VERSAO = window.VERSAO_ACERVO ?? null;
+    const PREFIXO_CACHE = "decisivas:pagina:";
+    const LIMITE_PAGINAS = 12;
+    const chaveCache = PREFIXO_CACHE + publico + "|" + tema;
+
+    function leDoNavegador() {
+      try {
+        const bruto = localStorage.getItem(chaveCache);
+        if (!bruto) return null;
+        const entrada = JSON.parse(bruto);
+        if (!VERSAO || entrada.versao !== VERSAO) {
+          localStorage.removeItem(chaveCache);
+          return null;
+        }
+        return entrada.pagina;
+      } catch { return null; }
+    }
+
+    function guardaNoNavegador(dados) {
+      try {
+        // Interruptor CACHE_ENABLED desligado no servidor: nada é guardado
+        // e o que existia para este match é descartado.
+        if (!VERSAO || dados.cache_habilitado === false || !dados.versao_acervo) {
+          localStorage.removeItem(chaveCache);
+          return;
+        }
+        localStorage.setItem(chaveCache, JSON.stringify({
+          versao: dados.versao_acervo,
+          salvoEm: Date.now(),
+          pagina: dados,
+        }));
+        // Limite do total guardado: descarta a entrada mais antiga.
+        const entradas = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k || !k.startsWith(PREFIXO_CACHE)) continue;
+          let salvoEm = 0;
+          try { salvoEm = JSON.parse(localStorage.getItem(k)).salvoEm ?? 0; } catch {}
+          entradas.push({ k, salvoEm });
+        }
+        entradas.sort((a, b) => a.salvoEm - b.salvoEm);
+        while (entradas.length > LIMITE_PAGINAS) localStorage.removeItem(entradas.shift().k);
+      } catch { /* armazenamento indisponível ou cheio: segue sem guardar */ }
+    }
+
     async function carrega() {
       if (!publico || !tema) {
         mostraErro("Escolha um público e um tema na página inicial.");
         return;
       }
+      // Versão do acervo confere: exibe imediatamente, sem chamar o servidor.
+      const guardada = leDoNavegador();
+      if (guardada) { renderiza(guardada); return; }
       try {
         const resposta = await fetch("/api/match", {
           method: "POST",
@@ -223,6 +277,7 @@
         const dados = await resposta.json();
         if (!resposta.ok) { mostraErro(dados.erro ?? "Não foi possível consultar o acervo."); return; }
         renderiza(dados);
+        guardaNoNavegador(dados);
       } catch {
         mostraErro("Não foi possível consultar o acervo. Tente novamente em instantes.");
       }

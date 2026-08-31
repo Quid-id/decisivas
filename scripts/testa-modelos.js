@@ -61,11 +61,13 @@ entrega o material de apoio. Regras absolutas:
 4. Cada campo preenchido deve listar os ids dos trechos usados.
 5. Campo sem trechos suficientes recebe o valor "LACUNA". Nunca preencha por
    aproximação.
-6. Liberdade de forma, fidelidade de substância: você pode reformular e
+6. Campo em lacuna recebe a string "LACUNA" no lugar do objeto inteiro — nunca
+   um objeto com "LACUNA" dentro de "texto" ou "itens".
+7. Liberdade de forma, fidelidade de substância: você pode reformular e
    reordenar, mas toda afirmação deve estar sustentada por um trecho fornecido.
-7. Trechos com base "restrita" que afirmem prevalência mantêm o escopo
+8. Trechos com base "restrita" que afirmem prevalência mantêm o escopo
    "entre os participantes do estudo".
-8. Responda apenas com o JSON no formato abaixo, sem nenhum texto fora dele.
+9. Responda apenas com o JSON no formato abaixo, sem nenhum texto fora dele.
 
 Os campos:
 - "gatilho": o ângulo que mobiliza este público neste tema, em uma ou duas

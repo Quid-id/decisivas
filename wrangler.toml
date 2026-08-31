@@ -16,11 +16,12 @@ watch_dir = "brand"
 [observability]
 enabled = true
 
-# Permite ao Worker importar docs/08-regras-de-formato.md como texto:
-# a governança de formatos entra no prompt direto do arquivo, a cada build.
+# Permite ao Worker importar arquivos como texto: docs/08-regras-de-formato.md
+# entra no prompt direto do arquivo, e data/versao-acervo.txt carimba as
+# respostas com a versão do acervo, a cada build.
 [[rules]]
 type = "Text"
-globs = ["**/*.md"]
+globs = ["**/*.md", "**/*.txt"]
 fallthrough = true
 
 # Site estático. run_worker_first garante que /api/* sempre passa pelo
@@ -48,3 +49,6 @@ AGENT_ENABLED = "true"
 # ATENÇÃO: cada deploy substitui as variáveis de texto do painel pelas
 # deste arquivo — mude o modelo AQUI, não no painel.
 MODEL_ID = "z-ai/glm-5.2:free"
+# Cache de páginas geradas (docs/06): "false" ignora os dois níveis
+# (servidor e navegador) e gera tudo a cada requisição.
+CACHE_ENABLED = "true"

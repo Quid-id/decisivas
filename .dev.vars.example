@@ -30,4 +30,5 @@ SIMULAR_MODELO=
 # As variáveis abaixo têm valores padrão no wrangler.toml e podem ser
 # sobrescritas aqui durante o desenvolvimento:
 # AGENT_ENABLED=true
-# MODEL_ID=openrouter/auto
+# MODEL_ID=z-ai/glm-5.2:free
+# CACHE_ENABLED=true   ("false" ignora os dois níveis de cache — docs/06)
