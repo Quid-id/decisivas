@@ -237,12 +237,16 @@
 
     // ---------- Adaptar formato ----------
 
-    function textoDoFormato(formato, conteudo) {
-      if (formato === "whatsapp") return conteudo.mensagem;
-      if (formato === "carrossel") {
-        return conteudo.cartoes.map((c, i) => `Cartão ${i + 1} — ${c.titulo}\n${c.texto}`).join("\n\n");
-      }
-      return conteudo.cenas.map((c, i) => `Cena ${i + 1} (${c.descricao})\n${c.fala}`).join("\n\n");
+    // A plataforma orienta, a pessoa escreve (docs/08): a entrega são as
+    // três partes da orientação, nunca uma mensagem pronta.
+    function textoDoFormato(dados) {
+      const o = dados.orientacao;
+      const partes = [];
+      if (dados.aviso_orientacao) partes.push(dados.aviso_orientacao);
+      partes.push(`Gatilho: ${o.gatilho}`);
+      partes.push(`O que ancorar:\n- ${o.ancorar.join("\n- ")}`);
+      partes.push(`O que evitar:\n- ${o.evitar.join("\n- ")}`);
+      return partes.join("\n\n");
     }
 
     for (const botao of document.querySelectorAll("[data-formato]")) {
@@ -258,7 +262,7 @@
           });
           const dados = await resposta.json();
           if (!resposta.ok) { painel.textContent = dados.erro ?? "Não foi possível adaptar."; return; }
-          painel.textContent = `${textoDoFormato(dados.formato, dados.conteudo)}\n\n${dados.rotulo_ia}`;
+          painel.textContent = `${textoDoFormato(dados)}\n\n${dados.rotulo_ia}`;
         } catch {
           painel.textContent = "Não foi possível adaptar. Tente novamente em instantes.";
         }
