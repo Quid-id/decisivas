@@ -48,7 +48,7 @@ AGENT_ENABLED = "true"
 # Modelo chamado via OpenRouter (id SEM o prefixo "openrouter/").
 # ATENÇÃO: cada deploy substitui as variáveis de texto do painel pelas
 # deste arquivo — mude o modelo AQUI, não no painel.
-MODEL_ID = "z-ai/glm-5.2:free"
+MODEL_ID = "openai/gpt-5.6-sol"
 # Cache de páginas geradas (docs/06): "false" ignora os dois níveis
 # (servidor e navegador) e gera tudo a cada requisição.
 CACHE_ENABLED = "true"
