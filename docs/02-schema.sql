@@ -1,5 +1,5 @@
 -- DECISIVAS — schema do banco D1
--- D1 é SQLite gerenciado pelo Cloudflare. Este arquivo cria as quatro tabelas.
+-- D1 é SQLite gerenciado pelo Cloudflare. Este arquivo cria as seis tabelas.
 
 -- Um registro por estudo. Espelha a aba Cabeçalhos da planilha.
 CREATE TABLE documentos (
@@ -56,5 +56,35 @@ CREATE TABLE registros (
   formato       TEXT,                       -- só na rota formato
   ids_trechos   TEXT,                       -- lista dos ids usados, separada por vírgula
   modelo        TEXT,                       -- qual modelo respondeu (MODEL_ID)
+  origem        TEXT,                       -- 'geracao' (modelo/lacuna por código) ou 'cache'
   resposta      TEXT NOT NULL               -- o texto integral entregue
+);
+
+-- Cache nível 1: páginas geradas por /api/match, uma por cruzamento.
+-- ids_acervo guarda o conjunto ORDENADO de ids de trechos do cruzamento no
+-- momento da geração (match + hábitos de mídia); se o conjunto atual do banco
+-- for diferente, a entrada é inválida e a página é gerada de novo.
+CREATE TABLE paginas (
+  publico        TEXT NOT NULL,
+  macronarrativa TEXT NOT NULL,
+  resposta       TEXT NOT NULL,             -- a página completa, em JSON
+  ids_trechos    TEXT NOT NULL,             -- ids usados na página, separados por vírgula
+  ids_acervo     TEXT NOT NULL,             -- conjunto ordenado de ids do cruzamento (validade)
+  modelo         TEXT,                      -- modelo que gerou (nulo em página só de lacunas)
+  gerado_em      TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (publico, macronarrativa)
+);
+
+-- Cache nível 1 das saídas de /api/formato, uma por cruzamento + formato.
+-- Mesma regra de validade da tabela paginas.
+CREATE TABLE formatos (
+  publico        TEXT NOT NULL,
+  macronarrativa TEXT NOT NULL,
+  formato        TEXT NOT NULL,             -- whatsapp, carrossel ou roteiro
+  resposta       TEXT NOT NULL,             -- a orientação completa, em JSON
+  ids_trechos    TEXT NOT NULL,
+  ids_acervo     TEXT NOT NULL,
+  modelo         TEXT,
+  gerado_em      TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (publico, macronarrativa, formato)
 );

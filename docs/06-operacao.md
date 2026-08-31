@@ -91,6 +91,85 @@ npx wrangler d1 execute decisivas --local --command="SELECT COUNT(*) AS trechos 
 
 (Troque `--local` por `--remote` para conferir a produção.)
 
+### Depois de CADA carga: versão do acervo e regeneração do cache
+
+A carga muda o acervo, e duas coisas dependem dele:
+
+1. **Atualize `data/versao-acervo.txt`** com uma marca nova (ex.:
+   `2026-09-15-carga-oficial-1`) **no mesmo commit do seed**. Essa marca vai
+   para o site no deploy e é o que faz o navegador das pessoas descartar
+   páginas guardadas da carga anterior.
+2. **Regenere o cache de páginas** (obrigatório — ver seção Cache abaixo):
+
+```sh
+BASE_URL=https://SEU-DOMINIO node scripts/gera-cache.js
+```
+
+Sem esse passo nada quebra — o cache invalida sozinho —, mas a primeira
+pessoa de cada cruzamento paga o tempo de geração.
+
+## Cache de páginas geradas
+
+Dois níveis, ambos desligáveis pela variável `CACHE_ENABLED=false` (em
+`[vars]` no `wrangler.toml`; localmente em `.dev.vars` — reinicie o
+`wrangler dev` ao mudar, a troca a quente nem sempre é aplicada).
+
+**Nível 1 — servidor (tabelas `paginas` e `formatos` no D1).** As duas rotas
+consultam o cache antes de qualquer chamada ao modelo; havendo entrada
+válida, devolvem-na e gravam em `registros` com `origem = 'cache'`. O
+mecanismo de validade é a **comparação literal do conjunto ordenado de ids
+de trechos do cruzamento** (match + hábitos de mídia): o conjunto é guardado
+na coluna `ids_acervo` no momento da geração e comparado com o conjunto
+atual do banco a cada consulta. Escolhemos comparação do conjunto inteiro,
+não hash nem data: não existe colisão possível, e a string guardada é
+auditável direto no banco (`SELECT ids_acervo FROM paginas WHERE ...`).
+Qualquer linha incluída, removida ou com id trocado invalida a entrada na
+hora, sem passo manual.
+
+Atenção: a tabela `recursos` não entra na validade (a regra cobre trechos).
+Se só os recursos mudarem, rode a regeneração do cache — por isso o passo é
+obrigatório após qualquer carga.
+
+**Nível 2 — navegador (localStorage).** A página de resultado guarda as
+páginas já vistas com a marca de versão de `data/versao-acervo.txt`
+(publicada no site no build como `/versao-acervo.js`). Versão igual: exibe
+imediatamente, sem chamar o servidor. Versão diferente: descarta e busca.
+Guarda somente conteúdo de página (nunca dado da pessoa), com teto de 12
+páginas — estourou, a mais antiga sai. Com `CACHE_ENABLED=false`, as
+respostas avisam o navegador, que descarta o que guardou e para de guardar.
+
+**Gerar o cache em lote** (`scripts/gera-cache.js`): percorre os 35
+cruzamentos chamando `/api/match`; cruzamento sem acervo suficiente vira
+página de lacunas, sem custo de modelo. Reporta quantas páginas gerou,
+quantas já estavam em cache, quantas ficaram em lacuna e o custo total do
+lote (medido pela diferença de uso na conta OpenRouter, se
+`OPENROUTER_API_KEY` estiver no ambiente).
+
+```sh
+# local (wrangler dev rodando em outro terminal)
+node scripts/gera-cache.js
+
+# produção
+BASE_URL=https://SEU-DOMINIO OPENROUTER_API_KEY=... node scripts/gera-cache.js
+```
+
+**Banco criado antes do cache existir?** O schema atual já traz as tabelas.
+Para um banco que rodou o schema antigo, aplique uma vez (local e remoto):
+
+```sh
+npx wrangler d1 execute decisivas --remote --command="
+ALTER TABLE registros ADD COLUMN origem TEXT;
+CREATE TABLE paginas (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, resposta TEXT NOT NULL, ids_trechos TEXT NOT NULL, ids_acervo TEXT NOT NULL, modelo TEXT, gerado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa));
+CREATE TABLE formatos (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, formato TEXT NOT NULL, resposta TEXT NOT NULL, ids_trechos TEXT NOT NULL, ids_acervo TEXT NOT NULL, modelo TEXT, gerado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa, formato));
+"
+```
+
+**Limpar o cache na mão** (raramente necessário; regenerar já substitui):
+
+```sh
+npx wrangler d1 execute decisivas --remote --command="DELETE FROM paginas; DELETE FROM formatos;"
+```
+
 ## Seções a completar (tarefa 8 de docs/05)
 
 - Cadastrar `OPENROUTER_API_KEY` como segredo

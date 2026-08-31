@@ -17,3 +17,14 @@ const cabecalho =
 const conteudo = fs.readFileSync(ORIGEM, "utf8");
 fs.writeFileSync(DESTINO, cabecalho + conteudo, "utf8");
 console.log(`tokens sincronizados: ${ORIGEM} → ${DESTINO}`);
+
+// Também gera public/versao-acervo.js a partir de data/versao-acervo.txt.
+// É a marca de versão do cache do navegador (nível 2): a carga oficial do
+// banco atualiza o .txt no mesmo commit, e o deploy leva a nova marca ao site.
+const versao = fs.readFileSync("data/versao-acervo.txt", "utf8").trim();
+fs.writeFileSync(
+  "public/versao-acervo.js",
+  `// ARQUIVO GERADO no build a partir de data/versao-acervo.txt — NÃO EDITAR AQUI.\nwindow.VERSAO_ACERVO = ${JSON.stringify(versao)};\n`,
+  "utf8"
+);
+console.log(`versão do acervo publicada: ${versao}`);
