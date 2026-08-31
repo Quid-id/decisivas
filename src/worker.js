@@ -52,8 +52,12 @@ const MENSAGEM_INDISPONIVEL =
 const TETO_TRECHOS = 60;
 
 // Prompt de sistema de docs/03-regras-do-agente.md, na íntegra.
-const PROMPT_SISTEMA = `Você preenche uma página de apoio à comunicação de temas de interesse público,
-usando exclusivamente os trechos de pesquisa fornecidos abaixo. Regras absolutas:
+// A pessoa escreve, a plataforma orienta (docs/08, Parte 1): o agente entrega
+// o material de escrita, nunca a mensagem pronta.
+const PROMPT_SISTEMA = `Você prepara o material para que uma pessoa escreva a própria comunicação
+de um tema de interesse público a um público específico, usando exclusivamente
+os trechos de pesquisa fornecidos abaixo. Você NÃO escreve a mensagem:
+entrega o material de apoio. Regras absolutas:
 
 1. Use somente os trechos fornecidos. Não acrescente fatos, números, exemplos
    ou afirmações de conhecimento próprio.
@@ -69,11 +73,22 @@ usando exclusivamente os trechos de pesquisa fornecidos abaixo. Regras absolutas
    "entre os participantes do estudo".
 8. Responda apenas com o JSON no formato abaixo, sem nenhum texto fora dele.
 
-Formato: {"importa": {"texto": "...", "ids": []},
-          "pesquisa": {"texto": "...", "ids": []},
-          "funciona": {"itens": ["...","...","..."], "ids": []},
-          "afasta": {"itens": ["...","...","..."], "ids": []},
-          "sintese": {"texto": "...", "ids": []}}`;
+Os campos:
+- "gatilho": o ângulo que mobiliza este público neste tema, em uma ou duas
+  frases, derivado dos trechos de tipo "achado". É o núcleo do que a mensagem
+  precisa tocar.
+- "ancorar": exatamente três elementos concretos que a mensagem deve conter,
+  vindos dos trechos de tipo "funciona".
+- "evitar": exatamente três elementos que a mensagem não deve conter, vindos
+  dos trechos de tipo "afasta".
+- "contexto": por que isso importa para este público, em uma ou duas frases.
+- "pesquisa": o que o acervo mostra sobre este cruzamento.
+
+Formato: {"gatilho": {"texto": "...", "ids": []},
+          "ancorar": {"itens": ["...","...","..."], "ids": []},
+          "evitar": {"itens": ["...","...","..."], "ids": []},
+          "contexto": {"texto": "...", "ids": []},
+          "pesquisa": {"texto": "...", "ids": []}}`;
 
 function respostaJson(corpo, status = 200) {
   return new Response(JSON.stringify(corpo, null, 2), {
@@ -184,24 +199,30 @@ async function rotaMatch(corpo, env, request) {
   ]);
 
   // Blocos e mínimos (docs/07). Abaixo do mínimo → lacuna declarada, por código.
+  // O gatilho deriva dos achados, então compartilha os trechos e o mínimo
+  // do bloco pesquisa.
+  const achados = trechosMatch.filter((t) => t.tipo === "achado");
+  const minimoAchados = achados.length >= 2 && achados.some((t) => t.forca === "forte");
   const blocos = {
-    importa: trechosMatch.filter((t) => t.tipo === "contexto" || t.tipo === "achado"),
-    pesquisa: trechosMatch.filter((t) => t.tipo === "achado"),
-    funciona: trechosMatch.filter((t) => t.tipo === "funciona"),
-    afasta: trechosMatch.filter((t) => t.tipo === "afasta"),
+    gatilho: achados,
+    ancorar: trechosMatch.filter((t) => t.tipo === "funciona"),
+    evitar: trechosMatch.filter((t) => t.tipo === "afasta"),
+    contexto: trechosMatch.filter((t) => t.tipo === "contexto" || t.tipo === "achado"),
+    pesquisa: achados,
     exemplos: trechosMatch.filter((t) => t.tipo === "exemplo" && t.link),
     midia: trechosMidia,
   };
   const minimos = {
-    importa: blocos.importa.length >= 1,
-    pesquisa: blocos.pesquisa.length >= 2 && blocos.pesquisa.some((t) => t.forca === "forte"),
-    funciona: blocos.funciona.length >= 3,
-    afasta: blocos.afasta.length >= 3,
+    gatilho: minimoAchados,
+    ancorar: blocos.ancorar.length >= 3,
+    evitar: blocos.evitar.length >= 3,
+    contexto: blocos.contexto.length >= 1,
+    pesquisa: minimoAchados,
     exemplos: blocos.exemplos.length >= 2,
     midia: blocos.midia.length >= 1,
   };
 
-  const camposDoModelo = ["importa", "pesquisa", "funciona", "afasta"];
+  const camposDoModelo = ["gatilho", "ancorar", "evitar", "contexto", "pesquisa"];
   const algumCampoViavel = camposDoModelo.some((c) => minimos[c]);
 
   // 5. Subconjunto vazio ou abaixo dos mínimos → lacuna por código, SEM modelo.
@@ -210,8 +231,8 @@ async function rotaMatch(corpo, env, request) {
   let subconjunto = [];
   if (!algumCampoViavel) {
     gerado = {
-      importa: "LACUNA", pesquisa: "LACUNA", funciona: "LACUNA",
-      afasta: "LACUNA", sintese: "LACUNA",
+      gatilho: "LACUNA", ancorar: "LACUNA", evitar: "LACUNA",
+      contexto: "LACUNA", pesquisa: "LACUNA",
     };
   } else {
     // Teto de 60 trechos, priorizando força forte e diversidade de pauta.
@@ -243,10 +264,6 @@ async function rotaMatch(corpo, env, request) {
   for (const campo of camposDoModelo) {
     pagina[campo] = montaCampo(gerado[campo], minimos[campo], campo, idsValidos, subconjunto, documentos);
   }
-  // Síntese: derivada dos demais; omitida se pesquisa em lacuna (docs/07).
-  pagina.sintese = pagina.pesquisa.lacuna
-    ? null
-    : montaCampo(gerado.sintese, true, "sintese", idsValidos, subconjunto, documentos);
 
   pagina.habitos_de_midia = minimos.midia
     ? {
@@ -346,13 +363,13 @@ function simulaModelo(subconjunto) {
       : "LACUNA";
   const achadoForte = subconjunto.find((t) => t.tipo === "achado" && t.forca === "forte");
   return JSON.stringify({
-    importa: campoTexto(dos(["contexto", "achado"], 1)),
-    pesquisa: campoTexto(dos(["achado"], 2)),
-    funciona: campoItens(dos(["funciona"], 3), 3),
-    afasta: campoItens(dos(["afasta"], 3), 3),
-    sintese: achadoForte
+    gatilho: achadoForte
       ? { texto: achadoForte.texto, ids: [achadoForte.id] }
       : "LACUNA",
+    ancorar: campoItens(dos(["funciona"], 3), 3),
+    evitar: campoItens(dos(["afasta"], 3), 3),
+    contexto: campoTexto(dos(["contexto", "achado"], 1)),
+    pesquisa: campoTexto(dos(["achado"], 2)),
   });
 }
 
@@ -375,6 +392,7 @@ function extraiJson(texto) {
 }
 
 // Formato fixo dos cinco campos. Cada campo é "LACUNA" ou o objeto esperado.
+// "ancorar" e "evitar" carregam exatamente três elementos (docs/03).
 function formatoValido(json) {
   if (typeof json !== "object" || json === null) return false;
   const textoOk = (c) =>
@@ -382,10 +400,11 @@ function formatoValido(json) {
     (c && typeof c.texto === "string" && Array.isArray(c.ids)) ;
   const itensOk = (c) =>
     c === "LACUNA" ||
-    (c && Array.isArray(c.itens) && c.itens.every((i) => typeof i === "string") && Array.isArray(c.ids));
+    (c && Array.isArray(c.itens) && c.itens.length === 3 &&
+      c.itens.every((i) => typeof i === "string") && Array.isArray(c.ids));
   return (
-    textoOk(json.importa) && textoOk(json.pesquisa) && textoOk(json.sintese) &&
-    itensOk(json.funciona) && itensOk(json.afasta)
+    textoOk(json.gatilho) && textoOk(json.contexto) && textoOk(json.pesquisa) &&
+    itensOk(json.ancorar) && itensOk(json.evitar)
   );
 }
 
@@ -459,7 +478,7 @@ async function mapaDocumentos(env, trechos) {
 
 function idsDaPagina(pagina) {
   const ids = new Set();
-  for (const campo of ["importa", "pesquisa", "funciona", "afasta", "sintese"]) {
+  for (const campo of ["gatilho", "ancorar", "evitar", "contexto", "pesquisa"]) {
     for (const id of pagina[campo]?.ids ?? []) ids.add(id);
   }
   for (const item of pagina.habitos_de_midia?.itens ?? []) ids.add(item.id);
@@ -535,13 +554,13 @@ Regras absolutas:
 2. Nunca mencione, avalie ou aluda a candidaturas, partidos, coligações, políticos ou eleições. Nunca peça voto nem sugira direção ou rejeição de voto.
 3. Nunca escreva URLs, nomes de sites ou referências a links.
 4. Aplique as Regras gerais e a seção "${NOMES_FORMATO[formato]}" do documento abaixo. Nunca invente regra de formato.
-5. Se a página não trouxer itens de "O que costuma funcionar" ou "O que costuma afastar", use apenas as regras do documento.
+5. Se a página não trouxer itens de "O que ancorar" ou "O que evitar", use apenas as regras do documento.
 6. Responda apenas com o JSON no formato indicado, sem nenhum texto fora dele.
 
-Entregue três coisas, nesta ordem:
-- "gatilho": qual ângulo da página funciona melhor neste formato, considerando a extensão e a estrutura definidas no documento (uma a duas frases).
-- "ancorar": lista do que deve aparecer, a partir dos itens de "O que costuma funcionar" da página, adaptados à estrutura do formato.
-- "evitar": lista do que evitar, a partir dos itens de "O que costuma afastar" da página somados aos cuidados específicos do formato.
+Entregue três coisas, nesta ordem (Parte 3 do documento):
+- "gatilho": o gatilho da página adaptado a este formato — qual ângulo funciona melhor neste meio, considerando a extensão e a estrutura definidas no documento (uma a duas frases).
+- "ancorar": lista do que deve aparecer, a partir dos itens de "O que ancorar" da página, adaptados à estrutura do formato.
+- "evitar": lista do que evitar, a partir dos itens de "O que evitar" da página somados aos cuidados específicos do formato.
 
 Formato: {"gatilho": "...", "ancorar": ["..."], "evitar": ["..."]}
 
@@ -604,10 +623,10 @@ async function rotaFormato(corpo, env, request) {
     formato,
     match: canonica.match,
     orientacao: gerado,
-    // Sinalização por código (docs/08, Parte 3): sem funciona e sem afasta
+    // Sinalização por código (docs/08, Parte 3): sem ancorar e sem evitar
     // na página, a orientação é geral, não específica deste público.
     aviso_orientacao:
-      canonica.funciona.length === 0 && canonica.afasta.length === 0
+      canonica.ancorar.length === 0 && canonica.evitar.length === 0
         ? AVISO_ORIENTACAO_GERAL
         : null,
     rotulo_ia: ROTULO_IA,
@@ -654,22 +673,22 @@ function paginaCanonica(pagina) {
 
   const partes = [];
   partes.push(`Público: ${publico}. Tema: ${macronarrativa}.`);
-  const importa = campoTexto("importa");
+  const gatilho = campoTexto("gatilho");
+  const contexto = campoTexto("contexto");
   const pesquisa = campoTexto("pesquisa");
-  const sintese = campoTexto("sintese");
-  const funciona = campoItens("funciona");
-  const afasta = campoItens("afasta");
-  if (importa) partes.push(`Por que isso importa: ${importa}`);
+  const ancorar = campoItens("ancorar");
+  const evitar = campoItens("evitar");
+  if (gatilho) partes.push(`Gatilho: ${gatilho}`);
+  if (contexto) partes.push(`Por que isso importa: ${contexto}`);
   if (pesquisa) partes.push(`O que a pesquisa mostra: ${pesquisa}`);
-  if (funciona.length) partes.push(`O que costuma funcionar:\n- ${funciona.join("\n- ")}`);
-  if (afasta.length) partes.push(`O que costuma afastar:\n- ${afasta.join("\n- ")}`);
-  if (sintese) partes.push(`Síntese: ${sintese}`);
+  if (ancorar.length) partes.push(`O que ancorar:\n- ${ancorar.join("\n- ")}`);
+  if (evitar.length) partes.push(`O que evitar:\n- ${evitar.join("\n- ")}`);
 
   // Sem nenhum campo substantivo não há o que adaptar.
   if (partes.length < 2) return null;
 
-  const ids = [...new Set(["importa", "pesquisa", "funciona", "afasta", "sintese"].flatMap(idsDe))];
-  return { match: { publico, macronarrativa }, texto: partes.join("\n\n"), ids, funciona, afasta };
+  const ids = [...new Set(["gatilho", "ancorar", "evitar", "contexto", "pesquisa"].flatMap(idsDe))];
+  return { match: { publico, macronarrativa }, texto: partes.join("\n\n"), ids, gatilho, ancorar, evitar };
 }
 
 // Corta no tamanho máximo e remove qualquer URL: o modelo nunca vê links.
@@ -684,14 +703,15 @@ function limpaTexto(valor) {
 // Simulador da rota formato: orientação determinística construída da página
 // canônica, na estrutura da Parte 3 de docs/08 (gatilho, ancorar, evitar).
 function simulaFormato(formato, canonica) {
-  const primeira = canonica.texto.split("\n").find((l) => l.trim()) ?? "";
+  const base =
+    canonica.gatilho ?? canonica.texto.split("\n").find((l) => l.trim()) ?? "";
   return JSON.stringify({
-    gatilho: `Para ${NOMES_FORMATO[formato]}, partir da situação concreta da página: ${primeira}`,
-    ancorar: canonica.funciona.length
-      ? canonica.funciona
+    gatilho: `Para ${NOMES_FORMATO[formato]}, partir do gatilho da página: ${base}`,
+    ancorar: canonica.ancorar.length
+      ? canonica.ancorar
       : ["Sem trechos específicos: seguir a estrutura recomendada do formato."],
     evitar: [
-      ...canonica.afasta,
+      ...canonica.evitar,
       `Cuidados específicos do formato ${NOMES_FORMATO[formato]} (docs/08).`,
     ],
   });

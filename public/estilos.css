@@ -207,7 +207,7 @@ h2 {
 
 @media (max-width: 40rem) { .colunas { grid-template-columns: 1fr; } }
 
-.sintese {
+.gatilho {
   font-family: var(--fonte-titulo);
   font-size: var(--texto-gg);
   line-height: 1.3;

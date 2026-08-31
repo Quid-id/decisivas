@@ -4,11 +4,11 @@ O agente não navega pelo acervo e não decide onde buscar. O Worker executa as 
 
 | Bloco da página | Consulta no banco | Mínimo | Abaixo do mínimo |
 |---|---|---|---|
-| Por que isso importa | publico + macronarrativa, tipos contexto ou achado | 1 | Lacuna declarada |
+| O gatilho | publico + macronarrativa, tipo achado (derivado dos achados) | 2, sendo 1 forte (o mesmo da pesquisa) | Lacuna declarada |
+| O que ancorar | publico + macronarrativa, tipo funciona | 3 | Lacuna declarada |
+| O que evitar | publico + macronarrativa, tipo afasta | 3 | Lacuna declarada |
+| Por que isso importa (contexto) | publico + macronarrativa, tipos contexto ou achado | 1 | Lacuna declarada |
 | O que a pesquisa mostra | publico + macronarrativa, tipo achado | 2, sendo 1 forte | Lacuna declarada |
-| O que costuma funcionar | publico + macronarrativa, tipo funciona | 3 | Lacuna declarada |
-| O que costuma afastar | publico + macronarrativa, tipo afasta | 3 | Lacuna declarada |
-| Síntese do tema | derivada dos blocos acima, sem consulta própria | — | Omitida se pesquisa em lacuna |
 | Hábitos de mídia | **publico + pauta 'consumo de mídia', ignorando a macronarrativa** | 1 | Lacuna declarada |
 | Exemplos públicos | publico + macronarrativa, tipo exemplo com link preenchido | 2 | Lacuna declarada |
 | Materiais complementares | tabela recursos, publico + macronarrativa | 0 (bloco omitido se vazio) | Bloco omitido |

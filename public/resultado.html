@@ -29,34 +29,34 @@
         <span class="suave" id="info-fontes"></span>
       </div>
 
-      <!-- 2. Por que isso importa -->
+      <!-- 2. O gatilho: o núcleo do que a mensagem precisa tocar -->
       <section>
-        <h2>Por que isso importa</h2>
-        <div id="bloco-importa"></div>
+        <h2>O gatilho</h2>
+        <div id="bloco-gatilho"></div>
       </section>
 
-      <!-- 3. O que a pesquisa mostra -->
+      <!-- 3. O que ancorar / O que evitar -->
+      <section class="colunas">
+        <div>
+          <h2>O que ancorar</h2>
+          <div id="bloco-ancorar"></div>
+        </div>
+        <div>
+          <h2>O que evitar</h2>
+          <div id="bloco-evitar"></div>
+        </div>
+      </section>
+
+      <!-- 4. Por que isso importa (contexto) -->
+      <section>
+        <h2>Por que isso importa</h2>
+        <div id="bloco-contexto"></div>
+      </section>
+
+      <!-- 5. O que a pesquisa mostra -->
       <section>
         <h2>O que a pesquisa mostra</h2>
         <div id="bloco-pesquisa"></div>
-      </section>
-
-      <!-- 4. Funciona / Afasta -->
-      <section class="colunas">
-        <div>
-          <h2>O que costuma funcionar</h2>
-          <div id="bloco-funciona"></div>
-        </div>
-        <div>
-          <h2>O que costuma afastar</h2>
-          <div id="bloco-afasta"></div>
-        </div>
-      </section>
-
-      <!-- 5. Síntese do tema -->
-      <section id="secao-sintese">
-        <h2>Síntese do tema</h2>
-        <div id="bloco-sintese"></div>
       </section>
 
       <!-- 6. Hábitos de mídia -->
@@ -121,10 +121,10 @@
     }
 
     // Lacuna declarada: a caixa de aviso sempre aparece; o campo nunca some.
-    function preencheTexto(idBloco, campo, comChips, comNota) {
+    function preencheTexto(idBloco, campo, comChips, comNota, classe) {
       const bloco = document.getElementById(idBloco);
       if (!campo || campo.lacuna) { bloco.appendChild(caixaLacuna()); return; }
-      bloco.appendChild(el("p", null, campo.texto));
+      bloco.appendChild(el("p", classe ?? null, campo.texto));
       if (comChips) bloco.appendChild(chips(campo));
       if (comNota && pagina.nota_base_restrita) {
         bloco.appendChild(el("p", "nota-restrita", pagina.nota_base_restrita));
@@ -147,19 +147,12 @@
       document.getElementById("info-fontes").textContent =
         `${dados.fontes} fonte${dados.fontes === 1 ? "" : "s"}${atualizado}`;
 
-      preencheTexto("bloco-importa", dados.importa, true, false);
+      // O gatilho é o núcleo do material: em destaque, com as fontes.
+      preencheTexto("bloco-gatilho", dados.gatilho, true, false, "gatilho");
+      preencheItens("bloco-ancorar", dados.ancorar);
+      preencheItens("bloco-evitar", dados.evitar);
+      preencheTexto("bloco-contexto", dados.contexto, true, false);
       preencheTexto("bloco-pesquisa", dados.pesquisa, true, true);
-      preencheItens("bloco-funciona", dados.funciona);
-      preencheItens("bloco-afasta", dados.afasta);
-
-      // Síntese: omitida quando a pesquisa está em lacuna (docs/07).
-      if (dados.sintese === null) {
-        document.getElementById("secao-sintese").hidden = true;
-      } else if (dados.sintese.lacuna) {
-        document.getElementById("bloco-sintese").appendChild(caixaLacuna());
-      } else {
-        document.getElementById("bloco-sintese").appendChild(el("p", "sintese", dados.sintese.texto));
-      }
 
       const midia = document.getElementById("bloco-midia");
       if (dados.habitos_de_midia.lacuna) {
