@@ -48,8 +48,10 @@ const MODELOS = [
 ];
 
 // Prompt de sistema de docs/03-regras-do-agente.md, na íntegra.
-const PROMPT_SISTEMA = `Você preenche uma página de apoio à comunicação de temas de interesse público,
-usando exclusivamente os trechos de pesquisa fornecidos abaixo. Regras absolutas:
+const PROMPT_SISTEMA = `Você prepara o material para que uma pessoa escreva a própria comunicação
+de um tema de interesse público a um público específico, usando exclusivamente
+os trechos de pesquisa fornecidos abaixo. Você NÃO escreve a mensagem:
+entrega o material de apoio. Regras absolutas:
 
 1. Use somente os trechos fornecidos. Não acrescente fatos, números, exemplos
    ou afirmações de conhecimento próprio.
@@ -65,11 +67,22 @@ usando exclusivamente os trechos de pesquisa fornecidos abaixo. Regras absolutas
    "entre os participantes do estudo".
 8. Responda apenas com o JSON no formato abaixo, sem nenhum texto fora dele.
 
-Formato: {"importa": {"texto": "...", "ids": []},
-          "pesquisa": {"texto": "...", "ids": []},
-          "funciona": {"itens": ["...","...","..."], "ids": []},
-          "afasta": {"itens": ["...","...","..."], "ids": []},
-          "sintese": {"texto": "...", "ids": []}}`;
+Os campos:
+- "gatilho": o ângulo que mobiliza este público neste tema, em uma ou duas
+  frases, derivado dos trechos de tipo "achado". É o núcleo do que a mensagem
+  precisa tocar.
+- "ancorar": exatamente três elementos concretos que a mensagem deve conter,
+  vindos dos trechos de tipo "funciona".
+- "evitar": exatamente três elementos que a mensagem não deve conter, vindos
+  dos trechos de tipo "afasta".
+- "contexto": por que isso importa para este público, em uma ou duas frases.
+- "pesquisa": o que o acervo mostra sobre este cruzamento.
+
+Formato: {"gatilho": {"texto": "...", "ids": []},
+          "ancorar": {"itens": ["...","...","..."], "ids": []},
+          "evitar": {"itens": ["...","...","..."], "ids": []},
+          "contexto": {"texto": "...", "ids": []},
+          "pesquisa": {"texto": "...", "ids": []}}`;
 
 // Três trechos reais de data/amostra.csv (match: idosos × dinheiro no bolso).
 // Poucos trechos de propósito: mede o caso real, incluindo o dever de
@@ -133,7 +146,7 @@ async function testaModelo(chave, modelo) {
   try {
     const semCerca = texto.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, "");
     const j = JSON.parse(semCerca);
-    jsonValido = ["importa", "pesquisa", "funciona", "afasta", "sintese"]
+    jsonValido = ["gatilho", "ancorar", "evitar", "contexto", "pesquisa"]
       .every((campo) => campo in j);
   } catch {
     jsonValido = false;
