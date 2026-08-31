@@ -198,25 +198,22 @@ async function rotaMatch(corpo, env, request) {
     );
   }
 
-  // 5. Cache nível 1 (docs/06): antes de qualquer chamada ao modelo. A
-  // entrada vale enquanto o conjunto de ids de trechos do cruzamento no
-  // banco for exatamente o conjunto guardado na geração.
+  // 5. Cache nível 1 (docs/06): antes de qualquer chamada ao modelo. Com o
+  // interruptor desligado, abreCachePagina não toca o banco — nem a consulta
+  // de validade, nem a tabela paginas. Qualquer falha ali (tabela ausente,
+  // coluna ausente) devolve cache indisponível e a rota segue para geração.
   const cacheLigado = env.CACHE_ENABLED !== "false";
-  const idsAcervo = cacheLigado ? await idsAcervoAtual(env, publico, macronarrativa) : null;
-  if (cacheLigado) {
-    const guardada = await env.DB.prepare(
-      "SELECT resposta, ids_trechos, modelo FROM paginas WHERE publico = ?1 AND macronarrativa = ?2 AND ids_acervo = ?3"
-    ).bind(publico, macronarrativa, idsAcervo).first();
-    if (guardada) {
-      const pagina = JSON.parse(guardada.resposta);
-      pagina.origem = "cache";
-      pagina.versao_acervo = VERSAO_ACERVO;
-      await gravaRegistro(env, {
-        rota: "match", publico, macronarrativa,
-        ids: guardada.ids_trechos, modelo: guardada.modelo, origem: "cache", resposta: pagina,
-      });
-      return respostaJson(pagina);
-    }
+  const cache = await abreCachePagina(env, cacheLigado, publico, macronarrativa);
+  if (cache.guardada) {
+    const pagina = JSON.parse(cache.guardada.resposta);
+    pagina.origem = "cache";
+    pagina.versao_acervo = VERSAO_ACERVO;
+    pagina.cache_habilitado = true;
+    await gravaRegistro(env, {
+      rota: "match", publico, macronarrativa,
+      ids: cache.guardada.ids_trechos, modelo: cache.guardada.modelo, origem: "cache", resposta: pagina,
+    });
+    return respostaJson(pagina);
   }
 
   // Consultas fixas (docs/07): o modelo não decide onde buscar.
@@ -271,7 +268,7 @@ async function rotaMatch(corpo, env, request) {
 
     gerado = await geraComValidacao(env, publico, macronarrativa, subconjunto);
     if (gerado === null) return respostaIndisponivel();
-    modeloUsado = env.SIMULAR_MODELO === "true" ? "simulacao" : env.MODEL_ID;
+    modeloUsado = modeloAtual(env);
 
     // Verificação de segurança na saída: termos bloqueados (variável de
     // ambiente, fora do repositório) → descarta e responde indisponibilidade.
@@ -328,13 +325,11 @@ async function rotaMatch(corpo, env, request) {
 
   // 7. Guarda no cache (páginas de lacuna também: não custam nada e a
   // validade por ids_acervo invalida sozinha quando o acervo mudar).
-  if (cacheLigado) {
-    await env.DB.prepare(
-      "INSERT OR REPLACE INTO paginas (publico, macronarrativa, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))"
-    )
-      .bind(publico, macronarrativa, JSON.stringify(pagina), [...idsUsados].join(","), idsAcervo, modeloUsado)
-      .run();
-  }
+  await guardaCache(
+    env, cache,
+    "INSERT OR REPLACE INTO paginas (publico, macronarrativa, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))",
+    [publico, macronarrativa, JSON.stringify(pagina), [...idsUsados].join(","), cache.idsAcervo, modeloUsado]
+  );
 
   // 8. Gravação em registros antes de devolver. Sem IP, sem identidade.
   await gravaRegistro(env, {
@@ -343,6 +338,62 @@ async function rotaMatch(corpo, env, request) {
   });
 
   return respostaJson(pagina);
+}
+
+// ---------------------------------------------------------------------------
+// Cache nível 1: o interruptor decide ANTES de qualquer acesso ao banco, e
+// falha de cache nunca derruba a rota (docs/06, seção Migrações de banco).
+// ---------------------------------------------------------------------------
+
+// Estado do cache para esta requisição. Com `ligado` falso não há uma única
+// consulta: devolve indisponível de imediato. Com o cache ligado, qualquer
+// erro (tabela ou coluna ausente, falha do D1) é registrado e devolve
+// indisponível, para a rota gerar normalmente em vez de responder 503.
+async function abreCachePagina(env, ligado, publico, macronarrativa) {
+  if (!ligado) return { disponivel: false, idsAcervo: null, guardada: null };
+  try {
+    const idsAcervo = await idsAcervoAtual(env, publico, macronarrativa);
+    const guardada = await env.DB.prepare(
+      "SELECT resposta, ids_trechos, modelo FROM paginas WHERE publico = ?1 AND macronarrativa = ?2 AND ids_acervo = ?3 AND (modelo IS NULL OR modelo = ?4)"
+    ).bind(publico, macronarrativa, idsAcervo, modeloAtual(env)).first();
+    return { disponivel: true, idsAcervo, guardada };
+  } catch (e) {
+    console.error("cache de páginas indisponível, gerando normalmente:", e.message);
+    return { disponivel: false, idsAcervo: null, guardada: null };
+  }
+}
+
+// Mesma lógica para as saídas de formato, com o formato na chave.
+async function abreCacheFormato(env, ligado, publico, macronarrativa, formato) {
+  if (!ligado) return { disponivel: false, idsAcervo: null, guardada: null };
+  try {
+    const idsAcervo = await idsAcervoAtual(env, publico, macronarrativa);
+    const guardada = await env.DB.prepare(
+      "SELECT resposta, ids_trechos, modelo FROM formatos WHERE publico = ?1 AND macronarrativa = ?2 AND formato = ?3 AND ids_acervo = ?4 AND (modelo IS NULL OR modelo = ?5)"
+    ).bind(publico, macronarrativa, formato, idsAcervo, modeloAtual(env)).first();
+    return { disponivel: true, idsAcervo, guardada };
+  } catch (e) {
+    console.error("cache de formatos indisponível, gerando normalmente:", e.message);
+    return { disponivel: false, idsAcervo: null, guardada: null };
+  }
+}
+
+// Guarda no cache. Não guarda nada se o cache estiver desligado ou se a
+// leitura já tinha falhado; falha na gravação é registrada e ignorada, porque
+// a resposta já está pronta para a pessoa.
+async function guardaCache(env, cache, sqlTexto, parametros) {
+  if (!cache.disponivel) return;
+  try {
+    await env.DB.prepare(sqlTexto).bind(...parametros).run();
+  } catch (e) {
+    console.error("falha ao guardar no cache, resposta entregue sem guardar:", e.message);
+  }
+}
+
+// Modelo desta requisição, como entra no cache e em registros. Também valida
+// a entrada guardada: página gerada por outro modelo não é reutilizada.
+function modeloAtual(env) {
+  return env.SIMULAR_MODELO === "true" ? "simulacao" : env.MODEL_ID;
 }
 
 // Conjunto atual de ids de trechos que alimentam a página do cruzamento
@@ -358,12 +409,24 @@ async function idsAcervoAtual(env, publico, macronarrativa) {
   return linhas.map((l) => l.id).join(",");
 }
 
-async function gravaRegistro(env, { rota, publico, macronarrativa, formato = null, ids, modelo, origem, resposta }) {
-  await env.DB.prepare(
-    "INSERT INTO registros (rota, publico, macronarrativa, formato, ids_trechos, modelo, origem, resposta) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)"
-  )
-    .bind(rota, publico, macronarrativa, formato, ids, modelo, origem, JSON.stringify(resposta))
-    .run();
+async function gravaRegistro(env, dados) {
+  const { rota, publico, macronarrativa, formato = null, ids, modelo, origem, resposta } = dados;
+  try {
+    await env.DB.prepare(
+      "INSERT INTO registros (rota, publico, macronarrativa, formato, ids_trechos, modelo, origem, resposta) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)"
+    )
+      .bind(rota, publico, macronarrativa, formato, ids, modelo, origem, JSON.stringify(resposta))
+      .run();
+  } catch (e) {
+    // O registro é salvaguarda do projeto (docs/04): se o banco recusar a
+    // gravação, o conteúdo entregue vai para o log do Worker em vez de se
+    // perder, e a pessoa continua atendida. Esta linha no log significa
+    // schema desatualizado — ver docs/06, seção Migrações de banco.
+    console.error(
+      "FALHA AO GRAVAR REGISTRO —", e.message,
+      "| registro:", JSON.stringify({ rota, publico, macronarrativa, formato, ids_trechos: ids, modelo, origem, resposta })
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -680,27 +743,24 @@ async function rotaFormato(corpo, env, request) {
     return respostaJson({ erro: "Página ausente ou fora do formato entregue pela plataforma." }, 400);
   }
 
-  // Cache nível 1, mesma validade da rota match: o conjunto de ids do
-  // cruzamento no banco precisa ser exatamente o guardado na geração.
+  // Cache nível 1, mesma validade e mesma proteção da rota match: com o
+  // interruptor desligado nada aqui toca o banco, e falha de cache cai para
+  // geração normal em vez de derrubar a rota.
   const cacheLigado = env.CACHE_ENABLED !== "false";
-  const idsAcervo = cacheLigado
-    ? await idsAcervoAtual(env, canonica.match.publico, canonica.match.macronarrativa)
-    : null;
-  if (cacheLigado) {
-    const guardada = await env.DB.prepare(
-      "SELECT resposta, ids_trechos, modelo FROM formatos WHERE publico = ?1 AND macronarrativa = ?2 AND formato = ?3 AND ids_acervo = ?4"
-    ).bind(canonica.match.publico, canonica.match.macronarrativa, formato, idsAcervo).first();
-    if (guardada) {
-      const respostaCache = JSON.parse(guardada.resposta);
-      respostaCache.origem = "cache";
-      respostaCache.versao_acervo = VERSAO_ACERVO;
-      await gravaRegistro(env, {
-        rota: "formato",
-        publico: canonica.match.publico, macronarrativa: canonica.match.macronarrativa, formato,
-        ids: guardada.ids_trechos, modelo: guardada.modelo, origem: "cache", resposta: respostaCache,
-      });
-      return respostaJson(respostaCache);
-    }
+  const cache = await abreCacheFormato(
+    env, cacheLigado, canonica.match.publico, canonica.match.macronarrativa, formato
+  );
+  if (cache.guardada) {
+    const respostaCache = JSON.parse(cache.guardada.resposta);
+    respostaCache.origem = "cache";
+    respostaCache.versao_acervo = VERSAO_ACERVO;
+    respostaCache.cache_habilitado = true;
+    await gravaRegistro(env, {
+      rota: "formato",
+      publico: canonica.match.publico, macronarrativa: canonica.match.macronarrativa, formato,
+      ids: cache.guardada.ids_trechos, modelo: cache.guardada.modelo, origem: "cache", resposta: respostaCache,
+    });
+    return respostaJson(respostaCache);
   }
 
   const sistema = promptFormato(formato);
@@ -721,7 +781,7 @@ async function rotaFormato(corpo, env, request) {
     return respostaIndisponivel();
   }
 
-  const modeloUsado = env.SIMULAR_MODELO === "true" ? "simulacao" : env.MODEL_ID;
+  const modeloUsado = modeloAtual(env);
   const resposta = {
     formato,
     match: canonica.match,
@@ -735,18 +795,18 @@ async function rotaFormato(corpo, env, request) {
     rotulo_ia: ROTULO_IA,
     versao_acervo: VERSAO_ACERVO,
     origem: "geracao",
+    // O front usa esta flag: com o cache desligado, descarta o que guardou.
+    cache_habilitado: cacheLigado,
   };
 
-  if (cacheLigado) {
-    await env.DB.prepare(
-      "INSERT OR REPLACE INTO formatos (publico, macronarrativa, formato, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))"
-    )
-      .bind(
-        canonica.match.publico, canonica.match.macronarrativa, formato,
-        JSON.stringify(resposta), canonica.ids.join(","), idsAcervo, modeloUsado
-      )
-      .run();
-  }
+  await guardaCache(
+    env, cache,
+    "INSERT OR REPLACE INTO formatos (publico, macronarrativa, formato, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))",
+    [
+      canonica.match.publico, canonica.match.macronarrativa, formato,
+      JSON.stringify(resposta), canonica.ids.join(","), cache.idsAcervo, modeloUsado,
+    ]
+  );
 
   // Gravação em registros antes de devolver. Sem IP, sem identidade.
   await gravaRegistro(env, {

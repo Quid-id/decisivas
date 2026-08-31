@@ -29,7 +29,7 @@ O comando imprime um `database_id`. Cole esse valor no campo
 (hoje está como `PREENCHER-APOS-CRIAR-O-BANCO`) e faça commit.
 O banco local não precisa desse passo: ele é criado na primeira execução.
 
-### Aplicar o schema (cria as quatro tabelas)
+### Aplicar o schema (cria as seis tabelas)
 
 ```sh
 # local
@@ -108,6 +108,99 @@ BASE_URL=https://SEU-DOMINIO node scripts/gera-cache.js
 Sem esse passo nada quebra — o cache invalida sozinho —, mas a primeira
 pessoa de cada cruzamento paga o tempo de geração.
 
+## Migrações de banco
+
+### A regra
+
+**Toda alteração em `docs/02-schema.sql` exige aplicação no banco remoto ANTES
+do deploy do código que depende dela.** O D1 não tem migração automática: o
+schema versionado no repositório é só um arquivo de texto, e um `CREATE TABLE`
+commitado não cria nada em produção. Código novo contra schema velho aparece
+como `no such table: X` ou `table Y has no column named Z` nos logs.
+
+A ordem é sempre esta, e não pode ser invertida:
+
+1. Aplicar os comandos de migração no banco remoto.
+2. Rodar o comando de verificação e confirmar o resultado.
+3. Só então fazer o deploy (push na branch principal).
+
+Alterar o schema sem entregar os comandos de migração remota é entrega
+incompleta — a regra está no `CLAUDE.md`.
+
+Uma migração é sempre **aditiva** (`ALTER TABLE ... ADD COLUMN`, `CREATE TABLE`,
+`CREATE INDEX`). O SQLite do D1 não remove nem renomeia coluna com um comando
+só; se um dia isso for necessário, a migração cria a tabela nova, copia os
+dados, e a antiga é removida em uma migração posterior, depois do deploy.
+
+### Procedimento pelo console do painel (sem terminal)
+
+O console SQL do painel executa **um comando por vez**, então cada comando da
+migração vai sozinho, em uma linha, sem comentários:
+
+1. dash.cloudflare.com → **Storage & Databases → D1 SQL Database → decisivas**
+   → aba **Console**.
+2. Cole o comando 1 da migração, execute e confira que não houve erro.
+3. Repita para cada comando, **na ordem numerada**.
+4. Cole o comando de verificação e confirme o resultado esperado.
+5. Registre a migração como aplicada na tabela abaixo (data e quem aplicou),
+   no mesmo commit em que o schema mudou, se possível.
+
+Se um comando falhar dizendo que a tabela ou a coluna já existe, aquela parte
+da migração já estava aplicada: siga para o próximo comando. Nenhum comando
+desta seção apaga dados.
+
+Com terminal, o equivalente é `npx wrangler d1 execute decisivas --remote
+--file=<arquivo com os comandos>`, mas o painel é o caminho oficial do projeto
+(ver "Sem terminal", acima).
+
+### Registro de migrações
+
+| Nº | Commit | O que mudou | Remoto |
+|---|---|---|---|
+| 001 | schema inicial | Tabelas `documentos`, `trechos`, `recursos`, `registros`; índices `idx_trechos_match`, `idx_trechos_midia`, `idx_recursos_match` | Aplicada em 08/2026, pelo console |
+| 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Pendente** — falta aplicar; foi o que causou os erros `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
+
+Comandos da migração 002, um por bloco:
+
+```sql
+ALTER TABLE registros ADD COLUMN origem TEXT;
+```
+
+```sql
+CREATE TABLE paginas (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, resposta TEXT NOT NULL, ids_trechos TEXT NOT NULL, ids_acervo TEXT NOT NULL, modelo TEXT, gerado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa));
+```
+
+```sql
+CREATE TABLE formatos (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, formato TEXT NOT NULL, resposta TEXT NOT NULL, ids_trechos TEXT NOT NULL, ids_acervo TEXT NOT NULL, modelo TEXT, gerado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa, formato));
+```
+
+Verificação (deve devolver `1`, `1`, `1`):
+
+```sql
+SELECT (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='paginas') AS paginas, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='formatos') AS formatos, (SELECT COUNT(*) FROM pragma_table_info('registros') WHERE name='origem') AS coluna_origem;
+```
+
+Para conferir o schema remoto inteiro a qualquer momento, e comparar com
+`docs/02-schema.sql`:
+
+```sql
+SELECT type, name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' ORDER BY type, name;
+```
+
+### O que o código faz quando o schema está atrasado
+
+Desde a correção que acompanha esta seção, schema atrasado **degrada em vez de
+derrubar** — mas continua sendo defeito a corrigir, não estado aceitável:
+
+- Falha ao ler ou gravar o cache: a rota gera a página normalmente e o log traz
+  `cache de páginas indisponível, gerando normalmente: ...`.
+- Falha ao gravar em `registros`: a pessoa é atendida e o log traz
+  `FALHA AO GRAVAR REGISTRO — ... | registro: {...}`, com o conteúdo íntegro,
+  para o registro não se perder até a migração ser aplicada.
+
+Qualquer uma dessas duas linhas no log significa migração pendente. Elas são a
+condição de alerta a procurar depois de todo deploy.
+
 ## Cache de páginas geradas
 
 Dois níveis, ambos desligáveis pela variável `CACHE_ENABLED=false` (em
@@ -130,13 +223,31 @@ Atenção: a tabela `recursos` não entra na validade (a regra cobre trechos).
 Se só os recursos mudarem, rode a regeneração do cache — por isso o passo é
 obrigatório após qualquer carga.
 
+A validade tem **dois critérios**, ambos verificados na leitura:
+
+1. o conjunto de ids de trechos do cruzamento, como descrito acima;
+2. o **modelo** que gerou a entrada, comparado com o `MODEL_ID` atual — página
+   feita por outro modelo não é reutilizada. Páginas só de lacuna têm `modelo`
+   nulo (nenhum modelo foi chamado) e seguem válidas em qualquer modelo.
+
+Limitação conhecida: mudanças de **prompt** não entram na validade. Editar
+`docs/03-regras-do-agente.md` ou `docs/08-regras-de-formato.md` não invalida
+nada — nesses deploys, limpe o cache à mão (ver o fim desta seção).
+
 **Nível 2 — navegador (localStorage).** A página de resultado guarda as
 páginas já vistas com a marca de versão de `data/versao-acervo.txt`
 (publicada no site no build como `/versao-acervo.js`). Versão igual: exibe
 imediatamente, sem chamar o servidor. Versão diferente: descarta e busca.
 Guarda somente conteúdo de página (nunca dado da pessoa), com teto de 12
-páginas — estourou, a mais antiga sai. Com `CACHE_ENABLED=false`, as
-respostas avisam o navegador, que descarta o que guardou e para de guardar.
+páginas — estourou, a mais antiga sai.
+
+O interruptor alcança este nível **sem custo de requisição**: o build publica
+`window.CACHE_HABILITADO` em `/versao-acervo.js`, lido de `CACHE_ENABLED`
+(`.dev.vars` em desenvolvimento, `[vars]` do `wrangler.toml` em produção).
+Como a variável vive no `wrangler.toml`, mudá-la exige commit e deploy — o
+mesmo ciclo que regenera o arquivo, então os dois lados nunca discordam. Com
+o cache desligado, o front não lê nada guardado e **apaga todas** as páginas
+que tinha, não só a do match atual.
 
 **Gerar o cache em lote** (`scripts/gera-cache.js`): percorre os 35
 cruzamentos chamando `/api/match`; cruzamento sem acervo suficiente vira
