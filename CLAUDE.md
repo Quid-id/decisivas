@@ -28,6 +28,7 @@ Não é ferramenta eleitoral. Não menciona candidaturas. É um acervo de pesqui
 7. **Rótulo de IA visível** em toda saída gerada, com o texto definido na especificação.
 8. **Interface exclusivamente com os tokens de `brand/tokens.css`.** Sem cores ou fontes fora deles.
 9. Todo texto de interface em português do Brasil.
+10. **Alterar o schema sem entregar os comandos de migração remota é entrega incompleta.** O D1 não migra sozinho: `docs/02-schema.sql` é só um arquivo, e um `CREATE TABLE` commitado não cria nada em produção. Toda mudança de schema entrega junto os comandos prontos para o console do painel (um por bloco, uma linha, sem comentários), um comando de verificação, e a linha nova no registro de migrações de `docs/06-operacao.md`. A aplicação no remoto vem ANTES do deploy do código que depende dela.
 
 ## Vocabulários fechados (não criar valores novos)
 

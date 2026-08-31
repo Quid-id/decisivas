@@ -216,11 +216,33 @@
     // build a partir de data/versao-acervo.txt: versão diferente = acervo
     // novo, a entrada é descartada e a página buscada de novo.
     const VERSAO = window.VERSAO_ACERVO ?? null;
+    // Estado do interruptor CACHE_ENABLED, publicado no build a partir do
+    // wrangler.toml. É o que faz o interruptor alcançar este nível sem custo
+    // de requisição: desligado, não se lê nem se guarda nada aqui.
+    const CACHE_HABILITADO = window.CACHE_HABILITADO !== false;
     const PREFIXO_CACHE = "decisivas:pagina:";
     const LIMITE_PAGINAS = 12;
     const chaveCache = PREFIXO_CACHE + publico + "|" + tema;
 
+    function chavesGuardadas() {
+      const chaves = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(PREFIXO_CACHE)) chaves.push(k);
+      }
+      return chaves;
+    }
+
+    // Esvazia o nível 2 inteiro, não só o match atual.
+    function limpaTudoDoNavegador() {
+      try {
+        for (const k of chavesGuardadas()) localStorage.removeItem(k);
+      } catch { /* armazenamento indisponível: nada a limpar */ }
+    }
+
     function leDoNavegador() {
+      // Interruptor desligado: não serve nada guardado e descarta o que existe.
+      if (!CACHE_HABILITADO) { limpaTudoDoNavegador(); return null; }
       try {
         const bruto = localStorage.getItem(chaveCache);
         if (!bruto) return null;
@@ -234,27 +256,25 @@
     }
 
     function guardaNoNavegador(dados) {
+      // Interruptor desligado — pelo build ou pela resposta do servidor:
+      // nada é guardado e TODO o nível 2 é descartado, não só este match.
+      if (!CACHE_HABILITADO || dados.cache_habilitado === false) {
+        limpaTudoDoNavegador();
+        return;
+      }
       try {
-        // Interruptor CACHE_ENABLED desligado no servidor: nada é guardado
-        // e o que existia para este match é descartado.
-        if (!VERSAO || dados.cache_habilitado === false || !dados.versao_acervo) {
-          localStorage.removeItem(chaveCache);
-          return;
-        }
+        if (!VERSAO || !dados.versao_acervo) { limpaTudoDoNavegador(); return; }
         localStorage.setItem(chaveCache, JSON.stringify({
           versao: dados.versao_acervo,
           salvoEm: Date.now(),
           pagina: dados,
         }));
         // Limite do total guardado: descarta a entrada mais antiga.
-        const entradas = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (!k || !k.startsWith(PREFIXO_CACHE)) continue;
+        const entradas = chavesGuardadas().map((k) => {
           let salvoEm = 0;
           try { salvoEm = JSON.parse(localStorage.getItem(k)).salvoEm ?? 0; } catch {}
-          entradas.push({ k, salvoEm });
-        }
+          return { k, salvoEm };
+        });
         entradas.sort((a, b) => a.salvoEm - b.salvoEm);
         while (entradas.length > LIMITE_PAGINAS) localStorage.removeItem(entradas.shift().k);
       } catch { /* armazenamento indisponível ou cheio: segue sem guardar */ }
