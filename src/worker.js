@@ -10,6 +10,12 @@
 // Nenhuma chave de API entra neste arquivo: local em .dev.vars, produção
 // como segredo no painel do Cloudflare.
 
+// Governança de formatos (docs/08): o agente nunca inventa regra de formato,
+// aplica o que está escrito no documento. O arquivo entra no prompt no build
+// ([[rules]] no wrangler.toml), então editar o .md muda o comportamento no
+// próximo deploy.
+import REGRAS_DE_FORMATO from "../docs/08-regras-de-formato.md";
+
 // Vocabulários fechados (CLAUDE.md). Qualquer valor fora deles → 400.
 const PUBLICOS = [
   "idosos",
@@ -507,43 +513,51 @@ async function consulta(env, sqlTexto, parametros = []) {
 // restante descartado.
 // ---------------------------------------------------------------------------
 
-// Regras 2, 3 e 8 de docs/03, presentes em todo prompt de formato.
-const REGRAS_FORMATO = `Regras absolutas:
-1. Use somente o conteúdo da página fornecida. Não acrescente fatos, números
-   ou exemplos de conhecimento próprio.
-2. Nunca mencione, avalie ou aluda a candidaturas, partidos, coligações,
-   políticos ou eleições. Nunca peça voto nem sugira direção ou rejeição de voto.
-3. Nunca escreva URLs, nomes de sites ou referências a links.
-4. Responda apenas com o JSON no formato indicado, sem nenhum texto fora dele.`;
-
-// Prompts fixos por formato. Nada do usuário entra aqui.
-const PROMPTS_FORMATO = {
-  whatsapp: {
-    sistema: `Você adapta uma página de apoio à comunicação para uma mensagem curta de WhatsApp, em português do Brasil, com tom pessoal e direto, no máximo 900 caracteres, sem emojis em excesso.
-${REGRAS_FORMATO}
-
-Formato: {"mensagem": "..."}`,
-    valida: (j) => typeof j?.mensagem === "string" && j.mensagem.length > 0,
-  },
-  carrossel: {
-    sistema: `Você adapta uma página de apoio à comunicação para um carrossel de 5 a 7 cartões, em português do Brasil. Cada cartão tem um título curto (até 40 caracteres) e um texto de apoio (até 200 caracteres). O primeiro cartão apresenta o tema; o último resume.
-${REGRAS_FORMATO}
-
-Formato: {"cartoes": [{"titulo": "...", "texto": "..."}]}`,
-    valida: (j) =>
-      Array.isArray(j?.cartoes) && j.cartoes.length >= 3 && j.cartoes.length <= 8 &&
-      j.cartoes.every((c) => typeof c?.titulo === "string" && typeof c?.texto === "string"),
-  },
-  roteiro: {
-    sistema: `Você adapta uma página de apoio à comunicação para um roteiro de vídeo curto (até 60 segundos), em português do Brasil. Divida em cenas; cada cena tem uma descrição visual breve e a fala correspondente, em linguagem falada.
-${REGRAS_FORMATO}
-
-Formato: {"cenas": [{"descricao": "...", "fala": "..."}]}`,
-    valida: (j) =>
-      Array.isArray(j?.cenas) && j.cenas.length >= 2 &&
-      j.cenas.every((c) => typeof c?.descricao === "string" && typeof c?.fala === "string"),
-  },
+// Nome de cada formato como aparece na seção correspondente de docs/08.
+const NOMES_FORMATO = {
+  whatsapp: "WhatsApp",
+  carrossel: "Carrossel",
+  roteiro: "Roteiro de vídeo",
 };
+
+const AVISO_ORIENTACAO_GERAL =
+  "Orientação geral do formato: o acervo ainda não tem, para este cruzamento, trechos do que funciona ou do que afasta.";
+
+// Prompt fixo por formato: preâmbulo com as regras 2 e 3 de docs/03 e o
+// contrato de entrega da Parte 3 de docs/08 + o documento de governança
+// na íntegra. A pessoa escreve, a plataforma orienta: o modelo NUNCA
+// entrega a mensagem final.
+function promptFormato(formato) {
+  return `Você orienta a escrita de uma comunicação no formato "${NOMES_FORMATO[formato]}", em português do Brasil, a partir de uma página de apoio fornecida. Você NÃO escreve a mensagem final: entrega o material para que a pessoa escreva a própria mensagem.
+
+Regras absolutas:
+1. Toda orientação específica de público ou tema vem da página fornecida. O documento de regras de formato abaixo é a única fonte externa permitida. Não acrescente fatos, números ou exemplos de conhecimento próprio.
+2. Nunca mencione, avalie ou aluda a candidaturas, partidos, coligações, políticos ou eleições. Nunca peça voto nem sugira direção ou rejeição de voto.
+3. Nunca escreva URLs, nomes de sites ou referências a links.
+4. Aplique as Regras gerais e a seção "${NOMES_FORMATO[formato]}" do documento abaixo. Nunca invente regra de formato.
+5. Se a página não trouxer itens de "O que costuma funcionar" ou "O que costuma afastar", use apenas as regras do documento.
+6. Responda apenas com o JSON no formato indicado, sem nenhum texto fora dele.
+
+Entregue três coisas, nesta ordem:
+- "gatilho": qual ângulo da página funciona melhor neste formato, considerando a extensão e a estrutura definidas no documento (uma a duas frases).
+- "ancorar": lista do que deve aparecer, a partir dos itens de "O que costuma funcionar" da página, adaptados à estrutura do formato.
+- "evitar": lista do que evitar, a partir dos itens de "O que costuma afastar" da página somados aos cuidados específicos do formato.
+
+Formato: {"gatilho": "...", "ancorar": ["..."], "evitar": ["..."]}
+
+Documento de regras de formato:
+
+${REGRAS_DE_FORMATO}`;
+}
+
+function validaOrientacao(j) {
+  const lista = (v) =>
+    Array.isArray(v) && v.length >= 1 && v.every((i) => typeof i === "string" && i.trim());
+  return (
+    typeof j?.gatilho === "string" && j.gatilho.trim().length > 0 &&
+    lista(j?.ancorar) && lista(j?.evitar)
+  );
+}
 
 const TAMANHO_MAXIMO_CAMPO = 4000;
 
@@ -558,7 +572,7 @@ async function rotaFormato(corpo, env, request) {
   }
 
   // Lista fechada de formatos → 400 sem chamar o modelo.
-  if (!PROMPTS_FORMATO[formato]) {
+  if (!NOMES_FORMATO[formato]) {
     return respostaJson({ erro: "Formato fora da lista disponível." }, 400);
   }
 
@@ -567,14 +581,14 @@ async function rotaFormato(corpo, env, request) {
     return respostaJson({ erro: "Página ausente ou fora do formato entregue pela plataforma." }, 400);
   }
 
-  const { sistema, valida } = PROMPTS_FORMATO[formato];
-  const usuario = `Página a adaptar:\n\n${canonica.texto}`;
+  const sistema = promptFormato(formato);
+  const usuario = `Página de apoio:\n\n${canonica.texto}`;
 
   let gerado = null;
   for (let tentativa = 0; tentativa < 2 && gerado === null; tentativa++) {
     const texto = await chamaModelo(env, sistema, usuario, () => simulaFormato(formato, canonica));
     const json = extraiJson(texto);
-    if (json && valida(json)) gerado = json;
+    if (json && validaOrientacao(json)) gerado = json;
     else console.error(`formato ${formato}: resposta fora do formato (tentativa ${tentativa + 1})`);
   }
   if (gerado === null) return respostaIndisponivel();
@@ -589,7 +603,13 @@ async function rotaFormato(corpo, env, request) {
   const resposta = {
     formato,
     match: canonica.match,
-    conteudo: gerado,
+    orientacao: gerado,
+    // Sinalização por código (docs/08, Parte 3): sem funciona e sem afasta
+    // na página, a orientação é geral, não específica deste público.
+    aviso_orientacao:
+      canonica.funciona.length === 0 && canonica.afasta.length === 0
+        ? AVISO_ORIENTACAO_GERAL
+        : null,
     rotulo_ia: ROTULO_IA,
   };
 
@@ -649,7 +669,7 @@ function paginaCanonica(pagina) {
   if (partes.length < 2) return null;
 
   const ids = [...new Set(["importa", "pesquisa", "funciona", "afasta", "sintese"].flatMap(idsDe))];
-  return { match: { publico, macronarrativa }, texto: partes.join("\n\n"), ids };
+  return { match: { publico, macronarrativa }, texto: partes.join("\n\n"), ids, funciona, afasta };
 }
 
 // Corta no tamanho máximo e remove qualquer URL: o modelo nunca vê links.
@@ -661,22 +681,18 @@ function limpaTexto(valor) {
   return aparado.length ? aparado : null;
 }
 
-// Simulador da rota formato: adaptação determinística da página canônica.
+// Simulador da rota formato: orientação determinística construída da página
+// canônica, na estrutura da Parte 3 de docs/08 (gatilho, ancorar, evitar).
 function simulaFormato(formato, canonica) {
-  const linhas = canonica.texto.split("\n").filter((l) => l.trim());
-  const corte = (s, n) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
-  if (formato === "whatsapp") {
-    return JSON.stringify({ mensagem: corte(linhas.join(" "), 900) });
-  }
-  if (formato === "carrossel") {
-    const cartoes = linhas.slice(0, 7).map((l, i) => ({
-      titulo: corte(i === 0 ? "Para começar" : `Cartão ${i + 1}`, 40),
-      texto: corte(l, 200),
-    }));
-    while (cartoes.length < 3) cartoes.push({ titulo: `Cartão ${cartoes.length + 1}`, texto: "…" });
-    return JSON.stringify({ cartoes });
-  }
+  const primeira = canonica.texto.split("\n").find((l) => l.trim()) ?? "";
   return JSON.stringify({
-    cenas: linhas.slice(0, 4).map((l) => ({ descricao: "Pessoa falando à câmera.", fala: corte(l, 240) })),
+    gatilho: `Para ${NOMES_FORMATO[formato]}, partir da situação concreta da página: ${primeira}`,
+    ancorar: canonica.funciona.length
+      ? canonica.funciona
+      : ["Sem trechos específicos: seguir a estrutura recomendada do formato."],
+    evitar: [
+      ...canonica.afasta,
+      `Cuidados específicos do formato ${NOMES_FORMATO[formato]} (docs/08).`,
+    ],
   });
 }
