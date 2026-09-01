@@ -1,0 +1,434 @@
+<!-- DECISIVAS. Protótipo v3.
+     Home de seleção mais página de resultado, na mesma peça.
+     Cores e tipografia vêm dos tokens da identidade, reunidos em :root.
+     Nenhum conteúdo novo foi escrito: o que não veio do acervo ou do
+     material enviado está marcado como [preencher]. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DECISIVAS · protótipo v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+<style>
+  @font-face{font-family:"Inclusive Sans FB";font-style:normal;font-weight:300 700;font-display:swap;
+    src:url("https://cdn.jsdelivr.net/npm/@fontsource-variable/inclusive-sans/files/inclusive-sans-latin-wght-normal.woff2") format("woff2")}
+  @font-face{font-family:"Inclusive Sans FB";font-style:italic;font-weight:300 700;font-display:swap;
+    src:url("https://cdn.jsdelivr.net/npm/@fontsource-variable/inclusive-sans/files/inclusive-sans-latin-wght-italic.woff2") format("woff2")}
+
+  :root{
+    --rosa:#ff5aac; --verde:#16c172; --azul-claro:#26cbff; --laranja:#ffb23d;
+    --verde-claro:#b4db00; --amarelo:#ffcc32; --azul:#0f02fd; --vermelho:#ff3131;
+    --roxo:#7e2dff; --off-white:#f7f7ed; --preto:#000000;
+    --pub-jovens:var(--azul-claro); --pub-60mais:var(--verde);
+    --pub-benef:var(--laranja); --pub-2a5:var(--roxo);
+    --fundo:var(--off-white); --texto:var(--preto); --texto-fraco:#5a5a52;
+    --borda:#d8d8cc; --publico:var(--laranja); --publico-texto:var(--preto);
+    --grade:#00000012; --passo:24px;
+    --tipo:"Inclusive Sans","Inclusive Sans FB",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--texto);font-family:var(--tipo);font-size:17px;line-height:1.55;
+    background-color:var(--fundo);
+    background-image:linear-gradient(var(--grade) 1px,transparent 1px),linear-gradient(90deg,var(--grade) 1px,transparent 1px);
+    background-size:var(--passo) var(--passo)}
+  .larg{max-width:1040px;margin:0 auto;padding:0 20px}
+
+  .painel{background:#e9e9de;border-bottom:1px dashed #a9a99c;font-size:13px}
+  .painel .larg{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 20px}
+  .painel button{font:inherit;background:#fff;border:1px solid #a9a99c;border-radius:99px;padding:3px 12px;cursor:pointer}
+  .painel button[aria-pressed="true"]{background:var(--preto);border-color:var(--preto);color:var(--off-white)}
+
+  /* banner rotativo */
+  .banner{position:relative;height:220px;overflow:hidden;border-bottom:3px solid var(--preto);background:var(--off-white)}
+  .banner figure{position:absolute;inset:0;margin:0;opacity:0;transition:opacity .8s}
+  .banner figure.ativa{opacity:1}
+  .banner svg{width:100%;height:100%;display:block}
+  .banner .nota{position:absolute;right:12px;bottom:8px;font-size:11px;color:var(--texto-fraco);background:#f7f7edcc;padding:2px 8px}
+  @media (max-width:700px){.banner{height:150px}}
+
+  .barra{background:var(--preto);color:var(--off-white);position:sticky;top:0;z-index:20}
+  .barra .larg{display:flex;align-items:center;justify-content:space-between;padding:14px 20px}
+  .marca{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:22px}
+  .barra nav a{color:var(--off-white);text-decoration:none;font-size:15px;margin-left:22px;border-bottom:1px solid transparent;padding-bottom:2px;cursor:pointer}
+  .barra nav a:hover{border-bottom-color:var(--rosa)}
+
+  main{padding:44px 0 72px}
+
+  /* home */
+  .chamada{font-size:clamp(28px,4.4vw,46px);line-height:1.12;font-weight:700;margin:0 0 8px;max-width:20ch;min-height:2.3em}
+  .apoio{color:var(--texto-fraco);margin:0 0 40px;max-width:60ch}
+  .etapa{margin-bottom:34px}
+  .etapa h2{font-size:13px;letter-spacing:.12em;color:var(--texto-fraco);font-weight:400;margin:0 0 14px}
+  .opcoes{display:flex;flex-wrap:wrap;gap:10px}
+  .opcoes button{font:inherit;font-size:16px;background:transparent;border:2px solid var(--preto);border-radius:99px;padding:9px 20px;cursor:pointer}
+  .opcoes button[aria-pressed="true"]{background:var(--cor,var(--preto));color:var(--cor-texto,var(--off-white));border-color:var(--preto);font-weight:700}
+  .acao{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:8px}
+  .caminhos{font:inherit;font-size:17px;font-weight:700;letter-spacing:.08em;background:var(--preto);color:var(--off-white);border:2px solid var(--preto);border-radius:99px;padding:14px 34px;cursor:pointer}
+  .caminhos[disabled]{background:transparent;color:#9a9a8e;border-color:#c4c4b6;cursor:not-allowed}
+  .escolha{color:var(--texto-fraco);font-size:15px}
+
+  /* resultado */
+  .cartao{background:#fff;border:2px solid var(--preto);padding:32px}
+  h3{font-size:21px;margin:32px 0 12px;font-weight:700}
+  h3:first-of-type{margin-top:20px}
+  p{margin:0 0 12px;max-width:70ch}
+  .voltar{font:inherit;background:transparent;border:0;color:var(--texto-fraco);cursor:pointer;padding:0;margin-bottom:20px;border-bottom:1px solid var(--texto-fraco)}
+  .idmarca{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:14px}
+  .pilula{background:var(--publico);color:var(--publico-texto);border-radius:99px;padding:5px 16px;font-weight:700}
+  .pilula.tema{background:transparent;color:var(--preto);border:2px solid var(--preto)}
+  .meta{color:var(--texto-fraco)}
+  .pautas{margin-top:18px;padding-top:16px;border-top:1px solid var(--borda)}
+  .pautas .rot{font-size:14px;color:var(--texto-fraco);margin-bottom:8px}
+  .pautas button{font:inherit;font-size:14px;background:transparent;border:2px solid var(--preto);border-radius:99px;padding:5px 16px;margin:0 8px 8px 0;cursor:pointer}
+  .pautas button[aria-pressed="true"]{background:var(--rosa);border-color:var(--preto);font-weight:700}
+  .itens{display:grid;gap:10px}
+  .item{border-left:5px solid var(--verde);background:#faf9f2;padding:12px 14px}
+  #bloco-evitar .item{border-left-color:var(--vermelho)}
+  .duas{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  @media (max-width:700px){.duas{grid-template-columns:1fr}}
+  .lacuna{background:#faf9f2;border:1px dashed #b4b4a4;padding:12px 14px;color:var(--texto-fraco);font-size:15px}
+  .falta{border:1px dashed #b4b4a4;padding:12px 14px;color:var(--texto-fraco);font-size:14px}
+  .versionado{border-left:5px solid var(--rosa);padding-left:14px;margin-left:-19px}
+  .selo{display:inline-block;font-size:13px;background:var(--rosa);color:var(--preto);border-radius:99px;padding:2px 10px;margin-left:10px;vertical-align:middle;font-weight:400}
+  .midia{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start}
+  @media (max-width:700px){.midia{grid-template-columns:1fr}}
+  .card-semio{aspect-ratio:4/5;border:1px dashed #b4b4a4;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;color:var(--texto-fraco);font-size:13px}
+  .formatos{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 16px}
+  .formatos button{font:inherit;background:transparent;border:2px solid var(--preto);border-radius:99px;padding:9px 22px;cursor:pointer}
+  .formatos button[aria-pressed="true"]{background:var(--cor);color:var(--preto);font-weight:700}
+  #copiar{margin-left:auto;background:var(--preto);color:var(--off-white)}
+  .saida{background:#faf9f2;border:1px solid var(--borda);padding:18px;white-space:pre-wrap;font-size:16px}
+  .aviso-ia{font-size:11.5px;line-height:1.45;color:var(--texto-fraco);margin-top:10px;max-width:70ch;font-style:italic}
+
+  footer{background:var(--preto);color:var(--off-white);padding:64px 0 28px}
+  .grade-rodape{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px}
+  @media (max-width:760px){.grade-rodape{grid-template-columns:1fr;gap:32px}}
+  footer h4{font-size:12px;letter-spacing:.12em;color:#9b9b90;margin:0 0 18px;font-weight:400}
+  footer ul{list-style:none;margin:0;padding:0}
+  footer li{margin-bottom:14px}
+  footer a{color:var(--off-white);text-decoration:none;border-bottom:1px solid var(--off-white);padding-bottom:2px}
+  footer a:hover{border-bottom-color:var(--rosa)}
+  .assinatura{font-size:22px;font-weight:700;margin:0 0 10px}
+  .tagline{color:#c9c9bd;margin:0;max-width:34ch}
+  .fixa-ia{color:#9b9b90;font-size:12px;max-width:60ch;margin-top:14px;font-style:italic}
+  .base{border-top:1px solid #35352f;margin-top:48px;padding-top:22px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;font-size:12px;color:#9b9b90}
+  .creditos{display:flex;flex-wrap:wrap;gap:26px;align-items:center}
+  .credito{display:flex;align-items:center;gap:10px}
+  .logo{border:1px dashed #55554c;padding:8px 16px;color:#c9c9bd;font-size:12px}
+
+  .modal{position:fixed;inset:0;background:#000000e6;display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .modal .caixa{background:var(--off-white);max-width:920px;width:100%}
+  .video{aspect-ratio:16/9;background:#111;color:#c9c9bd;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font-size:14px}
+  .modal .pe{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;font-size:14px}
+  .modal .pe button{font:inherit;background:var(--preto);color:var(--off-white);border:0;border-radius:99px;padding:8px 20px;cursor:pointer}
+  [hidden]{display:none !important}
+  button:focus-visible,a:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){.banner figure{transition:none}}
+</style>
+
+<div class="painel"><div class="larg">
+  <strong>Teste:</strong>
+  <span>fontes</span>
+  <button data-fontes="nao" aria-pressed="true">oculto</button>
+  <button data-fontes="sim" aria-pressed="false">visível</button>
+  <span style="margin-left:12px">escopo das tags</span>
+  <button data-escopo="curto" aria-pressed="true">gatilho e formato</button>
+  <button data-escopo="amplo" aria-pressed="false">inclui ancorar e evitar</button>
+  <button id="ver-video" style="margin-left:auto">rever abertura</button>
+</div></div>
+
+<div class="banner" id="banner">
+  <figure class="ativa"><svg viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="1200" height="220" fill="#f7f7ed"/>
+    <g fill="none" stroke-width="9" stroke-linecap="square">
+      <path d="M60 220 V120 H240 V40" stroke="#0f02fd"/><path d="M330 0 V90 H470 V220" stroke="#ff5aac"/>
+      <path d="M600 220 V150 H760 V70 H900" stroke="#16c172"/><path d="M960 0 V100 H1120 V220" stroke="#ff3131"/>
+    </g>
+    <g fill="none" stroke-width="9"><circle cx="240" cy="40" r="14" stroke="#0f02fd"/><circle cx="900" cy="70" r="14" stroke="#16c172"/></g>
+  </svg></figure>
+  <figure><svg viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="1200" height="220" fill="#f7f7ed"/>
+    <g stroke="#f7f7ed" stroke-width="10">
+      <rect x="0" y="0" width="300" height="90" fill="#26cbff"/><rect x="320" y="0" width="420" height="90" fill="#ffcc32"/>
+      <rect x="760" y="0" width="440" height="90" fill="#7e2dff"/><rect x="0" y="110" width="480" height="110" fill="#16c172"/>
+      <rect x="500" y="110" width="300" height="110" fill="#ff5aac"/><rect x="820" y="110" width="380" height="110" fill="#b4db00"/>
+    </g>
+  </svg></figure>
+  <figure><svg viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="1200" height="220" fill="#000"/>
+    <g fill="none" stroke-width="9" stroke-linecap="round">
+      <path d="M0 60 H200 V180 H420" stroke="#ffb23d"/><path d="M420 20 H640 V140 H860" stroke="#26cbff"/>
+      <path d="M860 200 H1000 V60 H1200" stroke="#ff5aac"/>
+    </g>
+  </svg></figure>
+  <span class="nota">imagens provisórias. Substituir pelos assets da pasta</span>
+</div>
+
+<div class="barra"><div class="larg">
+  <span class="marca">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="#ff5aac"><path d="M12 0l2.4 6.6L21 4.2l-3.6 5.4L24 12l-6.6 2.4L21 19.8l-6.6-2.4L12 24l-2.4-6.6L3 19.8l3.6-5.4L0 12l6.6-2.4L3 4.2l6.6 2.4z"/></svg>
+    DECISIVAS
+  </span>
+  <nav><a id="ir-home">Início</a><a href="#">Sobre</a></nav>
+</div></div>
+
+<main><div class="larg">
+
+  <!-- HOME -->
+  <section id="home">
+    <h1 class="chamada" id="chamada">Qual conversa DECISIVA você quer ter hoje?</h1>
+    <p class="apoio">Escolha um público e um tema. A plataforma entrega o material de pesquisa para você construir a mensagem.</p>
+
+    <div class="etapa">
+      <h2>COM QUEM VOCÊ QUER FALAR</h2>
+      <div class="opcoes" id="publicos">
+        <button data-pub="jovens" style="--cor:var(--pub-jovens);--cor-texto:#000" aria-pressed="false">Jovens</button>
+        <button data-pub="60+" style="--cor:var(--pub-60mais);--cor-texto:#f7f7ed" aria-pressed="false">60+</button>
+        <button data-pub="mulheres beneficiárias" style="--cor:var(--pub-benef);--cor-texto:#000" aria-pressed="false">Mulheres beneficiárias</button>
+        <button data-pub="mulheres de 2 a 5 salários mínimos" style="--cor:var(--pub-2a5);--cor-texto:#f7f7ed" aria-pressed="false">Mulheres de 2 a 5 SM</button>
+      </div>
+    </div>
+
+    <div class="etapa">
+      <h2>SOBRE O QUÊ</h2>
+      <div class="opcoes" id="temas">
+        <button data-tema="dinheiro no bolso" aria-pressed="false">Dinheiro no bolso</button>
+        <button data-tema="trabalho digno" aria-pressed="false">Trabalho digno</button>
+        <button data-tema="família e cuidado" aria-pressed="false">Família e cuidado</button>
+        <button data-tema="brasil e pertencimento" aria-pressed="false">Brasil e pertencimento</button>
+        <button data-tema="participação e voz" aria-pressed="false">Participação e voz</button>
+      </div>
+    </div>
+
+    <div class="acao">
+      <button class="caminhos" id="btn-caminhos" disabled>VER CAMINHOS</button>
+      <span class="escolha" id="escolha">Escolha um público e um tema.</span>
+    </div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section id="resultado" hidden>
+    <button class="voltar" id="voltar">Voltar e trocar a combinação</button>
+
+    <div class="cartao" id="sem-conteudo" hidden>
+      <p style="margin:0">Este cruzamento existe, mas só o cruzamento de mulheres beneficiárias com dinheiro no bolso tem conteúdo real carregado neste protótipo. Os demais entram quando o acervo revisado subir para o banco.</p>
+    </div>
+
+    <div class="cartao" id="com-conteudo">
+      <div class="idmarca">
+        <span class="pilula">mulheres beneficiárias</span>
+        <span class="pilula tema">dinheiro no bolso</span>
+        <span class="meta" id="fontes" hidden>2 fontes</span>
+        <span class="meta">acervo atualizado em [preencher]</span>
+      </div>
+
+      <div class="pautas">
+        <div class="rot">Ajustar o ângulo da mensagem</div>
+        <button data-pauta="todas" aria-pressed="true">Visão geral</button>
+        <button data-pauta="p1" aria-pressed="false">[pauta 1]</button>
+        <button data-pauta="p2" aria-pressed="false">[pauta 2]</button>
+        <button data-pauta="p3" aria-pressed="false">[pauta 3]</button>
+      </div>
+
+      <h3>Por que falar com este público sobre este tema</h3>
+      <p>Entre os participantes do estudo, mulheres constituem mais de 84% das titularidades de programas de transferência de renda e sentem mais as variações na qualidade dos serviços públicos. Por isso, um território previsto para a comunicação é reconhecer que a beneficiária não é suspeita, mas gestora.</p>
+
+      <h3>O que a pesquisa mostra</h3>
+      <div class="lacuna">Evidência insuficiente no acervo para este item.</div>
+
+      <div id="bloco-gatilho">
+        <h3>O gatilho da mensagem<span class="selo selo-pauta" hidden></span></h3>
+        <div class="lacuna" id="gatilho-base">Evidência insuficiente no acervo para este item.</div>
+        <div class="falta" id="gatilho-versao" hidden>Versão do gatilho para a pauta selecionada, composta a partir dos trechos do cruzamento que carregam essa pauta. Conteúdo a gerar.</div>
+      </div>
+
+      <div class="duas">
+        <div id="bloco-ancorar">
+          <h3>O que ancorar<span class="selo selo-pauta" hidden></span></h3>
+          <div class="itens">
+            <div class="item">Apresentar a beneficiária como gestora legítima, capaz de explicar o peso de cada escolha.</div>
+            <div class="item">Tratar o dinheiro como estabilidade mínima para organizar, priorizar, pagar, reservar, cuidar e planejar.</div>
+            <div class="item">Falar de despesas concretas, como compra, conta paga, gás reservado, remédio e atendimento dos filhos.</div>
+          </div>
+        </div>
+        <div id="bloco-evitar">
+          <h3>O que evitar<span class="selo selo-pauta" hidden></span></h3>
+          <div class="lacuna">Evidência insuficiente no acervo para este item.</div>
+        </div>
+      </div>
+
+      <h3>Quem é este público</h3>
+      <div class="falta">Vem dos trechos de tipo <code>perfil</code>, com macronarrativa vazia. Texto fixo do público a subir.</div>
+
+      <h3>Hábitos de mídia</h3>
+      <div class="midia">
+        <div class="card-semio">[card semiótico do público. Imagem fixa, 1000 × 1250 px]</div>
+        <div class="lacuna">Evidência insuficiente no acervo para este item.</div>
+      </div>
+
+      <h3>Adaptar formato<span class="selo selo-pauta" hidden></span></h3>
+      <div class="formatos">
+        <button data-fmt="whatsapp" style="--cor:var(--verde-claro)" aria-pressed="true">WhatsApp</button>
+        <button data-fmt="carrossel" style="--cor:var(--rosa)" aria-pressed="false">Carrossel</button>
+        <button data-fmt="video" style="--cor:var(--azul-claro)" aria-pressed="false">Roteiro de vídeo</button>
+        <button id="copiar">Copiar</button>
+      </div>
+      <div class="saida" id="saida"></div>
+      <p class="aviso-ia">Texto organizado por inteligência artificial a partir do banco de pesquisa próprio do DECISIVAS. Não usa fontes externas, não indica voto e não menciona candidaturas.</p>
+    </div>
+  </section>
+
+</div></main>
+
+<footer><div class="larg">
+  <div class="grade-rodape">
+    <div>
+      <p class="assinatura">DECISIVAS</p>
+      <p class="tagline">[assinatura do projeto a preencher]</p>
+      <p class="fixa-ia">O funcionamento da plataforma, a origem dos dados e o uso de inteligência artificial estão descritos em Sobre o projeto.</p>
+    </div>
+    <div>
+      <h4>NAVEGAÇÃO</h4>
+      <ul>
+        <li><a href="#">Início</a></li>
+        <li><a href="#">Sobre o projeto</a></li>
+        <li><a href="#">Vídeo de apresentação</a></li>
+        <li><a href="#">Política de privacidade</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>CONTATO</h4>
+      <ul>
+        <li><a href="#">[e-mail a preencher]</a></li>
+        <li><a href="#">[Instagram a preencher]</a></li>
+        <li style="color:#c9c9bd">São Paulo · Brasil</li>
+      </ul>
+    </div>
+  </div>
+  <div class="base">
+    <div class="creditos">
+      <span class="credito"><span>ORGANIZAÇÃO</span><span class="logo">[logo Quid]</span></span>
+      <span class="credito"><span>REALIZAÇÃO</span><span class="logo">[logo BRIEF]</span></span>
+    </div>
+    <span>© 2026 · TODOS OS DIREITOS RESERVADOS</span>
+  </div>
+</div></footer>
+
+<div class="modal" id="modal">
+  <div class="caixa">
+    <div class="video">[vídeo de apresentação. Embed do YouTube em youtube-nocookie.com, ID a preencher. Proporção 16:9]</div>
+    <div class="pe">
+      <span>O mesmo vídeo fica fixo na página Sobre.</span>
+      <button id="fechar">Fechar e ver caminhos</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var estado={fontes:"nao",escopo:"curto",pauta:"todas",fmt:"whatsapp",pub:null,tema:null};
+  var COM_CONTEUDO={pub:"mulheres beneficiárias",tema:"dinheiro no bolso"};
+
+  var frases=["Qual conversa DECISIVA você quer ter hoje?","Quem você pode mobilizar agora?","Com quem você quer falar hoje?"];
+  var iFrase=0;
+  var reduz=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!reduz){
+    setInterval(function(){
+      iFrase=(iFrase+1)%frases.length;
+      document.getElementById("chamada").textContent=frases[iFrase];
+    },5000);
+    var figs=document.querySelectorAll("#banner figure"),iB=0;
+    setInterval(function(){
+      figs[iB].classList.remove("ativa"); iB=(iB+1)%figs.length; figs[iB].classList.add("ativa");
+    },5000);
+  }
+
+  var whatsapp=[
+    "Gatilho: Abrir com uma despesa concreta do dia a dia e, em poucas frases, reconhecer a beneficiária como quem organiza escolhas e prioridades. Fechar convidando a compartilhar uma experiência ou repassar a reflexão.",
+    "","O que ancorar:",
+    "- Apresentar a beneficiária como gestora legítima, capaz de explicar o peso de cada escolha.",
+    "- Mostrar o dinheiro como estabilidade mínima para organizar, priorizar, pagar, reservar, cuidar e planejar.",
+    "- Escolher uma situação concreta, como compra, conta paga, gás reservado, remédio ou atendimento dos filhos, mantendo uma ideia central na mensagem.",
+    "","O que evitar:",
+    "- Como não há itens específicos de afastamento na página, seguir os cuidados gerais do formato.",
+    "- Não usar saudação institucional nem tom de comunicado.",
+    "- Não escrever em bloco único; distribuir o conteúdo entre 3 e 6 linhas, com frases curtas.",
+    "- Não misturar mais de uma ideia na mesma mensagem.",
+    "- Evitar caixa alta e excesso de emojis.",
+    "- Não fazer promessas de resultado, benefício ou solução.",
+    "- Garantir que a mensagem se sustente sozinha caso seja reencaminhada sem contexto."
+  ].join("\n");
+  var pendente="[a preencher. Regras deste formato vivem no repositório e ainda não foram carregadas neste protótipo.]";
+  var textos={whatsapp:whatsapp,carrossel:pendente,video:pendente};
+  var rotuloIA="Texto organizado por inteligência artificial a partir do banco de pesquisa próprio do DECISIVAS. Não usa fontes externas, não indica voto e não menciona candidaturas.";
+
+  function grupo(a,v){document.querySelectorAll("[data-"+a+"]").forEach(function(b){b.setAttribute("aria-pressed",String(b.getAttribute("data-"+a)===v));});}
+
+  function render(){
+    document.getElementById("fontes").hidden=estado.fontes!=="sim";
+    var comPauta=estado.pauta!=="todas";
+    var rotulo=comPauta?document.querySelector('[data-pauta="'+estado.pauta+'"]').textContent:"";
+    var vers=["bloco-gatilho"];
+    if(estado.escopo==="amplo")vers.push("bloco-ancorar","bloco-evitar");
+    ["bloco-gatilho","bloco-ancorar","bloco-evitar"].forEach(function(id){
+      document.getElementById(id).classList.toggle("versionado",comPauta&&vers.indexOf(id)>-1);
+    });
+    document.querySelectorAll(".selo-pauta").forEach(function(s){
+      var dono=s.closest("#bloco-gatilho, #bloco-ancorar, #bloco-evitar");
+      var vale=dono?vers.indexOf(dono.id)>-1:true;
+      s.hidden=!(comPauta&&vale); s.textContent=rotulo;
+    });
+    document.getElementById("gatilho-base").hidden=comPauta;
+    document.getElementById("gatilho-versao").hidden=!comPauta;
+    var corpo=textos[estado.fmt];
+    if(comPauta&&estado.fmt==="whatsapp")corpo+="\n\n[ângulo ajustado para "+rotulo+". Versão a gerar.]";
+    document.getElementById("saida").textContent=corpo+"\n\n"+rotuloIA;
+  }
+
+  ["fontes","escopo","pauta","fmt"].forEach(function(a){
+    document.querySelectorAll("[data-"+a+"]").forEach(function(b){
+      b.onclick=function(){estado[a]=b.dataset[a];grupo(a,estado[a]);render();};
+    });
+  });
+
+  function atualizaAcao(){
+    var pronto=estado.pub&&estado.tema;
+    document.getElementById("btn-caminhos").disabled=!pronto;
+    document.getElementById("escolha").textContent=pronto
+      ? estado.pub+" · "+estado.tema
+      : (estado.pub||estado.tema ? "Falta escolher "+(estado.pub?"um tema.":"um público.") : "Escolha um público e um tema.");
+  }
+  document.querySelectorAll("[data-pub]").forEach(function(b){
+    b.onclick=function(){estado.pub=b.dataset.pub;grupo("pub",estado.pub);atualizaAcao();};
+  });
+  document.querySelectorAll("[data-tema]").forEach(function(b){
+    b.onclick=function(){estado.tema=b.dataset.tema;grupo("tema",estado.tema);atualizaAcao();};
+  });
+
+  document.getElementById("btn-caminhos").onclick=function(){
+    var real=estado.pub===COM_CONTEUDO.pub&&estado.tema===COM_CONTEUDO.tema;
+    document.getElementById("com-conteudo").hidden=!real;
+    document.getElementById("sem-conteudo").hidden=real;
+    document.getElementById("home").hidden=true;
+    document.getElementById("resultado").hidden=false;
+    window.scrollTo(0,0);
+  };
+  function voltarHome(){
+    document.getElementById("resultado").hidden=true;
+    document.getElementById("home").hidden=false;
+    window.scrollTo(0,0);
+  }
+  document.getElementById("voltar").onclick=voltarHome;
+  document.getElementById("ir-home").onclick=voltarHome;
+
+  document.getElementById("copiar").onclick=function(){
+    var t=document.getElementById("saida").textContent,b=this;
+    var ok=function(){b.textContent="Copiado";setTimeout(function(){b.textContent="Copiar";},1500);};
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,function(){});}else{ok();}
+  };
+  document.getElementById("fechar").onclick=function(){document.getElementById("modal").hidden=true;};
+  document.getElementById("ver-video").onclick=function(){document.getElementById("modal").hidden=false;};
+
+  render(); atualizaAcao();
+})();
+</script>
