@@ -221,17 +221,17 @@ function rodape(parciais, configuracao) {
     MARCA_NAVEGADOR: escapa(configuracao.privacidade.marca_navegador),
     MARCA_RODAPE: marca(configuracao).replace('class="marca"', 'class="marca assinatura"'),
     ASSINATURA: ehPendente(r.assinatura)
-      ? pendencia(configuracao, "dados/configuracao.json", "assinatura")
+      ? pendencia(configuracao, "dados/configuracao.json", "rodape.assinatura")
       : escapa(r.assinatura),
     NOTA_IA: escapa(r.nota_ia),
     TITULO_NAVEGACAO: escapa(r.titulo_navegacao),
     NAVEGACAO_RODAPE: navegacaoRodape(configuracao),
     TITULO_CONTATO: escapa(r.titulo_contato),
-    CONTATO_EMAIL: contato(configuracao, r.contato.email, "email", (v) => `mailto:${v}`),
+    CONTATO_EMAIL: contato(configuracao, r.contato.email, "rodape.contato.email", (v) => `mailto:${v}`),
     CONTATO_INSTAGRAM: contato(
       configuracao,
       r.contato.instagram,
-      "instagram",
+      "rodape.contato.instagram",
       (v) => `https://instagram.com/${String(v).replace(/^@/, "")}`
     ),
     CONTATO_CIDADE: escapa(r.contato.cidade),
@@ -283,6 +283,24 @@ function retrato(configuracao, publico, nome) {
   return `      <img class="retrato" src="${escapa(publico.retrato)}" alt="${escapa(alternativo)}" width="800" height="800">`;
 }
 
+// Bloco "Explorar o acervo" (etapa 10), ligado. Os textos vêm da
+// configuração; os botões de pauta e os dois números do texto de apoio vêm do
+// acervo, lido no build. Os identificadores de público e tema entram em
+// data-* porque é o que o script manda para a rota /api/explorar — são os
+// identificadores do vocabulário, não os nomes de tela.
+function explorar(parciais, configuracao, { idPublico, idTema, texto, pautas }) {
+  return troca(parciais.explorar, {
+    ID_PUBLICO: escapa(idPublico),
+    ID_TEMA: escapa(idTema),
+    TITULO_EXPLORAR: escapa(configuracao.explorar.titulo),
+    TEXTO_EXPLORAR: escapa(texto),
+    PAUTAS: pautas,
+    ROTULO_CAMPO_EXPLORAR: escapa(configuracao.explorar.rotulo_campo),
+    EXEMPLO_CAMPO_EXPLORAR: escapa(configuracao.explorar.exemplo_campo),
+    BOTAO_EXPLORAR: escapa(configuracao.explorar.botao),
+  });
+}
+
 // O vídeo vive só na página Sobre, pelo código de incorporação da
 // configuração. Não há janela de abertura em nenhuma tela.
 function video(configuracao) {
@@ -305,4 +323,5 @@ module.exports = {
   video,
   voltar,
   retrato,
+  explorar,
 };

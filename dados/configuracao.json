@@ -92,20 +92,41 @@
     "botao": "Ir para o início"
   },
   "explorar": {
+    "_leia_me": "O bloco Explorar o acervo, ligado no beta (etapa 10). Dois modos: botões de pauta, que consultam o banco direto, sem modelo; e pergunta livre, em que o modelo ESCOLHE trechos do acervo e devolve só uma lista de números — nunca escreve texto. Todo texto que aparece na tela está aqui.",
     "titulo": "Explorar o acervo",
     "texto": "Esta página é um recorte. O acervo tem {trechos} trechos sobre este cruzamento, {achados} deles achados de pesquisa. Escolha um assunto ou escreva o que procura: a resposta traz só trechos da pesquisa, com a origem de cada um.",
     "rotulo_campo": "O que você procura no acervo",
     "exemplo_campo": "Ex.: o que a pesquisa mostra sobre este tema",
     "botao": "Quero explorar mais",
-    "aviso_desligado": "Este recurso chega em breve. No beta, a página traz o recorte já revisado; explorar o acervo inteiro vem depois.",
-    "aviso_ia": "Seleção feita com apoio de inteligência artificial, apenas com trechos do acervo de pesquisa do DECISIVAS. Não indica voto nem menciona candidaturas.",
+    "botao_ver_mais": "Ver mais",
+    "rotulo_pauta": "Trechos do acervo de pesquisa do DECISIVAS, sem edição.",
+    "rotulo_pergunta": "Seleção feita com apoio de inteligência artificial, apenas com trechos do acervo de pesquisa do DECISIVAS. Não indica voto nem menciona candidaturas.",
+    "aviso_sem_resultado": "O acervo não tem trechos sobre isso para este cruzamento. Tente um dos assuntos acima.",
+    "aviso_fora_do_escopo": "A plataforma não trata de candidatos, partidos ou governos. Ela ajuda a falar com públicos sobre temas.",
+    "aviso_pergunta_curta": "[preencher: aviso de pergunta curta — pedir três palavras ou mais, sem jargão]",
+    "aviso_limite": "[preencher: aviso de limite de perguntas por hora atingido, com o que fazer em seguida]",
+    "aviso_erro": "[preencher: aviso de falha ao consultar o acervo, sem texto técnico]",
+    "aviso_desligado": "[preencher: aviso de que o Explorar está temporariamente desligado, sem prometer data]",
+    "aviso_sem_pautas": "Sem pautas etiquetadas neste cruzamento.",
     "etiquetas": {
       "achado": "Achado",
-      "verbatim": "Depoimento",
       "funciona": "O que funciona",
-      "afasta": "O que afasta"
+      "afasta": "O que afasta",
+      "verbatim": "Depoimento",
+      "contexto": "Contexto"
     },
-    "aviso_sem_pautas": "Sem pautas etiquetadas neste cruzamento."
+    "origens": {
+      "D01": "[preencher: nome curto do estudo D01, como aparece na tela]",
+      "D03": "[preencher: nome curto do estudo D03, como aparece na tela]",
+      "D04": "[preencher: nome curto do estudo D04, como aparece na tela]",
+      "D06": "[preencher: nome curto do estudo D06, como aparece na tela]",
+      "D07": "[preencher: nome curto do estudo D07, como aparece na tela]",
+      "D09": "[preencher: nome curto do estudo D09, como aparece na tela]",
+      "D10": "[preencher: nome curto do estudo D10, como aparece na tela]",
+      "D11": "[preencher: nome curto do estudo D11, como aparece na tela]",
+      "D12": "[preencher: nome curto do estudo D12, como aparece na tela]",
+      "D13": "[preencher: nome curto do estudo D13, como aparece na tela]"
+    }
   },
   "compartilhar": {
     "rotulo": "Compartilhar esta página",

@@ -12,14 +12,14 @@ Não é ferramenta eleitoral. Não pede voto e não fala de candidatos. É pesqu
 
 **As 20 páginas são texto fixo**, escrito pela equipe a partir do acervo e validado pelo jurídico. Vivem em `conteudo/*.json`, um arquivo por público, e o build monta o HTML. **Não há modelo de linguagem no acesso** — a geração de página por modelo saiu na etapa 8A porque produzia texto genérico.
 
-O acervo de 2.405 trechos continua no banco: é a base auditável do que está escrito e do recurso **Explorar o acervo** (etapa 10), que devolverá trechos da pesquisa com a origem de cada um. Nem ali o modelo redige: ele pode escolher e ordenar trechos, não escrever texto.
+O acervo de 2.405 trechos continua no banco: é a base auditável do que está escrito e do recurso **Explorar o acervo**, ligado na etapa 10, que devolve trechos da pesquisa com a origem de cada um. Nem ali o modelo redige: ele escolhe e ordena trechos, não escreve texto — a única saída que tem é uma lista de números.
 
 ## Stack
 
 - Site estático servido pelo Cloudflare (telas em HTML, CSS e JS simples, sem framework pesado). As fontes ficam em `paginas/` e `parciais/`; **`public/` é saída de build**, inteira
-- Worker do Cloudflare na rota `/api/*`: reduzido na etapa 8A a servir os assets — nenhuma rota de API existe hoje. A próxima é `/api/explorar` (etapa 10)
+- Worker do Cloudflare na rota `/api/*`: uma rota só, `POST /api/explorar`, o "Explorar o acervo" (etapa 10), governada por `AGENT_ENABLED`. Fora de `/api/*`, o Worker entrega o site estático
 - Banco Cloudflare D1 (SQL) com o acervo etiquetado — schema em `docs/02-schema.sql`
-- **Nenhuma chamada a modelo de linguagem em nenhuma rota.** Volta na etapa 10, para escolher e ordenar trechos
+- **Chamada a modelo em uma rota só**, e só no modo pergunta do `/api/explorar`: o modelo escolhe trechos do acervo e devolve uma lista de números. Prompt em `prompts/explorar.txt`, leitura da resposta em `src/interpreta-ids.js`
 - Sem CMS por enquanto (etapa 9). O conteúdo das páginas vive em `conteudo/*.json`; os textos e identificadores das telas, em `dados/configuracao.json`; o acervo entra por carga versionada (planilha em `dados/` → `scripts/carga-acervo.js` → D1)
 - Deploy automático: push na branch principal publica; branches geram pré-visualização
 
@@ -28,10 +28,10 @@ O acervo de 2.405 trechos continua no banco: é a base auditável do que está e
 1. **Nenhuma chave de API no código.** Local: `.dev.vars` (no `.gitignore`). Produção: segredo no painel do Cloudflare. Se encontrar chave em código, pare e avise.
 2. **Nenhum texto de conteúdo escrito por quem programa.** Todo texto de página vem de `conteudo/*.json`, escrito pela equipe e validado pelo jurídico. Onde falta, aparece `[preencher]` visível na tela — nunca texto inventado para tapar o buraco. Vale para os textos das telas em `dados/configuracao.json`.
 2.1. **Nada de texto, rótulo, endereço ou nome de imagem escrito dentro de template ou script.** Tudo o que aparece na tela vem de `dados/configuracao.json`, `conteudo/*.json` ou `dados/vocabulario.json` (mais os nomes de pauta, que são vocabulário fechado do acervo). Quem preenche os marcadores dos parciais com esses valores é `scripts/interface.js`; `scripts/verifica-literais.js` roda no fim do build e **falha a publicação** se achar na tela palavra que não venha dessas fontes. É esta regra que permite ao CMS da etapa 9 editar a interface inteira sem tocar em código.
-3. **O modelo não redige.** Não há chamada a modelo em nenhuma rota. Quando o "Explorar o acervo" for ligado (etapa 10), ele devolve trechos do acervo com a origem de cada um, podendo escolher e ordenar — nunca escrever. Nada de conhecimento geral, nada de completar lacuna.
+3. **O modelo não redige.** A única rota que o chama é o `/api/explorar`, no modo pergunta, e ali ele **só escolhe**: recebe a pergunta e a lista numerada de trechos do cruzamento e responde `{"ids": [...]}`, até cinco números. Qualquer outra forma de resposta — prosa, cerca de código, número inexistente — é descartada por `src/interpreta-ids.js` e vale como resultado vazio. O texto que vai à tela é sempre o do acervo, palavra por palavra, com a origem. Nada de conhecimento geral, nada de completar lacuna.
 4. **Nunca mencionar candidaturas, partidos, políticos ou direção de voto**, nem em código, nem em texto de interface, nem em conteúdo de página. Também não avaliar governo ou gestão específica, nem aludir a figura política sem nome. Pesquisa que cite candidato pode ser parafraseada com a fonte nomeada e sem o nome dele. As regras completas estão em `docs/CONTEXTO_DECISIVAS.md` (seção 1, "a regra máxima de conteúdo") e em `docs/04-conformidade.md`. **O build varre todo o texto de `conteudo/*.json` e de `dados/configuracao.json` contra a lista de `BLOCKED_TERMS` e falha nomeando arquivo, campo e termo** (`scripts/verifica-conteudo.js`); a lista vive em variável de ambiente, e em produção é variável de build no painel do Cloudflare — nunca em arquivo do repositório.
 5. **Não coletar dados pessoais.** Sem cadastro, sem cookie de rastreamento, sem script de terceiro, sem análise de perfil. O registro guarda conteúdo entregue, nunca identidade. A **única** coisa guardada no navegador é a marca de que o aviso de privacidade já foi visto (`localStorage`, chave `aviso_privacidade_visto`, com a data): não é cookie, não vai a servidor nenhum, não sai do aparelho de quem navega, e o texto da política declara isso.
-6. **Interruptor de desligamento:** `AGENT_ENABLED` governa a rota `/api/explorar` (etapa 10) e só ela. As páginas são estáticas e não passam por checagem nenhuma.
+6. **Interruptor de desligamento:** `AGENT_ENABLED` governa a rota `/api/explorar` e só ela — desligada, a rota responde com o aviso da configuração e a página continua de pé. As páginas são estáticas e não passam por checagem nenhuma.
 7. **Rótulo de IA visível onde a inteligência artificial participou:** no Sobre, que explica em que etapas ela entrou, e no "Explorar o acervo" quando ele estiver ligado. Página fixa revisada por pessoas não leva rótulo de geração.
 8. **Interface exclusivamente com os tokens de `brand/tokens.css`.** Sem cores ou fontes fora deles.
 8.1. **Cabeçalho e rodapé são um parcial só** (`parciais/`), incluído no build. Nenhuma tela repete barra ou rodapé, e nada em `public/` é editado à mão.
@@ -45,7 +45,7 @@ O acervo de 2.405 trechos continua no banco: é a base auditável do que está e
 
 - **Públicos (4):** identificador no banco · nome na tela · slug da URL e dos assets. Cada um traz também a cor, a cor de texto sobre ela e o `retrato` (o arquivo em `assets/retrato-<slug>.webp`, usado no bloco "Quem é este público"):
   - `jovens` · Jovens · `jovens`
-  - `60+` · **70+** · `70-mais` — o público é de 70 anos ou mais; o identificador `60+` só muda no banco na migração 005, depois do beta, e `vocabulario.json` faz a ponte
+  - `60+` · **70+** · `70-mais` — o público é de 70 anos ou mais; o identificador `60+` só muda no banco na migração 006, depois do beta, e `vocabulario.json` faz a ponte
   - `mulheres beneficiárias` · Mulheres beneficiárias · `mulheres-beneficiarias`
   - `mulheres de 2 a 5 salários mínimos` · Mulheres de 2 a 5 SM · `mulheres-2-a-5-sm`
 - **Macronarrativas (5):** dinheiro no bolso · trabalho digno · família e cuidado · brasil e pertencimento · participação e voz — cada uma com o slug da URL em `vocabulario.json` (`dinheiro-no-bolso`, `trabalho-digno`, `familia-e-cuidado`, `brasil-e-pertencimento`, `participacao-e-voz`)
@@ -74,7 +74,10 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 - `arquivo/` — o que saiu de uso, com o `LEIA-ME.md` dizendo o que era cada coisa e quando saiu
 - `migracao-004.sql` — os comandos da migração 004, um por bloco, para o console
 - `brand/` — tokens de design, logotipo e guia (entregues pela equipe de identidade)
-- `dados/versao-acervo.txt` — marca de versão do acervo; muda a cada carga, no mesmo commit dos blocos
+- `dados/versao-acervo.txt` — marca de versão do acervo; muda a cada carga, no mesmo commit dos blocos. É a validade do cache de perguntas: carga nova invalida o que estava guardado
+- `prompts/explorar.txt` — o prompt de sistema do modo pergunta, lugar único, importado pelo Worker
+- `src/interpreta-ids.js` — a leitura da resposta do modelo, em módulo próprio para ser testável fora do Worker
+- `migracao-005.sql` — os comandos da migração 005 (tabela `consultas`), um por bloco, para o console
 - `arquivo/carga-003/` — os blocos SQL da carga do acervo v5, aplicados em 02/09/2026: provam qual acervo foi para o ar e quando. Uma carga nova escreve em `carga-acervo/`
 
 ## Estado atual dos dados
@@ -95,6 +98,6 @@ Onde o acervo não sustenta um bloco, a página **mostra os cards que existem e 
 
 **Endereços:** `/` (Início), `/caminhos/<slug do público>/<slug do tema>` (as 20 páginas), `/sobre`, `/privacidade`. `/resultado?publico=...&tema=...` redireciona para o caminho novo; `/metodologia` e `/transparencia` vão para `/sobre`.
 
-**Estado das etapas:** 0 a 7 concluídas (a 7 teve o lote de geração cancelado pela decisão de páginas fixas). 8A limpou o repositório e aplicou a migração 004; 8B montou as 20 páginas fixas, o compartilhamento e o aviso de privacidade; 8C entregou a verificação de conteúdo no build (estrutura, varredura de termos bloqueados e lista de pendências) e a publicação pela main. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (`70+` no banco).
+**Estado das etapas:** 0 a 7 concluídas (a 7 teve o lote de geração cancelado pela decisão de páginas fixas). 8A limpou o repositório e aplicou a migração 004; 8B montou as 20 páginas fixas, o compartilhamento e o aviso de privacidade; 8C entregou a verificação de conteúdo no build (estrutura, varredura de termos bloqueados e lista de pendências) e a publicação pela main. A **10 entra no beta**: o "Explorar o acervo" ligado, com botões de pauta (sem modelo) e pergunta livre (o modelo escolhe trechos), cache em `consultas`, limite por hora e varredura de termos na entrada e na saída — **a migração 005 tem de ser aplicada no remoto antes do deploy**. Depois do beta: 9 CMS e 11 migração 006 (`70+` no banco).
 
 **Datas:** beta em 04/09/2026, lançamento em 14/09/2026.
