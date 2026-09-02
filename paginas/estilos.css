@@ -84,6 +84,10 @@ html { scroll-behavior: smooth; }
   font-size: var(--texto-gg); letter-spacing: .02em; text-decoration: none;
 }
 .marca svg { display: block; }
+/* O logotipo entrou em assets/: a marca vira imagem, com a altura dos tokens.
+   Sem o arquivo, o build escreve o nome em tipografia de destaque. */
+.marca img { display: block; height: var(--altura-marca); width: auto; }
+.marca.assinatura img { height: var(--altura-marca-rodape); }
 .barra nav a {
   color: var(--off-white); text-decoration: none; font-size: var(--texto-m);
   margin-left: var(--espaco-4); border-bottom: 1px solid transparent; padding-bottom: var(--espaco-1);
@@ -180,7 +184,28 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .bloco h2::after { content: ""; flex: 1; height: 2px; background: var(--preto); }
 
 .grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--espaco-4); }
-@media (max-width: 760px) { .grade { grid-template-columns: 1fr; } }
+/* "Quem é este público" ganha uma coluna à esquerda para o retrato: retrato,
+   card de número e card de texto na mesma linha. */
+.grade.com-retrato { grid-template-columns: var(--tamanho-retrato) repeat(3, 1fr); }
+@media (max-width: 760px) {
+  .grade, .grade.com-retrato { grid-template-columns: 1fr; }
+}
+
+/* Retrato do público: círculo, cortado no centro. O arquivo vem de
+   dados/vocabulario.json; enquanto não existir, fica o círculo tracejado com o
+   nome esperado. */
+.retrato {
+  width: var(--tamanho-retrato); height: var(--tamanho-retrato);
+  border-radius: 50%; object-fit: cover; display: block; align-self: start;
+  border: var(--borda-cartao) solid var(--cor-borda-forte);
+  box-shadow: var(--sombra-publico);
+}
+.retrato-ausente {
+  width: var(--tamanho-retrato); height: var(--tamanho-retrato);
+  border-radius: 50%; align-self: start;
+  display: grid; place-items: center; text-align: center; padding: var(--espaco-3);
+  border: var(--borda-tracejada); color: var(--cor-texto-suave); font-size: var(--texto-p);
+}
 
 .card {
   background: var(--cor-superficie); border: var(--borda-cartao) solid var(--cor-borda-forte);
@@ -301,13 +326,34 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 }
 /* O voltar é redondo como os demais, com a flecha maior e o hover em rosa. */
 .botao-redondo.voltar { font-size: var(--texto-card-titulo); line-height: 1; }
+
+/* Em telas largas, o voltar é um botão fixo à esquerda do título da página,
+   na altura das pílulas do cabeçalho, visível desde o topo e independente da
+   barra de compartilhamento — ele não entra nem sai com ela. O da barra fica
+   escondido nessa largura, para não haver dois. */
+.botao-redondo.voltar-fixo {
+  position: fixed; z-index: 15;
+  top: calc(var(--altura-banner) + var(--altura-barra) + var(--espaco-5) - var(--espaco-1));
+  left: max(
+    var(--espaco-2),
+    calc(50vw - var(--largura-conteudo) / 2 - var(--tamanho-share) - var(--espaco-3))
+  );
+}
+.barra-lateral .voltar.na-faixa { display: none; }
+/* Entre 901 e 1140 px não há margem sobrando ao lado da coluna de conteúdo:
+   o botão encosta na borda e o conteúdo abre espaço para ele. */
+@media (min-width: 901px) and (max-width: 1140px) {
+  main.caminho > .larg { padding-left: calc(var(--tamanho-share) + var(--espaco-4)); }
+}
 @media (max-width: 900px) {
   .barra-lateral {
     top: auto; bottom: var(--espaco-3); right: var(--espaco-3); left: var(--espaco-3);
     flex-direction: row; justify-content: center; transform: none;
   }
-  /* Na faixa horizontal, o voltar fica à esquerda e um pouco separado. */
-  .barra-lateral .voltar { margin-right: var(--espaco-3); }
+  /* Na faixa horizontal, o voltar volta a aparecer, à esquerda e um pouco
+     separado dos ícones; o botão fixo sai de cena. */
+  .barra-lateral .voltar.na-faixa { display: grid; margin-right: var(--espaco-3); }
+  .botao-redondo.voltar-fixo { display: none; }
 }
 
 /* ---------- Aviso de privacidade ---------- */

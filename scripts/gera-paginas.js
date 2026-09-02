@@ -86,6 +86,7 @@ async function main() {
     cabecalho: (atual) => monta.cabecalho(parciais, configuracao, atual),
     rodape: monta.rodape(parciais, configuracao),
     compartilhar: monta.compartilhar(parciais, configuracao),
+    voltar: monta.voltar(configuracao),
     rodaBanner: monta.rodaBanner(configuracao),
   };
 

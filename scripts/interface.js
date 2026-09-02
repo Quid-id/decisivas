@@ -83,8 +83,10 @@ function navegacaoBarra(configuracao, atual) {
     .join("\n");
 }
 
+// A navegação do rodapé é lista própria (rodape.navegacao): ela leva também à
+// política de privacidade, que não fica na barra preta.
 function navegacaoRodape(configuracao) {
-  return configuracao.navegacao
+  return configuracao.rodape.navegacao
     .map((item) => `        <li><a href="${escapa(item.destino)}">${escapa(item.rotulo)}</a></li>`)
     .join("\n");
 }
@@ -195,6 +197,7 @@ function cabeca(parciais, configuracao, { titulo, descricao }) {
     TITULO: escapa(titulo),
     DESCRICAO: escapa(descricao),
     FAVICON: escapa(configuracao.favicon),
+    FAVICON_PNG: escapa(configuracao.favicon_png),
     IMAGEM_COMPARTILHAMENTO: escapa(configuracao.imagem_compartilhamento),
   });
 }
@@ -215,6 +218,7 @@ function rodape(parciais, configuracao) {
     DESTINO_PRIVACIDADE: escapa(configuracao.privacidade.destino),
     ROTULO_PRIVACIDADE: escapa(configuracao.privacidade.rotulo_link),
     BOTAO_PRIVACIDADE: escapa(configuracao.privacidade.botao),
+    MARCA_NAVEGADOR: escapa(configuracao.privacidade.marca_navegador),
     MARCA_RODAPE: marca(configuracao).replace('class="marca"', 'class="marca assinatura"'),
     ASSINATURA: ehPendente(r.assinatura)
       ? pendencia(configuracao, "dados/configuracao.json", "assinatura")
@@ -255,6 +259,30 @@ function compartilhar(parciais, configuracao) {
   });
 }
 
+// Voltar ao início na página de caminho: botão fixo à esquerda do título,
+// visível desde o topo e independente da barra de compartilhamento. Em telas
+// até 900 px ele sai daqui e quem aparece é o voltar da faixa do pé.
+function voltar(configuracao) {
+  const c = configuracao.caminho;
+  return (
+    `  <a class="botao-redondo voltar voltar-fixo" href="${escapa(c.voltar_destino)}" ` +
+    `title="${escapa(c.voltar)}" aria-label="${escapa(c.voltar)}">${escapa(c.icone_voltar)}</a>`
+  );
+}
+
+// Retrato do público, no bloco "Quem é este público". O arquivo vem de
+// dados/vocabulario.json (campo `retrato`), e o texto alternativo da
+// configuração, com o nome do público no lugar marcado. Enquanto o arquivo não
+// existir, entra o placeholder com o nome esperado.
+function retrato(configuracao, publico, nome) {
+  if (!publico.retrato) return "";
+  const alternativo = String(configuracao.caminho.retrato_alternativo).replace("{publico}", nome);
+  if (!existeAsset(publico.retrato)) {
+    return `      <div class="retrato retrato-ausente">${assetPendente(configuracao, publico.retrato)}</div>`;
+  }
+  return `      <img class="retrato" src="${escapa(publico.retrato)}" alt="${escapa(alternativo)}" width="800" height="800">`;
+}
+
 // O vídeo vive só na página Sobre, pelo código de incorporação da
 // configuração. Não há janela de abertura em nenhuma tela.
 function video(configuracao) {
@@ -275,4 +303,6 @@ module.exports = {
   compartilhar,
   rodaBanner,
   video,
+  voltar,
+  retrato,
 };

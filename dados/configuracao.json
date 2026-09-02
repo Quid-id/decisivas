@@ -2,10 +2,11 @@
   "_leia_me": "Textos, rótulos e assets de TODA a interface. Regra da entrega: nenhum texto fixo, rótulo, nome de imagem ou link é escrito dentro de template ou script — tudo o que aparece na tela vem daqui, de conteudo/*.json (as 20 páginas, o Sobre e a privacidade) ou de dados/vocabulario.json (públicos, temas, cores). O build recusa publicar se encontrar texto de interface fora desses três arquivos (scripts/verifica-literais.js). É este arquivo que o CMS da etapa 9 vai editar. Caminho de asset que ainda não existe aparece na tela como placeholder com o nome esperado; texto que falta redigir vai como [preencher].",
   "marca": {
     "nome": "DECISIVAS",
-    "logo": "/assets/logo-decisivas.svg",
-    "simbolo": "/assets/simbolo-asterisco.svg",
+    "logo": "/assets/logo-decisivas-sobre-escuro.svg",
+    "simbolo": "/assets/simbolo-asterisco-rosa.svg",
     "texto_alternativo": "DECISIVAS",
-    "destino": "/"
+    "destino": "/",
+    "logo_claro": "/assets/logo-decisivas-sobre-claro.svg"
   },
   "navegacao": [
     {
@@ -42,7 +43,7 @@
   "home": {
     "titulo": "Pessoas e temas que vão decidir as eleições 2026",
     "texto": "Tudo que funciona e que não funciona para dialogar com quem mais importa. Por isso montamos uma plataforma pra você usar, adaptar e repassar.",
-    "pergunta": "Com quem você quer falar hoje?",
+    "pergunta": "",
     "rotulo_publico": "Público",
     "rotulo_tema": "Tema",
     "botao": "VER CAMINHOS",
@@ -67,7 +68,8 @@
     "icone_funciona": "✓",
     "icone_nao_funciona": "✕",
     "icone_voltar": "←",
-    "voltar_destino": "/"
+    "voltar_destino": "/",
+    "retrato_alternativo": "Retrato do público {publico}"
   },
   "sobre": {
     "titulo": "Sobre o projeto",
@@ -162,11 +164,26 @@
     "aviso": "Este site não usa cookies de rastreamento nem coleta dados pessoais.",
     "rotulo_link": "Política de privacidade",
     "botao": "Entendi",
-    "destino": "/privacidade"
+    "destino": "/privacidade",
+    "marca_navegador": "aviso_privacidade_visto"
   },
   "rodape": {
     "assinatura": "Pessoas e temas que vão decidir as eleições 2026",
     "titulo_navegacao": "NAVEGAÇÃO",
+    "navegacao": [
+      {
+        "rotulo": "Início",
+        "destino": "/"
+      },
+      {
+        "rotulo": "Sobre o projeto",
+        "destino": "/sobre"
+      },
+      {
+        "rotulo": "Política de privacidade",
+        "destino": "/privacidade"
+      }
+    ],
     "titulo_contato": "CONTATO",
     "nota_ia": "O funcionamento da plataforma, a origem dos dados e o uso de inteligência artificial estão descritos em Sobre o projeto.",
     "contato": {
@@ -189,15 +206,15 @@
   "banner": {
     "imagens": [
       {
-        "arquivo": "/assets/banner-1.svg",
+        "arquivo": "/assets/banner-01.svg",
         "texto_alternativo": ""
       },
       {
-        "arquivo": "/assets/banner-2.svg",
+        "arquivo": "/assets/banner-02.svg",
         "texto_alternativo": ""
       },
       {
-        "arquivo": "/assets/banner-3.svg",
+        "arquivo": "/assets/banner-03.svg",
         "texto_alternativo": ""
       }
     ],
@@ -211,5 +228,6 @@
     "prefixo": "[preencher]",
     "formato": "{prefixo} {arquivo} → {campo}",
     "asset": "{prefixo} {arquivo}"
-  }
+  },
+  "favicon_png": "/assets/favicon-512.png"
 }

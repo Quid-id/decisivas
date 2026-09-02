@@ -90,7 +90,11 @@
 
   document.getElementById("titulo-home").textContent = HOME.titulo;
   document.getElementById("texto-home").textContent = HOME.texto;
-  document.getElementById("pergunta").textContent = HOME.pergunta;
+  // A pergunta é opcional: vazia na configuração, o elemento sai da tela em
+  // vez de virar um parágrafo em branco.
+  const pergunta = document.getElementById("pergunta");
+  if (HOME.pergunta) pergunta.textContent = HOME.pergunta;
+  else pergunta.remove();
   document.getElementById("rotulo-publico").textContent = HOME.rotulo_publico;
   document.getElementById("rotulo-tema").textContent = HOME.rotulo_tema;
   document.getElementById("btn-caminhos").textContent = HOME.botao;

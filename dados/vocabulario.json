@@ -6,28 +6,32 @@
       "nome": "Jovens",
       "cor": "#26cbff",
       "texto": "#000000",
-      "slug": "jovens"
+      "slug": "jovens",
+      "retrato": "/assets/retrato-jovens.webp"
     },
     {
       "id": "60+",
       "nome": "70+",
       "cor": "#16c172",
       "texto": "#000000",
-      "slug": "70-mais"
+      "slug": "70-mais",
+      "retrato": "/assets/retrato-70-mais.webp"
     },
     {
       "id": "mulheres beneficiárias",
       "nome": "Mulheres beneficiárias",
       "cor": "#ffb23d",
       "texto": "#000000",
-      "slug": "mulheres-beneficiarias"
+      "slug": "mulheres-beneficiarias",
+      "retrato": "/assets/retrato-mulheres-beneficiarias.webp"
     },
     {
       "id": "mulheres de 2 a 5 salários mínimos",
       "nome": "Mulheres de 2 a 5 SM",
       "cor": "#7e2dff",
       "texto": "#f7f7ed",
-      "slug": "mulheres-2-a-5-sm"
+      "slug": "mulheres-2-a-5-sm",
+      "retrato": "/assets/retrato-mulheres-2-a-5-sm.webp"
     }
   ],
   "macronarrativas": [

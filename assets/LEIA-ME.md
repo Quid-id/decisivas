@@ -14,3 +14,12 @@ Preparado em 02/09/2026 a partir do pacote da designer (Gabriela Bravin). Nomes 
 | simbolo-asterisco-*.svg, simbolo-seta-*.svg | símbolos da identidade, por cor |
 
 Faltam: logo da Quid e logo do BRIEF em SVG off-white (rodapé). As fontes já estão em assets/fonts/.
+
+**Qual arquivo cada tela usa não está escrito em código.** Está em
+`dados/configuracao.json` (`marca.logo`, `favicon`, `favicon_png`,
+`imagem_compartilhamento`, `banner.imagens` e os logotipos do `rodape`) — e o
+retrato de cada público, em `dados/vocabulario.json`, campo `retrato`, junto do
+nome, da cor e do slug. Substituir uma imagem mantendo o nome não pede nada;
+trocar o nome é trocar o caminho nesses arquivos. Arquivo que não existe aparece
+na tela como placeholder tracejado com o nome esperado, e o build lista as
+pendências no fim.

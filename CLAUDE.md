@@ -30,7 +30,7 @@ O acervo de 2.405 trechos continua no banco: é a base auditável do que está e
 2.1. **Nada de texto, rótulo, endereço ou nome de imagem escrito dentro de template ou script.** Tudo o que aparece na tela vem de `dados/configuracao.json`, `conteudo/*.json` ou `dados/vocabulario.json` (mais os nomes de pauta, que são vocabulário fechado do acervo). Quem preenche os marcadores dos parciais com esses valores é `scripts/interface.js`; `scripts/verifica-literais.js` roda no fim do build e **falha a publicação** se achar na tela palavra que não venha dessas fontes. É esta regra que permite ao CMS da etapa 9 editar a interface inteira sem tocar em código.
 3. **O modelo não redige.** Não há chamada a modelo em nenhuma rota. Quando o "Explorar o acervo" for ligado (etapa 10), ele devolve trechos do acervo com a origem de cada um, podendo escolher e ordenar — nunca escrever. Nada de conhecimento geral, nada de completar lacuna.
 4. **Nunca mencionar candidaturas, partidos, políticos ou direção de voto**, nem em código, nem em texto de interface, nem em conteúdo de página. Também não avaliar governo ou gestão específica, nem aludir a figura política sem nome. Pesquisa que cite candidato pode ser parafraseada com a fonte nomeada e sem o nome dele. As regras completas estão em `docs/CONTEXTO_DECISIVAS.md` (seção 1, "a regra máxima de conteúdo") e em `docs/04-conformidade.md`. **O build varre todo o texto de `conteudo/*.json` e de `dados/configuracao.json` contra a lista de `BLOCKED_TERMS` e falha nomeando arquivo, campo e termo** (`scripts/verifica-conteudo.js`); a lista vive em variável de ambiente, e em produção é variável de build no painel do Cloudflare — nunca em arquivo do repositório.
-5. **Não coletar dados pessoais.** Sem cadastro, sem cookie de rastreamento, sem script de terceiro, sem análise de perfil. O registro guarda conteúdo entregue, nunca identidade.
+5. **Não coletar dados pessoais.** Sem cadastro, sem cookie de rastreamento, sem script de terceiro, sem análise de perfil. O registro guarda conteúdo entregue, nunca identidade. A **única** coisa guardada no navegador é a marca de que o aviso de privacidade já foi visto (`localStorage`, chave `aviso_privacidade_visto`, com a data): não é cookie, não vai a servidor nenhum, não sai do aparelho de quem navega, e o texto da política declara isso.
 6. **Interruptor de desligamento:** `AGENT_ENABLED` governa a rota `/api/explorar` (etapa 10) e só ela. As páginas são estáticas e não passam por checagem nenhuma.
 7. **Rótulo de IA visível onde a inteligência artificial participou:** no Sobre, que explica em que etapas ela entrou, e no "Explorar o acervo" quando ele estiver ligado. Página fixa revisada por pessoas não leva rótulo de geração.
 8. **Interface exclusivamente com os tokens de `brand/tokens.css`.** Sem cores ou fontes fora deles.
@@ -43,7 +43,7 @@ O acervo de 2.405 trechos continua no banco: é a base auditável do que está e
 
 **A fonte única é `dados/vocabulario.json`**, com identificador, nome na tela e cor. O Worker importa esse arquivo, os scripts o exigem por `require`, e o build publica `public/vocabulario.js` para o front. Nenhuma outra cópia destas listas pode existir no repositório: quatro cópias literais divergindo foi o problema que a migração 003 resolveu. A lista abaixo é resumo, não fonte.
 
-- **Públicos (4):** identificador no banco · nome na tela · slug da URL e dos assets:
+- **Públicos (4):** identificador no banco · nome na tela · slug da URL e dos assets. Cada um traz também a cor, a cor de texto sobre ela e o `retrato` (o arquivo em `assets/retrato-<slug>.webp`, usado no bloco "Quem é este público"):
   - `jovens` · Jovens · `jovens`
   - `60+` · **70+** · `70-mais` — o público é de 70 anos ou mais; o identificador `60+` só muda no banco na migração 005, depois do beta, e `vocabulario.json` faz a ponte
   - `mulheres beneficiárias` · Mulheres beneficiárias · `mulheres-beneficiarias`
@@ -69,7 +69,7 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 - `paginas/` — fonte das telas: `index.html` (Início), `caminho.html` (o molde das 20 páginas), `sobre.html`, `privacidade.html`, `resultado.html` (redireciona a rota antiga), mais `estilos.css` e `_redirects`
 - `parciais/` — cabeça, cabeçalho, rodapé e a barra lateral (voltar ao início e compartilhar), comuns às telas e incluídos no build. Só marcadores: os valores entram por `scripts/interface.js`
 - `dados/configuracao.json` — **fonte única dos textos, rótulos, endereços e nomes de imagem da interface**; o que falta redigir está como `[preencher]`, e asset que ainda não existe aparece como placeholder com o nome esperado
-- `assets/` — pasta única de imagens (banner, logotipos, cards semióticos, favicon); enquanto um arquivo não existe, a tela mostra placeholder com o nome esperado
+- `assets/` — pasta única de imagens e fontes (banner, logotipos, favicon, retratos dos públicos, símbolos e padrões da identidade); enquanto um arquivo não existe, a tela mostra placeholder com o nome esperado. Qual arquivo cada tela usa vem de `dados/configuracao.json` — e o retrato, de `dados/vocabulario.json`
 - `referencia/decisivas_prototipo_v5.html` — referência visual oficial da etapa 8
 - `arquivo/` — o que saiu de uso, com o `LEIA-ME.md` dizendo o que era cada coisa e quando saiu
 - `migracao-004.sql` — os comandos da migração 004, um por bloco, para o console
@@ -87,7 +87,9 @@ A fonte do acervo é `dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`, 2.405 linha
 
 As 273 linhas da amostra antiga saíram do banco com a migração 004.
 
-**O texto das 20 páginas está em `conteudo/` e já monta as páginas**, em revisão pela equipe e pelo jurídico. Falta redigir: "quem faz" no Sobre, contato do rodapé e o código de incorporação do vídeo (`video_embed`) — tudo marcado `[preencher]`. O vídeo de apresentação vive **só na página Sobre**: não há janela de abertura no Início. Nenhum arquivo traz `revisado_em`, então as páginas mostram "texto em revisão" no lugar da data. Faltam também os assets da identidade (banner, cards semióticos, logos, arquivos da fonte em `assets/fonts/`).
+**O texto das 20 páginas está em `conteudo/` e já monta as páginas**, em revisão pela equipe e pelo jurídico. Falta redigir: "quem faz" no Sobre, contato do rodapé e o código de incorporação do vídeo (`video_embed`) — tudo marcado `[preencher]`. O vídeo de apresentação vive **só na página Sobre**: não há janela de abertura no Início. Nenhum arquivo traz `revisado_em`, então as páginas mostram "texto em revisão" no lugar da data.
+
+**Os assets da identidade chegaram em 02/09/2026** (logotipos, favicon, três faixas de banner e os quatro retratos duotone), ligados à configuração e ao vocabulário. Faltam só os logotipos da Quid e do BRIEF em off-white, que seguem como placeholder no rodapé.
 
 Onde o acervo não sustenta um bloco, a página declara a lacuna: hoje isso acontece em 70+ com dinheiro, trabalho e Brasil, e em trabalho digno para os dois públicos femininos. Lacuna é conteúdo, não erro. O tipo `exemplo` tem zero linhas no acervo e a coluna `link` está sempre vazia.
 

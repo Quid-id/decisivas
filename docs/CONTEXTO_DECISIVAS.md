@@ -89,7 +89,7 @@ Quando o acervo não sustenta um bloco, a página mostra o que existe e declara 
 
 **Explorar o acervo devolve trechos, não prosa.** O que quebrou foi o modelo redigindo. Escolher e ordenar trechos é seguro; escrever não é.
 
-**Sem cookie, sem rastreamento, sem script de terceiro.** Fonte tipográfica servida pelo site. Vídeo do YouTube em modo sem cookie, e **só na página Sobre**: a janela de abertura no Início saiu, porque atrapalhava a primeira escolha e o vídeo explica o projeto, que é assunto do Sobre. Compartilhamento por link simples. Por isso o aviso de privacidade é informativo, não um pedido de consentimento.
+**Sem cookie, sem rastreamento, sem script de terceiro.** Fonte tipográfica servida pelo site. Vídeo do YouTube em modo sem cookie, e **só na página Sobre**: a janela de abertura no Início saiu, porque atrapalhava a primeira escolha e o vídeo explica o projeto, que é assunto do Sobre. Compartilhamento por link simples. Por isso o aviso de privacidade é informativo, não um pedido de consentimento — e ele aparece só no primeiro acesso: ao clicar em "Entendi", o navegador guarda a marca de que o aviso foi visto (`localStorage`, com a data). Essa marca é a **única** coisa que o site guarda no aparelho de quem navega; não é cookie, não vai a servidor nenhum, e a política de privacidade declara isso em uma frase.
 
 **Texto e asset de interface são conteúdo, não código.** Nenhum texto fixo, rótulo, endereço ou nome de imagem é escrito dentro de template ou script: tudo o que aparece na tela vem de `dados/configuracao.json`, `conteudo/*.json` ou `dados/vocabulario.json`. O build confere e recusa publicar se achar palavra de fora (`scripts/verifica-literais.js`). É o que permite ao CMS da etapa 9 editar a interface inteira, e não só o texto das páginas.
 
@@ -104,7 +104,7 @@ Quando o acervo não sustenta um bloco, a página mostra o que existe e declara 
 1. Nenhuma chave de API em código.
 2. Nenhum texto publicado sem revisão humana e validação do jurídico.
 3. Não pedir voto. Não nomear candidato, partido ou figura política, nem aludir sem nome. Não avaliar governo ou gestão específica.
-4. Não coletar dados pessoais. Sem cadastro, sem cookie de rastreamento, sem script de terceiro.
+4. Não coletar dados pessoais. Sem cadastro, sem cookie de rastreamento, sem script de terceiro. A única marca guardada no navegador é a de que o aviso de privacidade já foi visto, declarada na política.
 5. Rótulo de IA visível onde a inteligência artificial participou (Sobre e, quando ligado, Explorar o acervo).
 6. Lacuna declarada, nunca preenchida por aproximação.
 7. Interface só com os tokens da identidade.
@@ -127,7 +127,7 @@ O repositório é a fonte de verdade; o Claude Code lê arquivos, não conversas
 
 **Próximas etapas:** 8A limpeza e migração 004; 8B páginas fixas em cards, compartilhamento, privacidade, responsivo; 8C verificação e publicação — as três entregues. A verificação de conteúdo roda no build: estrutura dos JSON, varredura de `BLOCKED_TERMS` sobre todo o texto de `conteudo/` e da configuração (zero ocorrências, e o build falha se achar) e a lista de pendências impressa no fim. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (70+).
 
-**Pendente de conteúdo:** "quem faz" no Sobre, contato do rodapé, código de incorporação do vídeo, assets da identidade (banner, cards, logotipos).
+**Pendente de conteúdo:** "quem faz" no Sobre, contato do rodapé, código de incorporação do vídeo. Os assets da identidade chegaram em 02/09/2026 — logotipos, favicon, três faixas de banner e os quatro retratos duotone dos públicos; faltam só os logotipos da Quid e do BRIEF em off-white.
 
 **Datas:** beta em 04/09/2026, lançamento em 14/09/2026.
 
