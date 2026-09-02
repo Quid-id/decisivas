@@ -66,11 +66,31 @@ const CONFIGURACAO = "dados/configuracao.json";
 // Pages e GitHub Actions, para a conferência não depender de uma só.
 const MARCAS_DE_CI = ["CI", "WORKERS_CI", "CF_PAGES", "GITHUB_ACTIONS"];
 
+function marcaLigada(marca) {
+  const valor = String(process.env[marca] ?? "").trim().toLowerCase();
+  return valor !== "" && valor !== "false" && valor !== "0";
+}
+
 function ehCI() {
-  return MARCAS_DE_CI.some((marca) => {
-    const valor = String(process.env[marca] ?? "").trim().toLowerCase();
-    return valor !== "" && valor !== "false" && valor !== "0";
-  });
+  return MARCAS_DE_CI.some(marcaLigada);
+}
+
+// Uma linha no começo do log dizendo em que ambiente o build está e se a lista
+// chegou. Existe porque o log do build do Cloudflare é o único lugar onde essa
+// resposta aparece: o check do GitHub só traz o número do build e um link para
+// o painel, sem texto nenhum. **Nunca imprime os termos** — só quantos são: o
+// log do build é visível a quem tem acesso ao painel, e a lista nomeia figuras
+// e partidos.
+function ambienteDoBuild() {
+  const marcas = MARCAS_DE_CI.filter(marcaLigada);
+  const onde = marcas.length ? `esteira (${marcas.join(", ")})` : "máquina local (nenhuma marca de esteira)";
+  const quantos = listaDeTermos().length;
+  const lista = quantos
+    ? `BLOCKED_TERMS: ${quantos} termo(s)`
+    : "BLOCKED_TERMS: AUSENTE ou vazia — se isto está num build do Cloudflare, " +
+      "a variável não chegou ao processo do build (confira em Settings → Build → Build variables, " +
+      "e não em Variables and Secrets, que é runtime)";
+  return `${onde} | ${lista}`;
 }
 
 function listaDeTermos() {
@@ -193,6 +213,8 @@ function varre() {
 // ---------------------------------------------------------------------------
 
 function verifica({ vocabulario }) {
+  console.log(`ambiente do build: ${ambienteDoBuild()}`);
+
   // 1. Estrutura: a mesma checagem que o build já fazia.
   const { publicos } = conteudo.carrega(vocabulario);
   const paginas = Object.values(publicos).reduce((n, p) => n + Object.keys(p.paginas).length, 0);
@@ -221,7 +243,7 @@ function verifica({ vocabulario }) {
   return { paginas, ...resultado };
 }
 
-module.exports = { verifica, varre, ehSigla, listaDeTermos };
+module.exports = { verifica, varre, ehSigla, listaDeTermos, ambienteDoBuild };
 
 if (require.main === module) {
   const vocabulario = JSON.parse(fs.readFileSync("dados/vocabulario.json", "utf8"));

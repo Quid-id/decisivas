@@ -628,6 +628,21 @@ A esteira é reconhecida pela presença de `CI`, `WORKERS_CI`, `CF_PAGES` ou
 reproduzir a falha na mão: `CI=1 node scripts/verifica-conteudo.js` sem a
 lista.
 
+**Como saber se a variável chegou.** A primeira linha do log do build diz, sem
+imprimir os termos:
+
+```
+ambiente do build: esteira (CI, WORKERS_CI) | BLOCKED_TERMS: 58 termo(s)
+ambiente do build: máquina local (nenhuma marca de esteira) | BLOCKED_TERMS: AUSENTE ou vazia …
+```
+
+Ela existe porque o **check do GitHub não traz log nenhum** — só o número do
+build e o link para o painel. Quando o check fica vermelho, é no log do build,
+por esse link, que está a resposta. E cuidado com a confusão mais comum do
+painel: `BLOCKED_TERMS` tem de estar em **Settings → Build → Build variables**
+(o ambiente em que o build roda), e não em **Variables and Secrets**, que é o
+ambiente do Worker em execução — o build não vê essas.
+
 **A variável tem de estar no painel ANTES deste comportamento entrar.** Foi por
 isso que ele veio depois dos assets: com o painel sem a lista, o build do
 Cloudflare falha e o site não republica — o que já está no ar continua no ar,
