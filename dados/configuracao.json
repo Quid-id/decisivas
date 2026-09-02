@@ -1,15 +1,215 @@
 {
-  "_leia_me": "Textos e identificadores das telas. O build publica este arquivo como public/configuracao.js (window.CONFIGURACAO), lido pela tela de Início. O texto das 20 páginas, do Sobre e da privacidade NÃO vive aqui: vive em conteudo/*.json. O que ainda não foi redigido está como [preencher] e aparece na tela em caixa tracejada — nada é inventado por código.",
-  "perguntas": [
-    "Com quem você quer falar hoje?",
-    "Qual conversa DECISIVA você quer ter hoje?",
-    "Quem você pode mobilizar agora?"
+  "_leia_me": "Textos, rótulos e assets de TODA a interface. Regra da entrega: nenhum texto fixo, rótulo, nome de imagem ou link é escrito dentro de template ou script — tudo o que aparece na tela vem daqui, de conteudo/*.json (as 20 páginas, o Sobre e a privacidade) ou de dados/vocabulario.json (públicos, temas, cores). O build recusa publicar se encontrar texto de interface fora desses três arquivos (scripts/verifica-literais.js). É este arquivo que o CMS da etapa 9 vai editar. Caminho de asset que ainda não existe aparece na tela como placeholder com o nome esperado; texto que falta redigir vai como [preencher].",
+  "marca": {
+    "nome": "DECISIVAS",
+    "logo": "/assets/logo-decisivas.svg",
+    "simbolo": "/assets/simbolo-asterisco.svg",
+    "texto_alternativo": "DECISIVAS",
+    "destino": "/"
+  },
+  "navegacao": [
+    {
+      "rotulo": "Início",
+      "destino": "/"
+    },
+    {
+      "rotulo": "Sobre",
+      "destino": "/sobre"
+    }
   ],
-  "apoio_inicio": "Escolha um público e um tema. Você recebe o que a pesquisa mostra, o que funciona, o que afasta e como chegar nessas pessoas. A mensagem, quem escreve é você.",
-  "video_youtube_id": "[preencher]",
-  "assinatura": "[preencher]",
-  "contato": {
-    "email": "[preencher]",
-    "instagram": "[preencher]"
+  "navegacao_rotulo": "Navegação principal",
+  "meta": {
+    "inicio": {
+      "titulo": "DECISIVAS · Pessoas e temas que vão decidir as eleições 2026",
+      "descricao": "Escolha um público e um tema e veja o que a pesquisa mostra sobre essa conversa: por que ela importa, o que funciona, o que não funciona e como chegar nessas pessoas."
+    },
+    "caminho": {
+      "padrao_titulo": "{publico} × {tema} · DECISIVAS"
+    },
+    "sobre": {
+      "titulo": "Sobre o projeto · DECISIVAS",
+      "descricao": "O que é o DECISIVAS, como foi feito, os públicos, os temas e onde a inteligência artificial entrou."
+    },
+    "privacidade": {
+      "titulo": "Política de privacidade · DECISIVAS",
+      "descricao": "O DECISIVAS não pede cadastro, não usa cookies de rastreamento e não coleta dados pessoais."
+    },
+    "redirecionamento": {
+      "titulo": "Este endereço mudou · DECISIVAS",
+      "descricao": "Os caminhos agora ficam em endereços próprios, um para cada público e tema."
+    }
+  },
+  "home": {
+    "titulo": "Pessoas e temas que vão decidir as eleições 2026",
+    "texto": "Tudo que funciona e que não funciona para dialogar com quem mais importa. Por isso montamos uma plataforma pra você usar, adaptar e repassar.",
+    "pergunta": "Com quem você quer falar hoje?",
+    "rotulo_publico": "Público",
+    "rotulo_tema": "Tema",
+    "botao": "VER CAMINHOS",
+    "chamada": "Não improvise. Adapte. Use!",
+    "dica_vazia": "Escolha um público e um tema."
+  },
+  "caminho": {
+    "blocos": {
+      "por_que": "Por que falar com este público sobre este tema",
+      "funciona": "O que funciona",
+      "nao_funciona": "O que não funciona",
+      "quem_e": "Quem é este público",
+      "como_chegar": "Como chegar nele",
+      "resumo": "Resumo",
+      "explorar": "Explorar o acervo"
+    },
+    "texto_em_revisao": "texto em revisão",
+    "prefixo_revisado": "texto revisado em",
+    "lacuna_padrao": "Evidência insuficiente no acervo para este item.",
+    "voltar": "Voltar ao início",
+    "separador_titulo": "×",
+    "icone_funciona": "✓",
+    "icone_nao_funciona": "✕",
+    "icone_voltar": "←",
+    "voltar_destino": "/"
+  },
+  "sobre": {
+    "titulo": "Sobre o projeto",
+    "blocos": {
+      "projeto": "O que é o DECISIVAS",
+      "como_foi_feito": "Como foi feito",
+      "publicos": "Os públicos",
+      "temas": "Os temas",
+      "aviso_ia": "Inteligência artificial e origem dos dados",
+      "quem_faz": "Quem faz"
+    }
+  },
+  "pagina_privacidade": {
+    "titulo": "Política de privacidade",
+    "prefixo_revisado": "Revisado em"
+  },
+  "redirecionamento": {
+    "titulo": "Este endereço mudou",
+    "aviso": "Levando você para o caminho novo…",
+    "aviso_sem_parametros": "Os caminhos agora ficam em endereços próprios. Escolha um público e um tema no início.",
+    "botao": "Ir para o início"
+  },
+  "explorar": {
+    "titulo": "Explorar o acervo",
+    "texto": "Esta página é um recorte. O acervo tem {trechos} trechos sobre este cruzamento, {achados} deles achados de pesquisa. Escolha um assunto ou escreva o que procura: a resposta traz só trechos da pesquisa, com a origem de cada um.",
+    "rotulo_campo": "O que você procura no acervo",
+    "exemplo_campo": "Ex.: o que a pesquisa mostra sobre este tema",
+    "botao": "Quero explorar mais",
+    "aviso_desligado": "Este recurso chega em breve. No beta, a página traz o recorte já revisado; explorar o acervo inteiro vem depois.",
+    "aviso_ia": "Seleção feita com apoio de inteligência artificial, apenas com trechos do acervo de pesquisa do DECISIVAS. Não indica voto nem menciona candidaturas.",
+    "etiquetas": {
+      "achado": "Achado",
+      "verbatim": "Depoimento",
+      "funciona": "O que funciona",
+      "afasta": "O que afasta"
+    },
+    "aviso_sem_pautas": "Sem pautas etiquetadas neste cruzamento."
+  },
+  "compartilhar": {
+    "rotulo": "Compartilhar esta página",
+    "redes": [
+      {
+        "id": "whatsapp",
+        "rotulo": "W",
+        "nome": "WhatsApp",
+        "ativo": true,
+        "cor_hover": "var(--verde)",
+        "cor_icone_hover": "var(--preto)"
+      },
+      {
+        "id": "x",
+        "rotulo": "X",
+        "nome": "X",
+        "ativo": true,
+        "cor_hover": "var(--preto)",
+        "cor_icone_hover": "var(--off-white)"
+      },
+      {
+        "id": "facebook",
+        "rotulo": "f",
+        "nome": "Facebook",
+        "ativo": true,
+        "cor_hover": "var(--azul)",
+        "cor_icone_hover": "var(--off-white)"
+      },
+      {
+        "id": "linkedin",
+        "rotulo": "in",
+        "nome": "LinkedIn",
+        "ativo": true,
+        "cor_hover": "var(--azul-claro)",
+        "cor_icone_hover": "var(--preto)"
+      },
+      {
+        "id": "bluesky",
+        "rotulo": "B",
+        "nome": "Bluesky",
+        "ativo": true,
+        "cor_hover": "var(--roxo)",
+        "cor_icone_hover": "var(--off-white)"
+      }
+    ],
+    "copiar": {
+      "rotulo": "⧉",
+      "nome": "Copiar link",
+      "confirmacao": "✓",
+      "cor_hover": "var(--amarelo)",
+      "cor_icone_hover": "var(--preto)"
+    }
+  },
+  "privacidade": {
+    "aviso": "Este site não usa cookies de rastreamento nem coleta dados pessoais.",
+    "rotulo_link": "Política de privacidade",
+    "botao": "Entendi",
+    "destino": "/privacidade"
+  },
+  "rodape": {
+    "assinatura": "Pessoas e temas que vão decidir as eleições 2026",
+    "titulo_navegacao": "NAVEGAÇÃO",
+    "titulo_contato": "CONTATO",
+    "nota_ia": "O funcionamento da plataforma, a origem dos dados e o uso de inteligência artificial estão descritos em Sobre o projeto.",
+    "contato": {
+      "email": "[preencher]",
+      "instagram": "[preencher]",
+      "cidade": "São Paulo · Brasil"
+    },
+    "organizacao": {
+      "rotulo": "ORGANIZAÇÃO",
+      "logo": "/assets/logo-quid.svg",
+      "texto_alternativo": "Quid"
+    },
+    "realizacao": {
+      "rotulo": "REALIZAÇÃO",
+      "logo": "/assets/logo-brief.svg",
+      "texto_alternativo": "BRIEF"
+    },
+    "direitos": "© 2026 · Todos os direitos reservados"
+  },
+  "banner": {
+    "imagens": [
+      {
+        "arquivo": "/assets/banner-1.svg",
+        "texto_alternativo": ""
+      },
+      {
+        "arquivo": "/assets/banner-2.svg",
+        "texto_alternativo": ""
+      },
+      {
+        "arquivo": "/assets/banner-3.svg",
+        "texto_alternativo": ""
+      }
+    ],
+    "intervalo_ms": 5000,
+    "nota_provisoria": "faixa provisória. Substituir pelos arquivos banner-* da pasta assets"
+  },
+  "video_embed": "[preencher: código de incorporação do YouTube em youtube-nocookie.com, só na página Sobre]",
+  "favicon": "/assets/favicon.svg",
+  "imagem_compartilhamento": "/assets/compartilhamento.png",
+  "pendencias": {
+    "prefixo": "[preencher]",
+    "formato": "{prefixo} {arquivo} → {campo}",
+    "asset": "{prefixo} {arquivo}"
   }
 }

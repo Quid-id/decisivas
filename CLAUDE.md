@@ -27,6 +27,7 @@ O acervo de 2.405 trechos continua no banco: é a base auditável do que está e
 
 1. **Nenhuma chave de API no código.** Local: `.dev.vars` (no `.gitignore`). Produção: segredo no painel do Cloudflare. Se encontrar chave em código, pare e avise.
 2. **Nenhum texto de conteúdo escrito por quem programa.** Todo texto de página vem de `conteudo/*.json`, escrito pela equipe e validado pelo jurídico. Onde falta, aparece `[preencher]` visível na tela — nunca texto inventado para tapar o buraco. Vale para os textos das telas em `dados/configuracao.json`.
+2.1. **Nada de texto, rótulo, endereço ou nome de imagem escrito dentro de template ou script.** Tudo o que aparece na tela vem de `dados/configuracao.json`, `conteudo/*.json` ou `dados/vocabulario.json` (mais os nomes de pauta, que são vocabulário fechado do acervo). Quem preenche os marcadores dos parciais com esses valores é `scripts/interface.js`; `scripts/verifica-literais.js` roda no fim do build e **falha a publicação** se achar na tela palavra que não venha dessas fontes. É esta regra que permite ao CMS da etapa 9 editar a interface inteira sem tocar em código.
 3. **O modelo não redige.** Não há chamada a modelo em nenhuma rota. Quando o "Explorar o acervo" for ligado (etapa 10), ele devolve trechos do acervo com a origem de cada um, podendo escolher e ordenar — nunca escrever. Nada de conhecimento geral, nada de completar lacuna.
 4. **Nunca mencionar candidaturas, partidos, políticos ou direção de voto**, nem em código, nem em texto de interface, nem em conteúdo de página. Também não avaliar governo ou gestão específica, nem aludir a figura política sem nome. Pesquisa que cite candidato pode ser parafraseada com a fonte nomeada e sem o nome dele. As regras completas estão em `docs/CONTEXTO_DECISIVAS.md` (seção 1, "a regra máxima de conteúdo") e em `docs/04-conformidade.md`.
 5. **Não coletar dados pessoais.** Sem cadastro, sem cookie de rastreamento, sem script de terceiro, sem análise de perfil. O registro guarda conteúdo entregue, nunca identidade.
@@ -66,8 +67,8 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 - `dados/DECISIVAS_pautas_de_para_v1.xlsx` — as 59 pautas consolidadas
 - `conteudo/` — **o texto das 20 páginas**, um JSON por público, mais `sobre.json`. Escrito e revisado pela equipe; o build monta o HTML
 - `paginas/` — fonte das telas: `index.html` (Início), `caminho.html` (o molde das 20 páginas), `sobre.html`, `privacidade.html`, `resultado.html` (redireciona a rota antiga), mais `estilos.css` e `_redirects`
-- `parciais/` — cabeça, cabeçalho, rodapé e barra de compartilhamento, comuns às telas e incluídos no build
-- `dados/configuracao.json` — textos e identificadores das telas; o que falta redigir está como `[preencher]`
+- `parciais/` — cabeça, cabeçalho, rodapé e a barra lateral (voltar ao início e compartilhar), comuns às telas e incluídos no build. Só marcadores: os valores entram por `scripts/interface.js`
+- `dados/configuracao.json` — **fonte única dos textos, rótulos, endereços e nomes de imagem da interface**; o que falta redigir está como `[preencher]`, e asset que ainda não existe aparece como placeholder com o nome esperado
 - `assets/` — pasta única de imagens (banner, logotipos, cards semióticos, favicon); enquanto um arquivo não existe, a tela mostra placeholder com o nome esperado
 - `referencia/decisivas_prototipo_v5.html` — referência visual oficial da etapa 8
 - `arquivo/` — o que saiu de uso, com o `LEIA-ME.md` dizendo o que era cada coisa e quando saiu
@@ -86,7 +87,7 @@ A fonte do acervo é `dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`, 2.405 linha
 
 As 273 linhas da amostra antiga saíram do banco com a migração 004.
 
-**O texto das 20 páginas está em `conteudo/` e já monta as páginas**, em revisão pela equipe e pelo jurídico. Falta redigir: "quem faz" no Sobre, assinatura e contato do rodapé, o id do vídeo — tudo marcado `[preencher]`. Nenhum arquivo traz `revisado_em`, então as páginas mostram "texto em revisão" no lugar da data. Faltam também os assets da identidade (banner, cards semióticos, logos, arquivos da fonte em `assets/fonts/`).
+**O texto das 20 páginas está em `conteudo/` e já monta as páginas**, em revisão pela equipe e pelo jurídico. Falta redigir: "quem faz" no Sobre, contato do rodapé e o código de incorporação do vídeo (`video_embed`) — tudo marcado `[preencher]`. O vídeo de apresentação vive **só na página Sobre**: não há janela de abertura no Início. Nenhum arquivo traz `revisado_em`, então as páginas mostram "texto em revisão" no lugar da data. Faltam também os assets da identidade (banner, cards semióticos, logos, arquivos da fonte em `assets/fonts/`).
 
 Onde o acervo não sustenta um bloco, a página declara a lacuna: hoje isso acontece em 70+ com dinheiro, trabalho e Brasil, e em trabalho digno para os dois públicos femininos. Lacuna é conteúdo, não erro. O tipo `exemplo` tem zero linhas no acervo e a coluna `link` está sempre vazia.
 

@@ -2,41 +2,38 @@
      não usa cookie nem coleta dado pessoal, então não há o que consentir.
      Sem persistência: reaparece a cada visita (regra 5 do CLAUDE.md). -->
 <div class="aviso-privacidade" id="aviso-privacidade">
-  <span>Este site não usa cookies de rastreamento nem coleta dados pessoais. <a href="/privacidade">Política de privacidade</a></span>
-  <button type="button" id="fechar-privacidade">Entendi</button>
+  <span>{{AVISO_PRIVACIDADE}} <a href="{{DESTINO_PRIVACIDADE}}">{{ROTULO_PRIVACIDADE}}</a></span>
+  <button type="button" id="fechar-privacidade">{{BOTAO_PRIVACIDADE}}</button>
 </div>
 
 <footer><div class="larg">
   <div class="grade-rodape">
     <div>
-      <p class="assinatura">DECISIVAS</p>
+      {{MARCA_RODAPE}}
       <p class="tagline">{{ASSINATURA}}</p>
-      <p class="fixa-ia">O funcionamento da plataforma, a origem dos dados e o uso de inteligência artificial estão descritos em Sobre o projeto.</p>
+      <p class="fixa-ia">{{NOTA_IA}}</p>
     </div>
     <div>
-      <h2>NAVEGAÇÃO</h2>
+      <h2>{{TITULO_NAVEGACAO}}</h2>
       <ul>
-        <li><a href="/">Início</a></li>
-        <li><a href="/sobre">Sobre o projeto</a></li>
-        <li><a href="/sobre#video">Vídeo de apresentação</a></li>
-        <li><a href="/privacidade">Política de privacidade</a></li>
+{{NAVEGACAO_RODAPE}}
       </ul>
     </div>
     <div>
-      <h2>CONTATO</h2>
+      <h2>{{TITULO_CONTATO}}</h2>
       <ul>
         <li>{{CONTATO_EMAIL}}</li>
         <li>{{CONTATO_INSTAGRAM}}</li>
-        <li class="tagline">São Paulo · Brasil</li>
+        <li class="tagline">{{CONTATO_CIDADE}}</li>
       </ul>
     </div>
   </div>
   <div class="base">
     <div class="creditos">
-      <span class="credito"><span>ORGANIZAÇÃO</span>{{LOGO_QUID}}</span>
-      <span class="credito"><span>REALIZAÇÃO</span>{{LOGO_BRIEF}}</span>
+      <span class="credito"><span>{{ROTULO_ORGANIZACAO}}</span>{{LOGO_ORGANIZACAO}}</span>
+      <span class="credito"><span>{{ROTULO_REALIZACAO}}</span>{{LOGO_REALIZACAO}}</span>
     </div>
-    <span>© 2026 · TODOS OS DIREITOS RESERVADOS</span>
+    <span>{{DIREITOS}}</span>
   </div>
 </div></footer>
 <script>

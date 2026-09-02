@@ -1,0 +1,36 @@
+<!-- DECISIVAS — janela do vídeo de abertura do Início, retirada em 02/09/2026.
+     O vídeo de apresentação passou a viver só na página Sobre, pelo campo
+     video_embed de dados/configuracao.json: a janela atrapalhava a primeira
+     escolha (público e tema) e o vídeo explica o projeto, que é assunto do
+     Sobre. Guardado aqui como estava, marcação e estilo, se um dia voltar.
+
+     Vinha do protótipo v5 e da especificação da etapa 8 ("Janela do vídeo na
+     primeira visita, sem armazenamento local, botão Fechar e ver caminhos").
+     Não é lido por nenhum script, build ou rota. -->
+
+<div class="modal" id="janela-video">
+  <div class="caixa">
+    <div class="video" id="video">{{VIDEO}}</div>
+    <div class="pe">
+      <span>{{TEXTO_JANELA}}</span>
+      <button type="button" id="fechar-video">{{BOTAO_JANELA}}</button>
+    </div>
+  </div>
+</div>
+<script>
+  document.getElementById("fechar-video").addEventListener("click", function () {
+    document.getElementById("janela-video").remove();
+  });
+</script>
+
+<style>
+/* De paginas/estilos.css, com o token --cor-veu de brand/tokens.css
+   (--cor-veu: rgba(0, 0, 0, 0.9)), que saiu junto. */
+.modal { position: fixed; inset: 0; background: var(--cor-veu); display: flex; align-items: center; justify-content: center; padding: var(--espaco-4); z-index: 50; }
+.modal .caixa { background: var(--cor-fundo); max-width: 920px; width: 100%; }
+.modal .pe { display: flex; justify-content: space-between; align-items: center; gap: var(--espaco-3); padding: var(--espaco-3); font-size: var(--texto-m); }
+.modal .pe button {
+  font: inherit; background: var(--cor-acao); color: var(--cor-acao-texto);
+  border: 0; border-radius: var(--raio-pilula); padding: var(--espaco-2) var(--espaco-4); cursor: pointer;
+}
+</style>

@@ -5,8 +5,9 @@ histórico**: cada arquivo aqui continua versionado, e o Git guarda tudo o que
 existiu antes. Esta pasta existe para o repositório descrever só o que está em
 uso — o que está aqui não é lido por nenhum script, build ou rota.
 
-Tudo saiu na **etapa 8A, em 02/09/2026**, quando as páginas geradas por modelo
-no acesso deram lugar a páginas fixas escritas pela equipe.
+A maior parte saiu na **etapa 8A, em 02/09/2026**, quando as páginas geradas
+por modelo no acesso deram lugar a páginas fixas escritas pela equipe. O que
+saiu depois traz a data na própria linha.
 
 ## Geração de página por modelo
 
@@ -40,6 +41,12 @@ no acesso deram lugar a páginas fixas escritas pela equipe.
 | `08-regras-de-formato.md` | governança dos formatos WhatsApp, carrossel e roteiro |
 | `DECISIVAS_especificacao_claude_code.md` | especificação em etapas versão 2, das etapas 0 a 7 |
 | `decisivas_prototipo_v3.html` | referência visual da etapa 6, substituída pelo protótipo v5 |
+
+## Peças de tela retiradas
+
+| Item | O que era |
+|---|---|
+| `janela-de-video.html` | a janela do vídeo de abertura do Início, com a marcação e o estilo como estavam. Retirada em 02/09/2026: o vídeo de apresentação passou a viver só na página Sobre, pelo `video_embed` da configuração |
 
 ## Cargas e migrações já aplicadas
 
