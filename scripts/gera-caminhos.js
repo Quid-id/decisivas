@@ -77,15 +77,17 @@ function caixaDeLacuna(texto) {
   return `\n    <div class="lacuna">${escapa(texto)}</div>`;
 }
 
-// "Quem é este público": o card de número na cor do público e, ao lado, o card
-// de texto off-white com a sombra na cor dele.
-function blocoQuemE(quemE, cor) {
+// "Quem é este público": o retrato do público em círculo, o card de número na
+// cor dele e o card de texto off-white com a sombra na mesma cor, os três na
+// mesma linha (em coluna única abaixo de 760 px).
+function blocoQuemE(quemE, cor, oRetrato) {
   const destaque =
     `      <div class="card numero" style="--cor: ${cor.cor}; --cor-texto-pilula: ${cor.texto}">` +
     `<div class="n">${escapa(quemE.destaque.n)}</div><h3>${escapa(quemE.destaque.titulo)}</h3>` +
     `<p>${escapa(quemE.destaque.texto)}</p></div>`;
   const texto = `      <div class="card publico largo"><p>${escapa(quemE.texto)}</p></div>`;
-  return `    <div class="grade">\n${destaque}\n${texto}\n    </div>`;
+  const linhas = [oRetrato, destaque, texto].filter(Boolean).join("\n");
+  return `    <div class="grade${oRetrato ? " com-retrato" : ""}">\n${linhas}\n    </div>`;
 }
 
 function blocoResumo(linhas) {
@@ -134,6 +136,7 @@ function montaCaminho(modelo, comum, configuracao, { publico, tema, dados, pagin
     CABECALHO: comum.cabecalho(null) + "\n" + comum.rodaBanner,
     RODAPE: comum.rodape,
     COMPARTILHAR: comum.compartilhar,
+    VOLTAR: comum.voltar,
     // A cor do público vale para a página inteira: é dela que sai a sombra dos
     // cards off-white (--sombra-publico, em brand/tokens.css).
     ESTILO_PUBLICO: `--cor-publico: ${cor.cor}`,
@@ -156,7 +159,7 @@ function montaCaminho(modelo, comum, configuracao, { publico, tema, dados, pagin
       grade(pagina.nao_funciona, "evita", configuracao.caminho.icone_nao_funciona) +
       (lacunaEm === "nao_funciona" ? caixaDeLacuna(pagina.lacuna) : ""),
     ROTULO_QUEM_E: escapa(blocos.quem_e),
-    QUEM_E: blocoQuemE(dados.quem_e, cor),
+    QUEM_E: blocoQuemE(dados.quem_e, cor, monta.retrato(configuracao, publico, dados.nome)),
     ROTULO_COMO_CHEGAR: escapa(blocos.como_chegar),
     COMO_CHEGAR: grade(dados.como_chegar, "publico", null),
     ROTULO_RESUMO: escapa(blocos.resumo),

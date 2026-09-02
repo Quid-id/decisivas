@@ -3,10 +3,12 @@
      endereço a compartilhar é o da própria página, lido no navegador, então
      não existe domínio escrito no build. A barra aparece quando o banner e a
      barra de menu saíram da tela, e some quando o rodapé começa a entrar. Em
-     telas até 900 px ela vira uma faixa horizontal no pé, com o voltar à
-     esquerda dos ícones. -->
+     telas até 900 px ela vira uma faixa horizontal no pé, e é só nessa
+     largura que o voltar aparece aqui, à esquerda dos ícones: em telas largas
+     quem manda é o botão fixo ao lado do título, que existe desde o topo da
+     página e não depende desta barra. -->
 <aside class="barra-lateral" id="barra-lateral" aria-label="{{ROTULO_COMPARTILHAR}}">
-  <a class="botao-redondo voltar" href="{{DESTINO_VOLTAR}}" title="{{ROTULO_VOLTAR}}" aria-label="{{ROTULO_VOLTAR}}">{{ICONE_VOLTAR}}</a>
+  <a class="botao-redondo voltar na-faixa" href="{{DESTINO_VOLTAR}}" title="{{ROTULO_VOLTAR}}" aria-label="{{ROTULO_VOLTAR}}">{{ICONE_VOLTAR}}</a>
 {{REDES}}
   <button type="button" class="botao-redondo" data-rede="copiar" id="copiar-link" data-confirmacao="{{CONFIRMACAO_COPIAR}}" style="--hover: {{COR_HOVER_COPIAR}}; --hover-icone: {{COR_ICONE_HOVER_COPIAR}}" title="{{NOME_COPIAR}}" aria-label="{{NOME_COPIAR}}">{{ROTULO_COPIAR}}</button>
 </aside>

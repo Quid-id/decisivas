@@ -185,7 +185,12 @@
   --altura-barra:        60px;
   /* Barra de compartilhamento: tamanho do botão e a folga que ela respeita
      nas duas pontas, para não cobrir o menu nem o rodapé. */
+  /* Altura do logotipo: na barra preta e, um pouco maior, no rodapé. */
+  --altura-marca:        26px;
+  --altura-marca-rodape: 34px;
   --tamanho-share: 44px;
+  /* Retrato do público no bloco "Quem é este público": círculo. */
+  --tamanho-retrato: 160px;
   --folga-share:   60px;
 
   /* ---------- Foco (acessibilidade) ---------- */

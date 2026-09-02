@@ -1,7 +1,11 @@
 <!-- Aviso de privacidade: informativo, não pedido de consentimento — o site
      não usa cookie nem coleta dado pessoal, então não há o que consentir.
-     Sem persistência: reaparece a cada visita (regra 5 do CLAUDE.md). -->
-<div class="aviso-privacidade" id="aviso-privacidade">
+     Aparece só no primeiro acesso: ao clicar em "Entendi", o navegador guarda
+     em localStorage a data em que o aviso foi visto, e com essa marca o aviso
+     não volta. Nenhum cookie, e a marca não sai do aparelho de quem navega
+     (regra 5 do CLAUDE.md). Nasce escondido e o script mostra quando não há
+     marca, para o aviso não piscar na tela de quem já o viu. -->
+<div class="aviso-privacidade" id="aviso-privacidade" data-marca="{{MARCA_NAVEGADOR}}" hidden>
   <span>{{AVISO_PRIVACIDADE}} <a href="{{DESTINO_PRIVACIDADE}}">{{ROTULO_PRIVACIDADE}}</a></span>
   <button type="button" id="fechar-privacidade">{{BOTAO_PRIVACIDADE}}</button>
 </div>
@@ -37,7 +41,32 @@
   </div>
 </div></footer>
 <script>
-  document.getElementById("fechar-privacidade").addEventListener("click", function () {
-    document.getElementById("aviso-privacidade").hidden = true;
-  });
+  (function () {
+    var aviso = document.getElementById("aviso-privacidade");
+    var chave = aviso.dataset.marca;
+
+    // localStorage pode estar bloqueado (janela privada, configuração do
+    // navegador). Bloqueado, o aviso aparece e o clique não guarda nada: o
+    // aviso é informativo, e mostrá-lo de novo não quebra nada.
+    function leu() {
+      try {
+        return Boolean(window.localStorage.getItem(chave));
+      } catch (e) {
+        return false;
+      }
+    }
+    function marca() {
+      try {
+        window.localStorage.setItem(chave, new Date().toISOString().slice(0, 10));
+      } catch (e) {
+        /* sem onde guardar: o aviso volta na próxima visita */
+      }
+    }
+
+    if (!leu()) aviso.hidden = false;
+    document.getElementById("fechar-privacidade").addEventListener("click", function () {
+      marca();
+      aviso.hidden = true;
+    });
+  })();
 </script>

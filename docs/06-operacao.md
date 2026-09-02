@@ -593,12 +593,11 @@ Sem a distinção, qualquer sigla de duas letras viraria falso positivo dentro d
 texto corrido; sem a insensibilidade nos nomes, bastaria escrever em minúscula
 para escapar.
 
-**Atenção à lista.** Alguns nomes de partido são também palavra comum do
-português — **Podemos**, **Cidadania**, **Solidariedade**, **Avante**. Como
-nome, a comparação ignora maiúsculas, então uma frase que use a palavra no
-sentido comum derruba o build. Hoje nenhuma das quatro aparece no conteúdo. Se
-aparecer, a saída mostra o campo e a frase: o caminho é **reescrever a frase**,
-não afrouxar a varredura.
+**Atenção ao montar a lista.** Nome de partido que também é palavra comum do
+português não entra: como nome, a comparação ignora maiúsculas, e uma frase que
+use a palavra no sentido comum derrubaria o build sem que houvesse menção a
+partido nenhum. Quando um termo assim for necessário, a saída mostra o campo e
+a frase, e o caminho é **reescrever a frase** — nunca afrouxar a varredura.
 
 **Onde a lista vive.** Em variável de ambiente, `BLOCKED_TERMS`, com os termos
 separados por `|` — nunca em arquivo do repositório, que é público e não deve
@@ -617,10 +616,17 @@ carregar uma lista de nomes de figuras e partidos.
 BLOCKED_TERMS="Sobrenome|Outro Nome|SIGLA" node scripts/verifica-conteudo.js
 ```
 
-Sem a variável, a varredura **não roda** e o build avisa em voz alta —
-`termos bloqueados: VARREDURA NÃO EXECUTADA` — em vez de passar em silêncio. É
-o que permite rodar `wrangler dev` sem a lista à mão; a linha no log do build
-do Cloudflare é o sinal de que a variável falta no painel.
+**Sem a variável, o que acontece depende de onde o build roda:**
+
+| Onde | Sem `BLOCKED_TERMS` |
+|---|---|
+| Build do Cloudflare, ou qualquer esteira | **o build FALHA.** Publicar sem a varredura é publicar sem a rede que sustenta a regra 4 |
+| Máquina de quem desenvolve | só avisa (`termos bloqueados: VARREDURA NÃO EXECUTADA`), para `wrangler dev` rodar sem a lista à mão |
+
+A esteira é reconhecida pela presença de `CI`, `WORKERS_CI`, `CF_PAGES` ou
+`GITHUB_ACTIONS` no ambiente — o build do Cloudflare define `CI`. Para
+reproduzir a falha na mão: `CI=1 node scripts/verifica-conteudo.js` sem a
+lista.
 
 ### A lista de pendências no fim do build
 
@@ -639,13 +645,41 @@ pendências na tela (6):
 
 ### Assets
 
-`assets/` é a pasta única de imagens e fontes (banner, logotipos, favicon e os
-arquivos da Inclusive Sans e da Unbounded em `assets/fonts/`), copiada para
-`public/assets/`
-no build. **Enquanto um arquivo não
-existir, a tela mostra um placeholder tracejado com o nome esperado** — nada
-quebra e nada é inventado. Os nomes estão em `assets/LEIA-ME.md`. Sem nenhum
-`banner-*`, o cabeçalho usa a faixa provisória de linhas coloridas do protótipo.
+`assets/` é a pasta única de imagens e fontes (banner, logotipos, favicon,
+retratos dos públicos e os arquivos da Inclusive Sans e da Unbounded em
+`assets/fonts/`), copiada para `public/assets/` no build. **Enquanto um arquivo
+não existir, a tela mostra um placeholder tracejado com o nome esperado** —
+nada quebra e nada é inventado. O que cada arquivo é está em
+`assets/LEIA-ME.md`, escrito por quem entrega a identidade.
+
+**Quem escolhe o arquivo é a configuração, não o código:** `marca.logo`,
+`favicon`, `favicon_png`, `imagem_compartilhamento`, `banner.imagens` e os
+logotipos de `rodape` vivem em `dados/configuracao.json`. A exceção é o retrato
+de cada público, que fica em `dados/vocabulario.json` (campo `retrato`), junto
+do nome, da cor e do slug — é atributo do público, e a fonte única dele é o
+vocabulário. Trocar uma imagem é trocar um caminho nesses dois arquivos.
+
+O pacote da designer entrou em 02/09/2026: logotipos, favicon, três faixas de
+banner (2560 × 440, em rotação) e os quatro retratos duotone (800 × 800),
+usados no bloco "Quem é este público" como círculo de 160 px. Sem nenhum
+`banner-*`, o cabeçalho volta à faixa provisória de linhas coloridas. Faltam só
+os logotipos da Quid e do BRIEF em off-white, que seguem como placeholder.
+
+### O aviso de privacidade, e a única coisa guardada no navegador
+
+O aviso aparece **no primeiro acesso**. Ao clicar em "Entendi", o navegador
+guarda em `localStorage` a chave de `privacidade.marca_navegador`
+(`aviso_privacidade_visto`) com a data; existindo a marca, o aviso não volta.
+
+- **Não é cookie** e não vai a servidor nenhum: a marca fica no aparelho de
+  quem navega, e nem o Worker nem o registro a veem.
+- O aviso nasce com `hidden` no HTML e o script o mostra quando não há marca,
+  para não piscar na tela de quem já o viu.
+- `localStorage` pode estar bloqueado (janela privada, configuração do
+  navegador). Bloqueado, o aviso aparece e o clique não guarda nada — o aviso é
+  informativo, e mostrá-lo de novo não quebra nada.
+- O texto da política em `conteudo/sobre.json` declara essa marca, em uma
+  frase: é a única coisa que o site guarda no navegador.
 
 ### Endereços das telas
 
