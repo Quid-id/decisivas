@@ -153,12 +153,34 @@ Com terminal, o equivalente é `npx wrangler d1 execute decisivas --remote
 --file=<arquivo com os comandos>`, mas o painel é o caminho oficial do projeto
 (ver "Sem terminal", acima).
 
+### Quem aplica, e de onde
+
+**A aplicação no remoto é sempre feita por uma pessoa**, no console do painel ou
+num terminal com `wrangler` autenticado. O ambiente onde o Claude Code roda não
+tem credencial do Cloudflare (sem `CLOUDFLARE_API_TOKEN` e sem sessão de
+`wrangler login`), então `--remote` falha ali por falta de autenticação, e não
+por erro do comando.
+
+O que o Claude Code faz é a parte de antes e a de depois: escreve os comandos,
+**valida cada um contra uma réplica local do schema que o remoto tem hoje**, e
+registra o resultado na tabela abaixo depois que a pessoa confirma a saída do
+comando de verificação. É por isso que o registro tem uma coluna de estado: a
+linha só vira "aplicada" com o resultado da verificação em mãos.
+
 ### Registro de migrações
 
 | Nº | Commit | O que mudou | Remoto |
 |---|---|---|---|
 | 001 | schema inicial | Tabelas `documentos`, `trechos`, `recursos`, `registros`; índices `idx_trechos_match`, `idx_trechos_midia`, `idx_recursos_match` | Aplicada em 08/2026, pelo console |
-| 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Pendente** — falta aplicar; foi o que causou os erros `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
+| 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Aguardando aplicação.** Comandos abaixo revalidados em 02/09/2026 contra réplica local do schema remoto: os três aplicam sem erro e o bloco de verificação devolve `1, 1, 1`. Foi a ausência desta migração que causou `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
+
+A migração 002 é a **etapa 0** de `docs/DECISIVAS_especificacao_claude_code.md`:
+o código publicado já a espera, e ela não muda nenhuma linha de código. Assim que
+o bloco de verificação devolver `1, 1, 1` no remoto, trocar a coluna de estado da
+linha 002 por `Aplicada em <data>, pelo console` e commitar a mudança.
+
+Ela entra **como está**, com a chave sem `pauta`. A coluna `pauta` nas duas
+tabelas de cache é assunto da migração 003 (etapa 2), que é aditiva sobre estas.
 
 Comandos da migração 002, um por bloco:
 
