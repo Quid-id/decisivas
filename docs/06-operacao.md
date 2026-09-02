@@ -616,10 +616,22 @@ carregar uma lista de nomes de figuras e partidos.
 BLOCKED_TERMS="Sobrenome|Outro Nome|SIGLA" node scripts/verifica-conteudo.js
 ```
 
-Sem a variável, a varredura **não roda** e o build avisa em voz alta —
-`termos bloqueados: VARREDURA NÃO EXECUTADA` — em vez de passar em silêncio. É
-o que permite rodar `wrangler dev` sem a lista à mão; a linha no log do build
-do Cloudflare é o sinal de que a variável falta no painel.
+**Sem a variável, o que acontece depende de onde o build roda:**
+
+| Onde | Sem `BLOCKED_TERMS` |
+|---|---|
+| Build do Cloudflare, ou qualquer esteira | **o build FALHA.** Publicar sem a varredura é publicar sem a rede que sustenta a regra 4 |
+| Máquina de quem desenvolve | só avisa (`termos bloqueados: VARREDURA NÃO EXECUTADA`), para `wrangler dev` rodar sem a lista à mão |
+
+A esteira é reconhecida pela presença de `CI`, `WORKERS_CI`, `CF_PAGES` ou
+`GITHUB_ACTIONS` no ambiente — o build do Cloudflare define `CI`. Para
+reproduzir a falha na mão: `CI=1 node scripts/verifica-conteudo.js` sem a
+lista.
+
+**A variável tem de estar no painel ANTES deste comportamento entrar.** Foi por
+isso que ele veio depois dos assets: com o painel sem a lista, o build do
+Cloudflare falha e o site não republica — o que já está no ar continua no ar,
+mas nada novo sobe.
 
 ### A lista de pendências no fim do build
 

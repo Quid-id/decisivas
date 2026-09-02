@@ -172,9 +172,12 @@ async function main() {
         `${conferido.ocorrencias.length} ocorrência(s)`
     );
   } else {
+    // Em CI a verificação já teria derrubado o build; aqui é máquina de quem
+    // desenvolve, e o aviso basta.
     console.log(
       "termos bloqueados: VARREDURA NÃO EXECUTADA — BLOCKED_TERMS ausente ou vazia. " +
-        "Em produção ela é variável de build no painel do Cloudflare (docs/06-operacao.md)."
+        "Fora de CI isso é só aviso; no build do Cloudflare derruba a publicação. " +
+        "Em produção ela é variável de build no painel (docs/06-operacao.md)."
     );
   }
 
