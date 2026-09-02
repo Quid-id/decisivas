@@ -125,7 +125,7 @@ O repositório é a fonte de verdade; o Claude Code lê arquivos, não conversas
 
 **Em produção de conteúdo:** as 20 páginas escritas (`DECISIVAS_20_paginas_v1.docx`), em revisão pela equipe e pelo jurídico.
 
-**Próximas etapas:** 8A limpeza e migração 004; 8B páginas fixas em cards, compartilhamento, privacidade, responsivo; 8C verificação e publicação. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (70+).
+**Próximas etapas:** 8A limpeza e migração 004; 8B páginas fixas em cards, compartilhamento, privacidade, responsivo; 8C verificação e publicação — as três entregues. A verificação de conteúdo roda no build: estrutura dos JSON, varredura de `BLOCKED_TERMS` sobre todo o texto de `conteudo/` e da configuração (zero ocorrências, e o build falha se achar) e a lista de pendências impressa no fim. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (70+).
 
 **Pendente de conteúdo:** "quem faz" no Sobre, contato do rodapé, código de incorporação do vídeo, assets da identidade (banner, cards, logotipos).
 

@@ -30,6 +30,7 @@ const { troca, confereMarcadores, leParciais, pendentes } = require("./html");
 const monta = require("./interface");
 const geraCaminhos = require("./gera-caminhos");
 const verificaLiterais = require("./verifica-literais");
+const verificaConteudo = require("./verifica-conteudo");
 
 const SAIDA = "public";
 const ASSETS = "assets";
@@ -69,6 +70,13 @@ async function main() {
   const vocabulario = JSON.parse(fs.readFileSync("dados/vocabulario.json", "utf8"));
   conferePaletaDosPublicos(vocabulario);
   const configuracao = JSON.parse(fs.readFileSync("dados/configuracao.json", "utf8"));
+
+  // Etapa 8C: antes de escrever qualquer tela, a verificação de conteúdo —
+  // estrutura dos JSON e varredura de BLOCKED_TERMS sobre todo o texto de
+  // conteudo/ e de dados/configuracao.json. Termo achado derruba o build
+  // nomeando arquivo, campo e termo; conteúdo com termo bloqueado não chega a
+  // ser publicado. Sem a variável, a varredura não roda e o build avisa.
+  const conferido = verificaConteudo.verifica({ vocabulario });
 
   const parciais = leParciais();
   // O rodapé e a barra lateral são iguais em toda tela: montados uma vez.
@@ -148,11 +156,36 @@ async function main() {
     `telas publicadas: ${PAGINAS.length} fixas + ${doConteudo.caminhos} caminhos + Sobre e privacidade ` +
       `(${escritos} arquivo(s) reescrito(s)) | ` +
       `banner: ${banners ? `${banners} imagem(ns) de assets/` : "faixa provisória"} | ` +
-      `assets copiados: ${copiados} | pendências na tela: ${pendentes().length}`
+      `assets copiados: ${copiados}`
   );
   console.log(
     `literais conferidos: ${literais.telas} telas, ${literais.palavras} palavras, todas das fontes de conteúdo`
   );
+
+  // Verificação de conteúdo: estrutura e termos bloqueados.
+  console.log(`estrutura conferida: ${conferido.paginas} páginas, ${vocabulario.publicos.length} públicos × ${vocabulario.macronarrativas.length} temas`);
+  if (conferido.rodou) {
+    console.log(
+      `termos bloqueados: ${conferido.termos} termos (${conferido.siglas} siglas, sensíveis a maiúsculas) ` +
+        `varridos em ${conferido.arquivos} arquivos e ${conferido.campos} campos de texto — ` +
+        `${conferido.ocorrencias.length} ocorrência(s)`
+    );
+  } else {
+    console.log(
+      "termos bloqueados: VARREDURA NÃO EXECUTADA — BLOCKED_TERMS ausente ou vazia. " +
+        "Em produção ela é variável de build no painel do Cloudflare (docs/06-operacao.md)."
+    );
+  }
+
+  // O que falta redigir ou falta de asset, listado no fim para a equipe ver
+  // sem precisar abrir tela.
+  const pendencias = pendentes();
+  if (pendencias.length) {
+    console.log(`pendências na tela (${pendencias.length}):`);
+    for (const pendencia of pendencias) console.log(`  - ${pendencia}`);
+  } else {
+    console.log("pendências na tela: nenhuma");
+  }
 }
 
 module.exports = { main };
