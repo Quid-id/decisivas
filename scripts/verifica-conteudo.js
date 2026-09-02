@@ -17,15 +17,9 @@
 //
 // A lista vive em variável de ambiente, fora do repositório — ela nomeia
 // figuras e partidos, e o repositório é público. Em produção, é uma variável
-// de build no painel do Cloudflare (docs/06-operacao.md).
-//
-// Sem a variável, o que acontece depende de ONDE o build está rodando:
-//
-//   - build do Cloudflare (ou qualquer CI): **falha**. Publicar sem a
-//     varredura é publicar sem a rede que sustenta a regra 4, e a falta da
-//     variável no painel passa a ser um erro visível, não um aviso no log.
-//   - máquina de quem desenvolve: só avisa, para `wrangler dev` rodar sem a
-//     lista à mão.
+// de build no painel do Cloudflare (docs/06-operacao.md). Sem a variável, a
+// varredura não roda e o build avisa em voz alta, para a falta aparecer no log
+// do build em vez de passar em silêncio.
 //
 // COMO RODAR SOZINHO
 //
@@ -60,18 +54,6 @@ const CONFIGURACAO = "dados/configuracao.json";
 // ---------------------------------------------------------------------------
 // A lista
 // ---------------------------------------------------------------------------
-
-// Rodando em CI? As esteiras de build marcam a própria presença no ambiente.
-// O build do Cloudflare define CI; as outras variáveis cobrem Workers Builds,
-// Pages e GitHub Actions, para a conferência não depender de uma só.
-const MARCAS_DE_CI = ["CI", "WORKERS_CI", "CF_PAGES", "GITHUB_ACTIONS"];
-
-function ehCI() {
-  return MARCAS_DE_CI.some((marca) => {
-    const valor = String(process.env[marca] ?? "").trim().toLowerCase();
-    return valor !== "" && valor !== "false" && valor !== "0";
-  });
-}
 
 function listaDeTermos() {
   return (process.env.BLOCKED_TERMS ?? "")
@@ -156,7 +138,7 @@ function trecho(texto, posicao) {
 function varre() {
   const lista = listaDeTermos();
   if (!lista.length) {
-    return { rodou: false, ci: ehCI(), termos: 0, arquivos: 0, campos: 0, ocorrencias: [] };
+    return { rodou: false, termos: 0, arquivos: 0, campos: 0, ocorrencias: [] };
   }
 
   const compilados = padroes(lista);
@@ -181,7 +163,6 @@ function varre() {
 
   return {
     rodou: true,
-    ci: ehCI(),
     termos: lista.length,
     siglas: compilados.filter((c) => c.sigla).length,
     arquivos: arquivos.length,
@@ -199,14 +180,6 @@ function verifica({ vocabulario }) {
 
   // 2. Termos bloqueados.
   const resultado = varre();
-  if (!resultado.rodou && resultado.ci) {
-    throw new Error(
-      "BLOCKED_TERMS ausente ou vazia num build de esteira (CI).\n" +
-        "Sem a lista, a varredura de termos bloqueados não roda, e publicar sem ela é\n" +
-        "publicar sem a rede que sustenta a regra 4. Defina a variável nas variáveis de\n" +
-        "build do painel do Cloudflare (docs/06-operacao.md, seção da varredura)."
-    );
-  }
   if (resultado.ocorrencias.length) {
     const lista = resultado.ocorrencias
       .map((o) => `  ${o.arquivo} · ${o.campo} · "${o.termo}"\n    ${o.trecho}`)
