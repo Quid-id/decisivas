@@ -16,9 +16,9 @@
 // próximo deploy.
 import REGRAS_DE_FORMATO from "../docs/08-regras-de-formato.md";
 
-// Versão do acervo (data/versao-acervo.txt, atualizada a cada carga oficial).
+// Versão do acervo (dados/versao-acervo.txt, atualizada a cada carga oficial).
 // Carimba as respostas e valida o cache do navegador (nível 2).
-import VERSAO_ACERVO_BRUTA from "../data/versao-acervo.txt";
+import VERSAO_ACERVO_BRUTA from "../dados/versao-acervo.txt";
 const VERSAO_ACERVO = VERSAO_ACERVO_BRUTA.trim();
 
 // Fonte única dos vocabulários fechados (migração 003).

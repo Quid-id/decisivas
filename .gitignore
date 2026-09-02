@@ -9,9 +9,6 @@
 node_modules/
 .wrangler/
 
-# Gerado por scripts/csv-para-seed.js — regenerar a partir do CSV
-seed.sql
-
 # Sistema operacional
 .DS_Store
 Thumbs.db
@@ -19,7 +16,7 @@ Thumbs.db
 # Gerado no build a partir de brand/tokens.css (scripts/sincroniza-tokens.js)
 public/tokens.css
 
-# Gerado no build a partir de data/versao-acervo.txt (scripts/sincroniza-tokens.js)
+# Gerado no build a partir de dados/versao-acervo.txt (scripts/sincroniza-tokens.js)
 public/versao-acervo.js
 
 # Gerado no build a partir de dados/vocabulario.json (scripts/sincroniza-tokens.js)

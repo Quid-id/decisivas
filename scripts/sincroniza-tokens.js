@@ -21,13 +21,13 @@ console.log(`tokens sincronizados: ${ORIGEM} → ${DESTINO}`);
 // Também gera public/versao-acervo.js, com os dois valores de que o cache do
 // navegador (nível 2) precisa:
 //
-// 1. VERSAO_ACERVO, de data/versao-acervo.txt: a carga oficial do banco
+// 1. VERSAO_ACERVO, de dados/versao-acervo.txt: a carga oficial do banco
 //    atualiza o .txt no mesmo commit, e o deploy leva a nova marca ao site.
 // 2. CACHE_HABILITADO, de CACHE_ENABLED no wrangler.toml: é o que faz o
 //    interruptor alcançar o navegador sem custo de requisição. A variável
 //    vive em [vars], então mudá-la exige commit + deploy — o mesmo ciclo que
 //    regenera este arquivo, o que mantém os dois lados sempre coerentes.
-const versao = fs.readFileSync("data/versao-acervo.txt", "utf8").trim();
+const versao = fs.readFileSync("dados/versao-acervo.txt", "utf8").trim();
 // Em produção o valor vem de [vars] no wrangler.toml. Em desenvolvimento o
 // .dev.vars sobrescreve o ambiente do Worker, então é lido primeiro para que
 // o front local não discorde do servidor local.

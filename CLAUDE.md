@@ -53,19 +53,20 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 - `docs/CONTEXTO_DECISIVAS.md` — contexto do projeto, versão 2; prevalece em caso de conflito
 - `docs/DECISIVAS_especificacao_claude_code.md` — especificação em etapas, versão 2
 - `dados/vocabulario.json` — **fonte única** dos vocabulários fechados
-- `dados/DECISIVAS_acervo_v5.xlsx` — o acervo (2.405 linhas); a carga é a etapa 3
+- `dados/DECISIVAS_acervo_v5.xlsx` — o acervo (2.405 linhas); fonte da carga da etapa 3
 - `dados/DECISIVAS_pautas_de_para_v1.xlsx` — as 59 pautas consolidadas
 - `dados/Regra_geral_formatos.xlsx`, `dados/Regra_gatilho.xlsx`, `dados/Regra_selecao.xlsx` — regras que entram no prompt (etapa 5)
 - `referencia/decisivas_prototipo_v3.html` — referência visual das telas (etapa 6)
 - `brand/` — tokens de design, logotipo e guia (entregues pela equipe de identidade)
-- `data/amostra.csv` — amostra de desenvolvimento, **aposentada**; sai na etapa 3, junto com a mudança de `data/` para `dados/`
+- `dados/versao-acervo.txt` — marca de versão do acervo; muda a cada carga e invalida o cache do navegador
+- `carga-003/` — os blocos SQL da carga do acervo v5, gerados por `scripts/carga-acervo.js`, versionados: provam qual acervo foi para o ar e quando
 
 ## Estado atual dos dados
 
-**A tabela `trechos` está vazia.** A migração 003 (etapa 2) criou a tabela nova, com a taxonomia final e as restrições; a carga do acervo é a etapa 3. Até ela acontecer, os 20 cruzamentos respondem com lacuna declarada em todos os blocos — comportamento correto, não erro.
+**O acervo v5 está no remoto:** 2.405 trechos, aplicados em 02/09/2026 pelo console, a partir dos blocos de `carga-003/` gerados na etapa 3. A verificação devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59, paginas 0, formatos 0`. Os 20 cruzamentos têm trechos, então lacuna declarada agora significa bloco sem evidência suficiente — não mais banco vazio.
 
 A fonte do acervo é `dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`, 2.405 linhas, já na taxonomia nova. Consolidado por regras aprovadas em lote, sem revisão linha a linha: tudo que estava nas extrações entrou, exceto o que a regra 4 veda. Conferido contra as restrições do banco: as 2.405 linhas passam, nenhuma violação.
 
-As 273 linhas da amostra antiga continuam preservadas no banco remoto, na tabela `trechos_ate_002`, que a migração 004 remove depois da carga e do deploy. **Elas não podem ser publicadas** e nenhuma consulta do código as alcança.
+As 273 linhas da amostra antiga continuam no banco remoto, na tabela `trechos_ate_002`. Com a carga aplicada, a migração 004 (que a remove) está liberada, e é a próxima coisa a escrever no `docs/06`. **Elas não podem ser publicadas** e nenhuma consulta do código as alcança.
 
 Ausências conhecidas, que o código deve tratar como lacuna e não como erro: a pauta `consumo de mídia` não existe entre as 59, então o bloco de hábitos de mídia sai vazio até a planilha própria chegar; o tipo `exemplo` tem zero linhas no acervo; e a coluna `link` está sempre vazia nesta versão.
