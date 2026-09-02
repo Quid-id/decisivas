@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+{{CABECA}}
+</head>
+<body>
+{{CABECALHO}}
+
+<main><div class="larg">
+  <div class="texto">
+    <h1>Política de privacidade</h1>
+
+    <p>
+      O DECISIVAS não pede cadastro, não usa cookie de rastreamento e não monta
+      perfil de quem navega. As páginas que a plataforma gera ficam guardadas no
+      seu próprio navegador para não serem pedidas de novo, e você pode apagá-las
+      limpando os dados do site.
+    </p>
+    <p>
+      O registro que a plataforma mantém é do conteúdo entregue — qual público,
+      qual tema, quais trechos do acervo e qual texto —, nunca de quem pediu.
+    </p>
+
+    <div id="texto-privacidade"></div>
+  </div>
+</div></main>
+
+{{RODAPE}}
+
+<script>
+  const CONFIG = window.CONFIGURACAO;
+  const alvo = document.getElementById("texto-privacidade");
+  const texto = CONFIG.privacidade?.texto;
+  if (!texto || texto === "[preencher]") {
+    const caixa = document.createElement("div");
+    caixa.className = "preencher";
+    caixa.textContent = "[preencher] política de privacidade completa — dados/configuracao.json";
+    alvo.appendChild(caixa);
+  } else {
+    const p = document.createElement("p");
+    p.textContent = texto;
+    alvo.appendChild(p);
+  }
+</script>
+</body>
+</html>

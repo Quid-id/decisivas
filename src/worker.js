@@ -209,8 +209,8 @@ async function rotaMatch(corpo, env, request) {
       origem: "cache", resposta: pagina,
     });
   } else {
-    const { trechos, perfil, recursos } = await carregaRecorte();
-    const gerada = await geraPaginaGeral(env, publico, macronarrativa, trechos, perfil, recursos);
+    const { trechos, perfil } = await carregaRecorte();
+    const gerada = await geraPaginaGeral(env, publico, macronarrativa, trechos, perfil);
     if (gerada === null) return respostaIndisponivel();
     pagina = gerada.pagina;
 
@@ -246,7 +246,7 @@ async function rotaMatch(corpo, env, request) {
 // Página do recorte geral: todos os trechos do cruzamento mais os de perfil do
 // público. Devolve a página montada, os ids usados e o modelo, ou null quando
 // a geração não pode ser entregue (fuga de formato ou termo bloqueado).
-async function geraPaginaGeral(env, publico, macronarrativa, trechos, perfil, recursos) {
+async function geraPaginaGeral(env, publico, macronarrativa, trechos, perfil) {
   // Blocos e mínimos (docs/07), na versão da etapa 5:
   //
   // - gatilho e pesquisa pedem 1 achado de QUALQUER força. A RGT07 é explícita:
@@ -265,7 +265,6 @@ async function geraPaginaGeral(env, publico, macronarrativa, trechos, perfil, re
     evitar: trechos.filter((t) => t.tipo === "afasta"),
     contexto: trechos.filter((t) => t.tipo === "contexto"),
     pesquisa: achados,
-    exemplos: trechos.filter((t) => t.tipo === "exemplo" && t.link),
   };
   const minimos = {
     gatilho: achados.length >= 1,
@@ -273,7 +272,6 @@ async function geraPaginaGeral(env, publico, macronarrativa, trechos, perfil, re
     evitar: blocos.evitar.length >= 1,
     contexto: blocos.contexto.length >= 1,
     pesquisa: achados.length >= 1,
-    exemplos: blocos.exemplos.length >= 2,
   };
   // Quantos itens o modelo deve entregar em cada bloco de lista. É código que
   // decide, não o modelo: ele escolhe quais, pelas RS, nunca quantos.
@@ -311,8 +309,9 @@ async function geraPaginaGeral(env, publico, macronarrativa, trechos, perfil, re
     }
   }
 
-  // 6. Anexação por código: lacunas, tags de pauta, hábitos de mídia,
-  // exemplos (links do banco), recursos.
+  // 6. Anexação por código: lacunas, tags de pauta, quem é este público e
+  // hábitos de mídia. Sem links: o bloco de exemplos e materiais saiu na
+  // etapa 6, e a tabela `recursos` deixou de ser consultada.
   const idsValidos = new Set(subconjunto.map((t) => t.id));
 
   const pagina = { match: { publico, macronarrativa } };
@@ -328,21 +327,18 @@ async function geraPaginaGeral(env, publico, macronarrativa, trechos, perfil, re
   // trechos que definem a validade desta entrada.
   pagina.tags = tagsDoCruzamento(trechos);
 
+  // Quem é este público (etapa 6, bloco 8): os trechos de tipo perfil, que não
+  // dependem do tema. Vão por código, não pelo modelo — são descrição do
+  // público, e reescrevê-los seria inventar.
+  pagina.perfil = perfil.length
+    ? { lacuna: false, itens: perfil.map((t) => ({ id: t.id, texto: t.texto })) }
+    : { lacuna: true, aviso: AVISO_LACUNA };
+
   // Hábitos de mídia: a planilha própria ainda não existe e a pauta
   // `consumo de mídia` não está entre as 59 da migração 003, então o bloco é
   // lacuna declarada — não erro. Volta a ter conteúdo quando a planilha chegar
   // (etapa 6 da especificação).
   pagina.habitos_de_midia = { lacuna: true, aviso: AVISO_LACUNA };
-
-  pagina.exemplos = minimos.exemplos
-    ? {
-        itens: blocos.exemplos.map((t) => ({ id: t.id, texto: t.texto, link: t.link })),
-        lacuna: false,
-      }
-    : { lacuna: true, aviso: AVISO_LACUNA };
-
-  // Materiais complementares: só da tabela recursos; vazio → bloco omitido.
-  pagina.materiais_complementares = recursos;
 
   // Data da última atualização do acervo: definida na carga, via variável
   // de ambiente (ex.: ACERVO_ATUALIZADO_EM="02/09/2026").
@@ -775,7 +771,7 @@ function idsDaPagina(pagina) {
     for (const id of pagina[campo]?.ids ?? []) ids.add(id);
   }
   for (const item of pagina.habitos_de_midia?.itens ?? []) ids.add(item.id);
-  for (const item of pagina.exemplos?.itens ?? []) ids.add(item.id);
+  for (const item of pagina.perfil?.itens ?? []) ids.add(item.id);
   return ids;
 }
 
@@ -785,15 +781,16 @@ function idsDaPagina(pagina) {
 // vez e vai para o cache.
 // ---------------------------------------------------------------------------
 
-// O que alimenta a página de um cruzamento: os trechos do cruzamento, os de
-// perfil do público (que não dependem do tema) e os recursos curados.
+// O que alimenta a página de um cruzamento: os trechos do cruzamento e os de
+// perfil do público, que não dependem do tema. A tabela `recursos` não é mais
+// consultada: nesta versão não há link na página (etapa 6, regra 2 do
+// CLAUDE.md), e o que não é consultado não vaza para a resposta.
 async function consultaRecorte(env, publico, macronarrativa) {
-  const [trechos, perfil, recursos] = await Promise.all([
+  const [trechos, perfil] = await Promise.all([
     consulta(env, "SELECT * FROM trechos WHERE publico = ?1 AND macronarrativa = ?2", [publico, macronarrativa]),
     consulta(env, "SELECT * FROM trechos WHERE publico = ?1 AND tipo = 'perfil'", [publico]),
-    consulta(env, "SELECT titulo, url, descricao FROM recursos WHERE publico = ?1 AND macronarrativa = ?2", [publico, macronarrativa]),
   ]);
-  return { trechos, perfil, recursos };
+  return { trechos, perfil };
 }
 
 // As tags da página: pautas do cruzamento com MINIMO_TRECHOS_PARA_TAG trechos

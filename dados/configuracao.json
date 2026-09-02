@@ -1,0 +1,36 @@
+{
+  "_leia_me": "Textos e identificadores de configuração das telas (etapa 6). O build publica este arquivo como public/configuracao.js (window.CONFIGURACAO). Tudo que ainda não foi redigido está como [preencher] e aparece na tela dentro de uma caixa tracejada — nada é inventado por código.",
+  "perguntas": [
+    "Com quem você quer falar hoje?",
+    "Qual conversa DECISIVA você quer ter hoje?",
+    "Quem você pode mobilizar agora?"
+  ],
+  "apoio_inicio": "Escolha um público e um tema. A plataforma entrega o material de pesquisa para você construir a mensagem.",
+  "video_youtube_id": "[preencher]",
+  "assinatura": "[preencher]",
+  "contato": {
+    "email": "[preencher]",
+    "instagram": "[preencher]"
+  },
+  "sobre": {
+    "projeto": "[preencher]",
+    "publicos": {
+      "jovens": "[preencher]",
+      "60+": "[preencher]",
+      "mulheres beneficiárias": "[preencher]",
+      "mulheres de 2 a 5 salários mínimos": "[preencher]"
+    },
+    "temas": {
+      "dinheiro no bolso": "[preencher]",
+      "trabalho digno": "[preencher]",
+      "família e cuidado": "[preencher]",
+      "brasil e pertencimento": "[preencher]",
+      "participação e voz": "[preencher]"
+    },
+    "quem_faz": "[preencher]",
+    "aviso_ia": "[preencher]"
+  },
+  "privacidade": {
+    "texto": "[preencher]"
+  }
+}

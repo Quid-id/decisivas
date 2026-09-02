@@ -14,8 +14,9 @@ O filtro é camada de código, sem IA (etapa 4 de `docs/DECISIVAS_especificacao_
 | Tags de pauta | publico + macronarrativa, contagem de trechos por pauta | 3 trechos na pauta | A pauta não vira tag |
 | O gatilho de uma pauta | publico + macronarrativa, pauta selecionada + `comunicação e linguagem` | o mesmo do gatilho geral, aplicado ao recorte da pauta | Lacuna declarada naquela tag |
 | Hábitos de mídia | nenhuma: a consulta por pauta `consumo de mídia` saiu na etapa 4, porque essa pauta não existe entre as 59 da migração 003 | — | Lacuna declarada, sempre, até a planilha própria de hábitos de mídia chegar |
-| Exemplos públicos | publico + macronarrativa, tipo exemplo com link preenchido | 2 | Lacuna declarada |
-| Materiais complementares | tabela recursos, publico + macronarrativa | 0 (bloco omitido se vazio) | Bloco omitido |
+| Quem é este público | publico, tipo `perfil` (não depende do tema) | 1 | Lacuna declarada |
+
+Os blocos de **exemplos públicos** e **materiais complementares** saíram na etapa 6, com o bloco "Exemplos e materiais" da tela. A tabela `recursos` deixou de ser consultada e nenhuma resposta da plataforma carrega link.
 
 ## O recorte geral
 
@@ -36,6 +37,8 @@ Para cada tag, o filtro monta um recorte próprio — os trechos daquela pauta m
 
 Cada recorte (o geral e o de cada pauta) tem entrada e validade de cache próprias: mexer numa pauta invalida aquela tag e o recorte geral, e não as outras tags.
 
+Na tela, selecionar uma tag troca **só o gatilho**, com um selo indicando a pauta ativa; os demais blocos não mudam. A adaptação de formato por pauta fica para depois do beta, e a saída de formato diz isso quando há tag selecionada.
+
 ## Blocos de lista: até três, mais a lacuna
 
 `ancorar` e `evitar` entregam **o número de trechos elegíveis, no máximo três** (RS06). Quem decide quantos é o código, e o número vai na mensagem ao modelo; o modelo escolhe **quais**, pelas regras de seleção. Com menos de três, a página traz os itens que vieram **e** a caixa de lacuna abaixo deles — nunca no lugar deles.
@@ -47,5 +50,5 @@ Com o mínimo de `contexto` restrito ao tipo `contexto`, três cruzamentos ficam
 ## Regras transversais
 
 1. Trechos com decisão diferente de aceitar nunca chegam ao banco, portanto nunca chegam ao agente.
-2. Links (tabela `recursos` e coluna `link`) são anexados por código depois da geração. O modelo nunca os vê nem os escreve. Nesta versão não há link nenhum na página.
+2. Nesta versão **não há link nenhum** na página: a tabela `recursos` não é consultada e a coluna `link` não é lida. O modelo nunca vê nem escreve URL.
 3. O modelo recebe somente o recorte; não tem acesso a SQL, à base completa ou a qualquer ferramenta de busca.

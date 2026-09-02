@@ -1,6 +1,6 @@
 # Especificação funcional
 
-> **Versão 1.** As telas descritas abaixo (7 públicos, chips de fonte, nota de base restrita, blocos de exemplos e materiais) foram redefinidas na etapa 6 de `docs/DECISIVAS_especificacao_claude_code.md`, que prevalece. O que segue atualizado aqui é a seção "Fluxo do match", corrigida na etapa 4 junto com o filtro.
+> **Versão 1.** As telas descritas abaixo (7 públicos, chips de fonte, nota de base restrita, blocos de exemplos e materiais) foram **substituídas** pelas da etapa 6 de `docs/DECISIVAS_especificacao_claude_code.md`, que prevalece e já está implementada: Início, resultado, Sobre e Política de privacidade, com a ordem de blocos daquela etapa. O que segue atualizado aqui é a seção "Fluxo do match", corrigida na etapa 4 junto com o filtro.
 
 ## Telas
 

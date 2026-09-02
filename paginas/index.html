@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+{{CABECA}}
+</head>
+<body>
+{{CABECALHO}}
+
+<main><div class="larg">
+  <h1 class="chamada" id="chamada"></h1>
+  <p class="apoio" id="apoio"></p>
+
+  <div class="etapa">
+    <h2 id="titulo-publicos">Com quem você quer falar</h2>
+    <div class="opcoes" id="publicos" role="group" aria-labelledby="titulo-publicos"></div>
+  </div>
+
+  <div class="etapa">
+    <h2 id="titulo-temas">Sobre o quê</h2>
+    <div class="opcoes" id="temas" role="group" aria-labelledby="titulo-temas"></div>
+  </div>
+
+  <div class="acao">
+    <button class="caminhos" id="btn-caminhos" disabled>VER CAMINHOS</button>
+    <span class="escolha" id="escolha">Escolha um público e um tema.</span>
+  </div>
+</div></main>
+
+<div class="modal" id="modal" hidden>
+  <div class="caixa" role="dialog" aria-modal="true" aria-label="Vídeo de apresentação">
+    <div class="video" id="video-abertura"></div>
+    <div class="pe">
+      <span>O mesmo vídeo fica fixo na página Sobre.</span>
+      <button id="fechar-video">Fechar e ver caminhos</button>
+    </div>
+  </div>
+</div>
+
+{{RODAPE}}
+
+<script>
+  // Vocabulários fechados: /vocabulario.js, gerado no build a partir de
+  // dados/vocabulario.json — a mesma fonte que o Worker valida. A cor e a cor
+  // do texto de cada público vêm de lá; nenhuma cor é escrita aqui.
+  const PUBLICOS = window.VOCABULARIO.publicos;
+  const TEMAS = window.VOCABULARIO.macronarrativas;
+  const CONFIG = window.CONFIGURACAO;
+
+  const selecao = { publico: null, tema: null };
+
+  function montaOpcoes(idGrupo, valores, chave) {
+    const grupo = document.getElementById(idGrupo);
+    for (const valor of valores) {
+      const botao = document.createElement("button");
+      botao.type = "button";
+      // O banco guarda o identificador; a tela mostra o nome.
+      botao.textContent = valor.nome;
+      botao.dataset.id = valor.id;
+      botao.setAttribute("aria-pressed", "false");
+      if (valor.cor) {
+        botao.style.setProperty("--cor", valor.cor);
+        botao.style.setProperty("--cor-texto-pilula", valor.texto);
+      }
+      botao.addEventListener("click", () => {
+        selecao[chave] = selecao[chave] === valor.id ? null : valor.id;
+        for (const irma of grupo.children) {
+          irma.setAttribute("aria-pressed", String(irma.dataset.id === selecao[chave]));
+        }
+        atualizaAcao();
+      });
+      grupo.appendChild(botao);
+    }
+  }
+
+  function atualizaAcao() {
+    const pronto = Boolean(selecao.publico && selecao.tema);
+    document.getElementById("btn-caminhos").disabled = !pronto;
+    const nomeDe = (lista, id) => (lista.find((v) => v.id === id) ?? {}).nome ?? "";
+    document.getElementById("escolha").textContent = pronto
+      ? `${nomeDe(PUBLICOS, selecao.publico)} · ${nomeDe(TEMAS, selecao.tema)}`
+      : selecao.publico || selecao.tema
+        ? `Falta escolher ${selecao.publico ? "um tema." : "um público."}`
+        : "Escolha um público e um tema.";
+  }
+
+  document.getElementById("btn-caminhos").addEventListener("click", () => {
+    const parametros = new URLSearchParams({ publico: selecao.publico, tema: selecao.tema });
+    window.location.href = `/resultado?${parametros}`;
+  });
+
+  // Pergunta em destaque: a primeira da configuração é a padrão; as demais
+  // são variações de teste, trocadas a cada 5 s. Com preferência por menos
+  // movimento, fica só a padrão.
+  const perguntas = CONFIG.perguntas ?? [];
+  const chamada = document.getElementById("chamada");
+  chamada.textContent = perguntas[0] ?? "";
+  document.getElementById("apoio").textContent = CONFIG.apoio_inicio ?? "";
+  const menosMovimento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!menosMovimento && perguntas.length > 1) {
+    let i = 0;
+    setInterval(() => {
+      i = (i + 1) % perguntas.length;
+      chamada.textContent = perguntas[i];
+    }, 5000);
+  }
+
+  // Vídeo na abertura: aparece a cada visita, sem nada guardado no navegador
+  // (regra 5 do CLAUDE.md) e sem reprodução automática com som.
+  const modal = document.getElementById("modal");
+  const caixaVideo = document.getElementById("video-abertura");
+  const idVideo = CONFIG.video_youtube_id;
+  if (idVideo && idVideo !== "[preencher]") {
+    const quadro = document.createElement("iframe");
+    quadro.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(idVideo)}?rel=0`;
+    quadro.title = "Vídeo de apresentação do DECISIVAS";
+    quadro.allow = "accelerometer; encrypted-media; gyroscope; picture-in-picture";
+    quadro.allowFullscreen = true;
+    caixaVideo.appendChild(quadro);
+  } else {
+    caixaVideo.textContent = "[preencher] vídeo de apresentação: identificador do YouTube em dados/configuracao.json";
+  }
+  modal.hidden = false;
+  document.getElementById("fechar-video").addEventListener("click", () => { modal.hidden = true; });
+
+  montaOpcoes("publicos", PUBLICOS, "publico");
+  montaOpcoes("temas", TEMAS, "tema");
+  atualizaAcao();
+</script>
+</body>
+</html>

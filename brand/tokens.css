@@ -1,105 +1,151 @@
 /* ============================================================
    DECISIVAS — tokens de design
-   VERSÃO PROVISÓRIA, para desenvolvimento.
+   Identidade da etapa 6 da especificação.
 
-   Substituição: quando a equipe de identidade entregar o
-   tokens.css definitivo, troque APENAS os VALORES abaixo.
-   Os NOMES das variáveis são contrato com as telas e não
-   devem mudar. Nenhum arquivo de interface deve conter cor,
-   fonte, espaçamento ou raio fora daqui.
+   ORIGEM ÚNICA. Nenhum arquivo de interface pode conter cor,
+   fonte, espaçamento ou raio fora daqui. O build copia este
+   arquivo para public/tokens.css (scripts/sincroniza-tokens.js);
+   não edite a cópia.
 
-   Este arquivo é a ORIGEM ÚNICA: o build gera public/tokens.css
-   a partir dele (scripts/sincroniza-tokens.js, [build] no
-   wrangler.toml). Não edite a cópia em public/.
+   As cores dos públicos NÃO ficam aqui: vivem em
+   dados/vocabulario.json, junto do identificador e do nome, que é
+   a fonte única do vocabulário. O que este arquivo garante é a
+   paleta de onde elas saem — e o build recusa cor de público que
+   não esteja na paleta abaixo.
    ============================================================ */
 
 :root {
 
+  /* ---------- Paleta da identidade (11 valores) ----------
+     Não existe cor fora desta lista. */
+  --rosa:        #ff5aac;
+  --verde:       #16c172;
+  --azul-claro:  #26cbff;
+  --laranja:     #ffb23d;
+  --verde-claro: #b4db00;
+  --amarelo:     #ffcc32;
+  --azul:        #0f02fd;
+  --vermelho:    #ff3131;
+  --roxo:        #7e2dff;
+  --off-white:   #f7f7ed;
+  --preto:       #000000;
+
+  /* Branco de cartão. A identidade admite cartão "branco ou
+     off-white"; é o único valor de superfície fora dos 11. */
+  --branco:      #ffffff;
+
+  /* ---------- Regra de contraste ----------
+     Texto corrido em off-white sobre roxo, vermelho, azul e verde.
+     Texto em preto sobre amarelo, verde claro, laranja, azul claro
+     e rosa. Estes tokens existem para ninguém decidir de novo. */
+  --sobre-roxo:        var(--off-white);
+  --sobre-vermelho:    var(--off-white);
+  --sobre-azul:        var(--off-white);
+  --sobre-verde:       var(--off-white);
+  --sobre-amarelo:     var(--preto);
+  --sobre-verde-claro: var(--preto);
+  --sobre-laranja:     var(--preto);
+  --sobre-azul-claro:  var(--preto);
+  --sobre-rosa:        var(--preto);
+
+  /* Combinações proibidas pela identidade, registradas para quem
+     for desenhar tela nova: vermelho com rosa, e azul com roxo.
+     Não há token que as produza; se aparecerem, é erro de quem
+     escreveu o CSS. */
+
   /* ---------- Superfícies ---------- */
-  --cor-fundo:            #F5F3EE;  /* fundo da página */
-  --cor-superficie:       #FFFFFF;  /* cartões e blocos sobre o fundo */
-  --cor-superficie-alt:   #EDEBE4;  /* blocos secundários, estados de repouso */
+  --cor-fundo:          var(--off-white);
+  --cor-superficie:     var(--branco);      /* cartões */
+  --cor-superficie-alt: #faf9f2;            /* blocos dentro do cartão */
+
+  /* Grade suave do fundo: linhas finas em preto a 6%, passo 22px. */
+  --grade-cor:  rgba(0, 0, 0, 0.06);
+  --grade-passo: 22px;
 
   /* ---------- Texto ---------- */
-  --cor-texto:            #1A1A18;  /* texto principal */
-  --cor-texto-suave:      #5F5E5A;  /* apoio, legendas, metadados, datas */
-
-  /* ---------- Marca (cor principal) ---------- */
-  --cor-marca:            #1B3A5C;  /* ações, títulos, tags selecionadas */
-  --cor-marca-forte:      #14293F;  /* estado pressionado */
-  --cor-marca-contraste:  #FFFFFF;  /* texto sobre a cor da marca */
-  --cor-destaque:         #E6EEF6;  /* fundo suave de destaque: tag não
-                                       selecionada, etiquetas do match;
-                                       texto por cima usa --cor-marca */
-
-  /* ---------- Aviso (lacuna declarada, alertas) ---------- */
-  --cor-aviso-texto:      #854F0B;
-  --cor-aviso-fundo:      #FAEEDA;
-  --cor-aviso-borda:      #EAD9B4;
-
-  /* ---------- Positivo (confirmações discretas) ---------- */
-  --cor-positivo:         #3B6D11;
-  --cor-positivo-fundo:   #E8F0E4;
-
-  /* ---------- Erro (falha de operação, nunca lacuna) ---------- */
-  --cor-erro:             #A32D2D;
-  --cor-erro-fundo:       #FBEBEB;
+  --cor-texto:       var(--preto);
+  --cor-texto-suave: #5a5a52;   /* metadados, legendas, rótulos */
+  --cor-texto-fraco: #9b9b90;   /* apoio sobre fundo preto */
 
   /* ---------- Linhas ---------- */
-  --cor-borda:            #DCDAD2;  /* bordas de cartão */
-  --cor-borda-forte:      #B9B6AC;  /* campos e controles */
+  --cor-borda:        #d8d8cc;  /* divisórias internas */
+  --cor-borda-forte:  var(--preto);
+  --borda-cartao:     2px;      /* cartões e pílulas: borda preta de 2px */
+  --borda-tracejada:  1px dashed #b4b4a4;  /* placeholder de asset ausente */
 
-  /* ---------- Tipografia ---------- */
-  --fonte-texto:  ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-                  Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* ---------- Papéis de cor ---------- */
+  --cor-acao:          var(--preto);      /* botão principal */
+  --cor-acao-texto:    var(--off-white);
+  --cor-tag-ativa:     var(--rosa);       /* tag de pauta selecionada */
+  --cor-tag-ativa-texto: var(--sobre-rosa);
+  --cor-ancorar:       var(--verde);      /* marcador do que ancorar */
+  --cor-evitar:        var(--vermelho);   /* marcador do que evitar */
+  --cor-foco:          var(--azul);       /* anel de foco */
+
+  /* Cores dos três formatos, na barra de adaptação. */
+  --cor-formato-whatsapp: var(--verde-claro);
+  --cor-formato-carrossel: var(--rosa);
+  --cor-formato-roteiro:  var(--azul-claro);
+
+  /* ---------- Aviso (lacuna declarada) ----------
+     Lacuna não é erro: caixa discreta, tracejada, sem cor de alarme. */
+  --cor-aviso-fundo:  var(--cor-superficie-alt);
+  --cor-aviso-texto:  var(--cor-texto-suave);
+  --cor-aviso-borda:  var(--borda-tracejada);
+
+  /* Véu da janela de vídeo, sobre a página inteira. */
+  --cor-veu: rgba(0, 0, 0, 0.9);
+
+  /* ---------- Erro (falha de operação, nunca lacuna) ---------- */
+  --cor-erro:       var(--vermelho);
+  --cor-erro-fundo: #fbebeb;
+
+  /* ---------- Tipografia ----------
+     Inclusive Sans (Google Fonts), pesos 300 a 700. Títulos em 700. */
+  --fonte-texto:  "Inclusive Sans", "Inclusive Sans FB", -apple-system,
+                  BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+                  sans-serif;
   --fonte-titulo: var(--fonte-texto);
-  --fonte-mono:   ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* ---------- Escala de texto ---------- */
-  --texto-pp:     0.75rem;   /* 12px — metadados */
-  --texto-p:      0.8125rem; /* 13px — legendas, rótulos */
-  --texto-m:      0.9375rem; /* 15px — corpo */
-  --texto-g:      1.3125rem; /* 21px — títulos de bloco, leitura em destaque */
-  --texto-gg:     1.75rem;   /* 28px — título de página */
-  --texto-titulo: 2.25rem;   /* 36px — título da home */
+  --texto-pp:     0.6875rem; /* 11px — rótulo de IA, créditos */
+  --texto-p:      0.8125rem; /* 13px — rótulos, metadados */
+  --texto-m:      0.875rem;  /* 14px — legendas, tags */
+  --texto-corpo:  1.0625rem; /* 17px — corpo */
+  --texto-g:      1.3125rem; /* 21px — títulos de bloco */
+  --texto-gg:     1.375rem;  /* 22px — marca na barra e no rodapé */
+  --texto-titulo: clamp(1.75rem, 4.4vw, 2.875rem); /* chamada da home */
 
-  /* ---------- Peso ---------- */
-  --peso-normal:  400;
-  --peso-medio:   500;
-  --peso-forte:   600;
+  --peso-normal: 400;
+  --peso-forte:  700;
 
-  /* ---------- Entrelinha ---------- */
-  --entrelinha-apertada: 1.25;
-  --entrelinha-normal:   1.6;
-  --entrelinha-solta:    1.75;
+  --entrelinha-apertada: 1.12;
+  --entrelinha-normal:   1.55;
 
   /* ---------- Espaçamento ---------- */
   --espaco-1: 0.25rem;
   --espaco-2: 0.5rem;
-  --espaco-3: 1rem;
-  --espaco-4: 1.5rem;
-  --espaco-5: 2.5rem;
-  --espaco-6: 4rem;
+  --espaco-3: 0.75rem;
+  --espaco-4: 1.25rem;
+  --espaco-5: 2rem;
+  --espaco-6: 3rem;
+  --espaco-7: 4.5rem;
 
   /* ---------- Raios ---------- */
-  --raio-s:   6px;    /* controles pequenos */
-  --raio-m:   10px;   /* cartões */
-  --raio-g:   999px;  /* tags e botões-pílula */
-
-  /* ---------- Sombra ---------- */
-  /* A identidade provisória quase não usa sombra: a hierarquia vem
-     de superfície e borda. Tokens mantidos para a identidade final. */
-  --sombra-1: 0 1px 2px rgba(26, 26, 24, 0.06);
-  --sombra-2: 0 1px 2px rgba(26, 26, 24, 0.06);
+  --raio-pilula: 99px;   /* pílulas, tags e botões */
+  --raio-nenhum: 0;      /* cartões da identidade são retos */
 
   /* ---------- Layout ---------- */
-  --largura-conteudo: 60rem;  /* largura máxima do miolo */
-  --largura-texto:    42rem;  /* largura de leitura confortável */
+  --largura-conteudo: 1040px;
+  --largura-texto:    70ch;
+  --altura-banner:       220px;
+  --altura-banner-movel: 150px;
 
   /* ---------- Foco (acessibilidade) ---------- */
-  --foco-cor:       var(--cor-marca);
-  --foco-espessura: 2px;
+  --foco-espessura: 3px;
   --foco-offset:    2px;
+
+  /* ---------- Movimento ---------- */
+  --tempo-banner: 0.8s;   /* transição entre imagens do banner */
 }
 
 /* Preferência por menos movimento: respeitada em toda a interface. */
