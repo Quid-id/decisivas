@@ -325,6 +325,14 @@ CREATE INDEX idx_trechos_midia ON trechos (publico, pauta);
 SELECT (SELECT COUNT(*) FROM pautas) AS pautas, (SELECT COUNT(*) FROM pragma_table_info('trechos')) AS colunas_trechos, (SELECT COUNT(*) FROM trechos) AS trechos, (SELECT COUNT(*) FROM pragma_table_info('paginas') WHERE name='pauta') AS paginas_pauta, (SELECT COUNT(*) FROM pragma_table_info('formatos') WHERE name='pauta') AS formatos_pauta, (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_trechos_match','idx_trechos_midia')) AS indices, (SELECT COUNT(*) FROM trechos_ate_002) AS preservados;
 ```
 
+**Os comandos desta seção são a fonte; copie daqui, não de uma conversa.**
+O bloco 2 foi conferido em 02/09/2026 com `openpyxl` contra
+`dados/DECISIVAS_pautas_de_para_v1.xlsx`: as 59 `pauta_consolidada` e os 59
+`macronarrativa_padrao` batem com o arquivo, sem sobra nem falta, e as 59
+pautas usadas em `dados/DECISIVAS_acervo_v5.xlsx` existem todas na tabela, o
+que fecha a chave estrangeira. Para reemitir os blocos em arquivo, sem
+transcrever nada: `node scripts/extrai-blocos-migracao.js 003`.
+
 **Depois da verificação**, confira que as restrições recusam valor fora da
 lista. Este comando **tem de falhar** com `CHECK constraint failed`:
 
