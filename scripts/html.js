@@ -43,22 +43,21 @@ function leParciais() {
 }
 
 // O que falta redigir aparece na tela como caixa [preencher], nunca como texto
-// inventado (regra 2 do CLAUDE.md). Devolve também a lista do que faltou, para
-// o build imprimir no fim.
+// inventado (regra 2 do CLAUDE.md). O texto da pendência é montado por
+// scripts/interface.js, com o formato que vem da configuração; aqui só fica a
+// lista, para o build imprimir no fim.
 const PENDENTES = [];
 
 function ehPendente(valor) {
   return !valor || String(valor).trim() === "" || String(valor).startsWith("[preencher");
 }
 
-function textoOuPendente(valor, oQue, onde) {
-  if (!ehPendente(valor)) return { html: `<p>${escapa(valor)}</p>`, pendente: false };
-  PENDENTES.push(`${oQue} (${onde})`);
-  return { html: `<div class="preencher">[preencher] ${escapa(oQue)} — ${escapa(onde)}</div>`, pendente: true };
+function registraPendencia(oQue) {
+  PENDENTES.push(oQue);
 }
 
 function pendentes() {
   return [...new Set(PENDENTES)];
 }
 
-module.exports = { escapa, troca, confereMarcadores, leParciais, ehPendente, textoOuPendente, pendentes };
+module.exports = { escapa, troca, confereMarcadores, leParciais, ehPendente, registraPendencia, pendentes };

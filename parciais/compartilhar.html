@@ -1,24 +1,22 @@
-<!-- Barra de compartilhamento: URL de compartilhamento simples, sem script de
-     terceiro, sem contador e sem pixel. O endereço a compartilhar é o da
-     própria página, lido no navegador — assim não existe domínio escrito no
-     build, e o link vale em produção, em pré-visualização e em desenvolvimento.
-     A barra aparece quando o banner e a barra de menu saíram da tela, e some
-     quando o rodapé começa a entrar. -->
-<aside class="compartilhar" id="compartilhar" aria-label="Compartilhar esta página">
-  <a data-rede="whatsapp" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no WhatsApp" aria-label="Compartilhar no WhatsApp">W</a>
-  <a data-rede="x" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no X" aria-label="Compartilhar no X">X</a>
-  <a data-rede="facebook" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no Facebook" aria-label="Compartilhar no Facebook">f</a>
-  <a data-rede="linkedin" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no LinkedIn" aria-label="Compartilhar no LinkedIn">in</a>
-  <a data-rede="bluesky" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no Bluesky" aria-label="Compartilhar no Bluesky">B</a>
-  <button type="button" id="copiar-link" title="Copiar link" aria-label="Copiar link desta página">⧉</button>
+<!-- Barra da direita: voltar ao início e compartilhar. Os rótulos, os nomes e
+     as cores de hover de cada rede vêm de configuracao.json (compartilhar); o
+     endereço a compartilhar é o da própria página, lido no navegador, então
+     não existe domínio escrito no build. A barra aparece quando o banner e a
+     barra de menu saíram da tela, e some quando o rodapé começa a entrar. Em
+     telas até 900 px ela vira uma faixa horizontal no pé, com o voltar à
+     esquerda dos ícones. -->
+<aside class="barra-lateral" id="barra-lateral" aria-label="{{ROTULO_COMPARTILHAR}}">
+  <a class="botao-redondo voltar" href="{{DESTINO_VOLTAR}}" title="{{ROTULO_VOLTAR}}" aria-label="{{ROTULO_VOLTAR}}">{{ICONE_VOLTAR}}</a>
+{{REDES}}
+  <button type="button" class="botao-redondo" data-rede="copiar" id="copiar-link" data-confirmacao="{{CONFIRMACAO_COPIAR}}" style="--hover: {{COR_HOVER_COPIAR}}; --hover-icone: {{COR_ICONE_HOVER_COPIAR}}" title="{{NOME_COPIAR}}" aria-label="{{NOME_COPIAR}}">{{ROTULO_COPIAR}}</button>
 </aside>
 <script>
   (function () {
-    var barra = document.getElementById("compartilhar");
+    var barra = document.getElementById("barra-lateral");
     var endereco = window.location.href.split("#")[0];
     var titulo = document.title.split(" · ")[0];
     var u = encodeURIComponent(endereco);
-    var t = encodeURIComponent(titulo + " — DECISIVAS");
+    var t = encodeURIComponent(titulo);
     var enderecos = {
       whatsapp: "https://api.whatsapp.com/send?text=" + t + "%20" + u,
       x: "https://twitter.com/intent/tweet?text=" + t + "&url=" + u,
@@ -27,16 +25,13 @@
       bluesky: "https://bsky.app/intent/compose?text=" + t + "%20" + u,
     };
     barra.querySelectorAll("[data-rede]").forEach(function (a) {
-      a.href = enderecos[a.dataset.rede];
+      if (enderecos[a.dataset.rede]) a.href = enderecos[a.dataset.rede];
     });
 
-    // A mesma folga nas duas pontas: a barra só aparece depois que o banner
-    // saiu por cima, e sai de cena assim que o rodapé entra por baixo.
+    // A mesma folga nas duas pontas. O rodapé é procurado a cada medição, e
+    // não uma vez só: este script vem ANTES do rodapé no HTML.
     var folga = 60;
     var alturaBarraDeMenu = 60;
-    // O rodapé é procurado a cada medição, e não uma vez só: este script vem
-    // ANTES do rodapé no HTML, então guardar a referência aqui daria null e a
-    // barra ficaria visível por cima do rodapé.
     function posiciona() {
       var banner = document.getElementById("banner");
       var rodape = document.querySelector("footer");
@@ -53,11 +48,13 @@
     document.addEventListener("DOMContentLoaded", posiciona);
     posiciona();
 
-    document.getElementById("copiar-link").addEventListener("click", function () {
-      var botao = this;
+    var copiar = document.getElementById("copiar-link");
+    var rotuloCopiar = copiar.textContent;
+    var confirmacao = copiar.dataset.confirmacao;
+    copiar.addEventListener("click", function () {
       function pronto() {
-        botao.textContent = "✓";
-        setTimeout(function () { botao.textContent = "⧉"; }, 1200);
+        copiar.textContent = confirmacao;
+        setTimeout(function () { copiar.textContent = rotuloCopiar; }, 1200);
       }
       if (navigator.clipboard) {
         navigator.clipboard.writeText(endereco).then(pronto, function () {});

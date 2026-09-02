@@ -1,7 +1,10 @@
 # Assets do DECISIVAS
 
 Pasta única de imagens da identidade. O build copia tudo daqui para
-`public/assets/`, e as telas apontam para `/assets/<arquivo>`.
+`public/assets/`, e as telas apontam para `/assets/<arquivo>`. **O nome de cada
+arquivo está em `dados/configuracao.json`**, não escrito dentro de template ou
+script: é lá que se troca uma imagem por outra (`marca`, `banner`, `favicon`,
+`imagem_compartilhamento` e os logotipos do `rodape`).
 
 **Enquanto um arquivo não existir, a tela mostra um placeholder tracejado com o
 nome esperado.** Nada é inventado por código, e nenhuma tela quebra por asset
@@ -9,10 +12,12 @@ faltando.
 
 | Arquivo | O que é | Tamanho |
 |---|---|---|
-| `banner-1.svg` … `banner-N.svg` (ou `.png`) | imagens do banner do cabeçalho, em rotação a cada 5 s | 2560 × 360 |
-| `logo-decisivas.svg` | logotipo DECISIVAS | vetor · **ainda não usado**: a barra desenha o logotipo em texto, como no protótipo v5 |
+| `banner-1.svg`, `banner-2.svg`, `banner-3.svg` | imagens do banner do cabeçalho, em rotação (a lista e o intervalo estão em `banner`, na configuração) | 2560 × 360 |
+| `logo-decisivas.svg` | logotipo DECISIVAS, da barra e do rodapé | vetor · enquanto não existir, a barra escreve `marca.nome` em tipografia de destaque |
+| `simbolo-asterisco.svg` | símbolo da marca | vetor · registrado em `marca.simbolo` |
 | `logo-quid.svg` | logo da Quid, monocromático off-white | vetor, 24 px de altura na tela |
 | `logo-brief.svg` | logo do BRIEF, monocromático off-white | vetor, 24 px de altura na tela |
+| `compartilhamento.png` | imagem que aparece ao compartilhar o link (`og:image`) | 1200 × 630 |
 | `fonts/inclusive-sans-latin.woff2` | Inclusive Sans, romana, pesos 300 a 700 (variável) — **no repositório** | 30 KB |
 | `fonts/inclusive-sans-latin-italico.woff2` | Inclusive Sans, itálica — **no repositório** | 31 KB |
 | `fonts/unbounded-latin.woff2` | Unbounded, a fonte de destaque, pesos 200 a 900 (variável) — **no repositório** | 50 KB |
@@ -36,8 +41,9 @@ SIL Open Font License 1.1, que permite uso e redistribuição.
 
 - **Inclusive Sans** é a fonte de corpo: leitura, cards, prosa.
 - **Unbounded** é a de destaque, no token `--tipo-destaque`: a marca DECISIVAS
-  na barra e no rodapé, a pergunta da home, o título de cada caminho e os
-  títulos de bloco em caixa alta. Não é fonte de leitura, e não entra no corpo.
+  na barra e no rodapé, o título e a chamada da home, o título de cada caminho
+  e os títulos de bloco em caixa alta. Não é fonte de leitura, e não entra no
+  corpo.
 
 Se um arquivo faltar, a tela cai na pilha de fontes do sistema, sem erro
 visível.

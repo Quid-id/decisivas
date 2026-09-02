@@ -9,44 +9,36 @@
 {{CABECALHO}}
 
 <main><div class="larg">
-  <h1 class="chamada" id="chamada"></h1>
-  <p class="apoio" id="apoio"></p>
+  <h1 class="titulo-home" id="titulo-home"></h1>
+  <p class="texto-home" id="texto-home"></p>
+  <p class="pergunta" id="pergunta"></p>
 
   <div class="etapa">
-    <h2 id="titulo-publicos">Público</h2>
-    <div class="opcoes" id="publicos" role="group" aria-labelledby="titulo-publicos"></div>
+    <h2 id="rotulo-publico"></h2>
+    <div class="opcoes" id="publicos" role="group" aria-labelledby="rotulo-publico"></div>
   </div>
 
   <div class="etapa">
-    <h2 id="titulo-temas">Tema</h2>
-    <div class="opcoes" id="temas" role="group" aria-labelledby="titulo-temas"></div>
+    <h2 id="rotulo-tema"></h2>
+    <div class="opcoes" id="temas" role="group" aria-labelledby="rotulo-tema"></div>
   </div>
 
   <div class="acao">
-    <button class="caminhos" id="btn-caminhos" disabled>VER CAMINHOS</button>
-    <span class="escolha" id="escolha">Escolha um público e um tema.</span>
+    <button class="caminhos" id="btn-caminhos" disabled></button>
+    <span class="escolha" id="escolha"></span>
   </div>
+  <p class="chamada-home" id="chamada-home"></p>
 </div></main>
-
-<div class="modal" id="modal" hidden>
-  <div class="caixa" role="dialog" aria-modal="true" aria-label="Vídeo de apresentação">
-    <div class="video" id="video-abertura"></div>
-    <div class="pe">
-      <span>O mesmo vídeo fica fixo na página Sobre.</span>
-      <button id="fechar-video">Fechar e ver caminhos</button>
-    </div>
-  </div>
-</div>
 
 {{RODAPE}}
 
 <script>
   // Vocabulários fechados: /vocabulario.js, gerado no build a partir de
-  // dados/vocabulario.json — a mesma fonte que o Worker valida. A cor e a cor
-  // do texto de cada público vêm de lá; nenhuma cor é escrita aqui.
+  // dados/vocabulario.json. Textos e rótulos: /configuracao.js, gerado de
+  // dados/configuracao.json. Nada de texto de interface neste arquivo.
   const PUBLICOS = window.VOCABULARIO.publicos;
   const TEMAS = window.VOCABULARIO.macronarrativas;
-  const CONFIG = window.CONFIGURACAO;
+  const HOME = window.CONFIGURACAO.home;
 
   const selecao = { publico: null, tema: null };
 
@@ -55,13 +47,13 @@
     for (const valor of valores) {
       const botao = document.createElement("button");
       botao.type = "button";
-      // Pílula de tema não tem cor: a classe é o que o estilo usa para
-      // distinguir as duas (protótipo v5).
-      if (!valor.cor) botao.className = "tema";
       // O banco guarda o identificador; a tela mostra o nome.
       botao.textContent = valor.nome;
       botao.dataset.id = valor.id;
       botao.setAttribute("aria-pressed", "false");
+      // Pílula de tema não tem cor: a classe é o que o estilo usa para
+      // distinguir as duas.
+      if (!valor.cor) botao.className = "tema";
       if (valor.cor) {
         botao.style.setProperty("--cor", valor.cor);
         botao.style.setProperty("--cor-texto-pilula", valor.texto);
@@ -83,14 +75,11 @@
     const nomeDe = (lista, id) => (lista.find((v) => v.id === id) ?? {}).nome ?? "";
     document.getElementById("escolha").textContent = pronto
       ? `${nomeDe(PUBLICOS, selecao.publico)} · ${nomeDe(TEMAS, selecao.tema)}`
-      : selecao.publico || selecao.tema
-        ? `Falta escolher ${selecao.publico ? "um tema." : "um público."}`
-        : "Escolha um público e um tema.";
+      : HOME.dica_vazia;
   }
 
   // O caminho é uma página estática, gerada no build a partir de conteudo/:
-  // /caminhos/<slug do público>/<slug do tema>. Os slugs vêm do vocabulário,
-  // fonte única, e as 20 páginas entram na sub-etapa 8B.
+  // /caminhos/<slug do público>/<slug do tema>.
   document.getElementById("btn-caminhos").addEventListener("click", () => {
     const slugDe = (lista, id) => (lista.find((v) => v.id === id) ?? {}).slug;
     const publico = slugDe(PUBLICOS, selecao.publico);
@@ -99,39 +88,13 @@
     window.location.href = `/caminhos/${publico}/${tema}`;
   });
 
-  // Pergunta em destaque: a primeira da configuração é a padrão; as demais
-  // são variações de teste, trocadas a cada 5 s. Com preferência por menos
-  // movimento, fica só a padrão.
-  const perguntas = CONFIG.perguntas ?? [];
-  const chamada = document.getElementById("chamada");
-  chamada.textContent = perguntas[0] ?? "";
-  document.getElementById("apoio").textContent = CONFIG.apoio_inicio ?? "";
-  const menosMovimento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!menosMovimento && perguntas.length > 1) {
-    let i = 0;
-    setInterval(() => {
-      i = (i + 1) % perguntas.length;
-      chamada.textContent = perguntas[i];
-    }, 5000);
-  }
-
-  // Vídeo na abertura: aparece a cada visita, sem nada guardado no navegador
-  // (regra 5 do CLAUDE.md) e sem reprodução automática com som.
-  const modal = document.getElementById("modal");
-  const caixaVideo = document.getElementById("video-abertura");
-  const idVideo = CONFIG.video_youtube_id;
-  if (idVideo && idVideo !== "[preencher]") {
-    const quadro = document.createElement("iframe");
-    quadro.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(idVideo)}?rel=0`;
-    quadro.title = "Vídeo de apresentação do DECISIVAS";
-    quadro.allow = "accelerometer; encrypted-media; gyroscope; picture-in-picture";
-    quadro.allowFullscreen = true;
-    caixaVideo.appendChild(quadro);
-  } else {
-    caixaVideo.textContent = "[preencher] vídeo de apresentação: identificador do YouTube em dados/configuracao.json";
-  }
-  modal.hidden = false;
-  document.getElementById("fechar-video").addEventListener("click", () => { modal.hidden = true; });
+  document.getElementById("titulo-home").textContent = HOME.titulo;
+  document.getElementById("texto-home").textContent = HOME.texto;
+  document.getElementById("pergunta").textContent = HOME.pergunta;
+  document.getElementById("rotulo-publico").textContent = HOME.rotulo_publico;
+  document.getElementById("rotulo-tema").textContent = HOME.rotulo_tema;
+  document.getElementById("btn-caminhos").textContent = HOME.botao;
+  document.getElementById("chamada-home").textContent = HOME.chamada;
 
   montaOpcoes("publicos", PUBLICOS, "publico");
   montaOpcoes("temas", TEMAS, "tema");

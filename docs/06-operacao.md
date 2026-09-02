@@ -483,6 +483,8 @@ arquivo está em `public/`, ele é saída de build; edite a fonte, nunca a cópi
 | `paginas/estilos.css`, `_redirects` | `public/` | `gera-paginas.js` |
 | `dados/configuracao.json` | `public/configuracao.js` | `gera-paginas.js` |
 | `assets/*`, inclusive `assets/fonts/` | `public/assets/` | `gera-paginas.js` |
+| `dados/configuracao.json` + `parciais/*.html` | os marcadores de toda tela | `interface.js` |
+| `public/**/*.html` (conferência) | falha o build se houver literal | `verifica-literais.js` |
 
 Saíram na etapa 8A: `public/versao-acervo.js`, que servia ao cache do
 navegador, e `prompts/gerado/*.txt`, os prompts do agente. Na 8B saiu
@@ -519,6 +521,35 @@ desabilitados e um aviso diz que o recurso chega em breve.
 `{{RODAPE}}`. Nenhuma tela repete a barra ou o rodapé: repetir é como duas
 telas divergem.
 
+### Texto de interface: nenhum literal em template ou script
+
+Os parciais e os moldes de `paginas/` **só têm marcadores**. Quem os preenche é
+`scripts/interface.js`, com os valores de `dados/configuracao.json`: marca,
+navegação, títulos e descrições do `<head>`, favicon, imagem de
+compartilhamento, banner, rodapé, aviso de privacidade, rótulos de bloco,
+ícones, textos do "Explorar o acervo" e as redes da barra lateral, com a cor de
+hover de cada uma.
+
+No fim do build, `scripts/verifica-literais.js` lê o que foi publicado em
+`public/`, junta toda palavra visível — texto e também `alt`, `title`,
+`placeholder`, `aria-label` e as descrições do `<head>` — e confere se cada uma
+existe em `dados/configuracao.json`, `conteudo/*.json` ou
+`dados/vocabulario.json`, mais os nomes de pauta que vêm do acervo. **Palavra
+de fora derruba o build**, com o arquivo e a palavra:
+
+```
+FALHA ao gerar as telas: texto de interface fora das fontes de conteúdo (2 palavra(s)).
+  "rascunho" em public/caminhos/70-mais/brasil-e-pertencimento.html
+```
+
+Não são conferidos o que está dentro de `<script>` e `<style>`, os comentários
+de HTML e os números — script é comportamento, comentário não aparece na tela,
+número vem do conteúdo ou da contagem do acervo.
+
+Onde falta redigir, a tela mostra `[preencher]` com o arquivo e o campo (por
+exemplo `[preencher] dados/configuracao.json → email`); quando quem escreve
+deixou a nota dentro do próprio campo, é a nota que aparece.
+
 O build é **idempotente**: só reescreve arquivo cujo conteúdo mudou
 (`scripts/escreve-se-mudou.js`). Sem isso, a saída dentro de um diretório
 observado pelo `wrangler dev` dispara o watcher e o Worker reinicia no meio das
@@ -531,7 +562,8 @@ o build em vez de publicar tela pela metade.
 ### Assets
 
 `assets/` é a pasta única de imagens e fontes (banner, logotipos, favicon e os
-arquivos da Inclusive Sans em `assets/fonts/`), copiada para `public/assets/`
+arquivos da Inclusive Sans e da Unbounded em `assets/fonts/`), copiada para
+`public/assets/`
 no build. **Enquanto um arquivo não
 existir, a tela mostra um placeholder tracejado com o nome esperado** — nada
 quebra e nada é inventado. Os nomes estão em `assets/LEIA-ME.md`. Sem nenhum

@@ -3,24 +3,30 @@
 <head>
 {{CABECA}}
 <meta name="robots" content="noindex">
+<script src="/vocabulario.js"></script>
+<script src="/configuracao.js"></script>
 </head>
 <body>
 {{CABECALHO}}
 
 <main><div class="larg">
-  <h1 class="chamada">Este endereço mudou</h1>
-  <p class="apoio" id="aviso">Levando você para o caminho novo…</p>
-  <div class="acao"><a class="caminhos" href="/">Ir para o início</a></div>
+  <h1 class="titulo-home" id="titulo"></h1>
+  <p class="texto-home" id="aviso"></p>
+  <div class="acao"><a class="caminhos" id="botao" href="/"></a></div>
 </div></main>
 
 {{RODAPE}}
 
-<script src="/vocabulario.js"></script>
 <script>
   // A rota antiga era /resultado?publico=...&tema=..., com a página gerada por
   // modelo. Os caminhos agora são estáticos, em /caminhos/<publico>/<tema>:
   // este redirecionamento mantém de pé qualquer link já compartilhado.
   (function () {
+    var TEXTOS = window.CONFIGURACAO.redirecionamento;
+    document.getElementById("titulo").textContent = TEXTOS.titulo;
+    document.getElementById("aviso").textContent = TEXTOS.aviso;
+    document.getElementById("botao").textContent = TEXTOS.botao;
+
     var p = new URLSearchParams(window.location.search);
     var slugDe = function (lista, id) {
       var achado = (lista || []).find(function (v) { return v.id === id; });
@@ -32,8 +38,7 @@
       window.location.replace("/caminhos/" + publico + "/" + tema);
       return;
     }
-    document.getElementById("aviso").textContent =
-      "Os caminhos agora ficam em endereços próprios. Escolha um público e um tema no início.";
+    document.getElementById("aviso").textContent = TEXTOS.aviso_sem_parametros;
   })();
 </script>
 </body>

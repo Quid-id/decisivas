@@ -37,12 +37,14 @@ body {
   font-family: var(--fonte-texto);
   font-size: var(--texto-corpo);
   line-height: var(--entrelinha-normal);
+  /* Fundo liso: a grade de linhas saiu de todas as telas. */
   background-color: var(--cor-fundo);
-  /* Grade suave da identidade. */
-  background-image:
-    linear-gradient(var(--grade-cor) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grade-cor) 1px, transparent 1px);
-  background-size: var(--grade-passo) var(--grade-passo);
+}
+
+/* Rótulo que existe para o leitor de tela e não para o olho. */
+.sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
 .larg { max-width: var(--largura-conteudo); margin: 0 auto; padding: 0 var(--espaco-4); }
@@ -90,13 +92,27 @@ html { scroll-behavior: smooth; }
 
 main { padding: var(--espaco-6) 0 var(--espaco-7); }
 
-/* ---------- Início ---------- */
-.chamada {
+/* ---------- Início ----------
+   Quatro textos, todos de configuracao.json (home): o título, o texto de
+   apoio, a pergunta que abre as escolhas e a chamada final. O título é a
+   tipografia de destaque; a leitura fica na fonte de corpo. */
+.titulo-home {
   font-family: var(--tipo-destaque);
   font-size: var(--texto-pergunta); line-height: 1.08;
-  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-3); max-width: 18ch; min-height: 2.4em;
+  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-4); max-width: 26ch;
 }
-.apoio { color: var(--cor-texto-suave); margin: 0 0 var(--espaco-6); max-width: 52ch; }
+.texto-home {
+  font-size: var(--texto-prosa); line-height: var(--entrelinha-normal);
+  margin: 0 0 var(--espaco-6); max-width: 58ch;
+}
+.pergunta {
+  font-size: var(--texto-g); font-weight: var(--peso-forte);
+  margin: 0 0 var(--espaco-2); max-width: 30ch;
+}
+.chamada-home {
+  font-family: var(--tipo-destaque); font-size: var(--texto-g);
+  font-weight: var(--peso-forte); margin: var(--espaco-6) 0 0;
+}
 .etapa { margin-bottom: var(--espaco-4); }
 .etapa h2 {
   font-size: var(--texto-p); letter-spacing: .1em; color: var(--cor-texto-suave);
@@ -129,7 +145,14 @@ main { padding: var(--espaco-6) 0 var(--espaco-7); }
 .escolha { color: var(--cor-texto-suave); font-size: var(--texto-m); }
 
 /* ---------- Página de caminho ---------- */
-main.caminho { padding: var(--espaco-5) 0 var(--espaco-7); }
+/* A cor do público chega no style do <main>, escrita pelo build a partir de
+   dados/vocabulario.json. A sombra na cor dela é recomposta aqui, e não em
+   brand/tokens.css, porque var() dentro de var() se resolve no elemento em que
+   a variável é declarada — e é neste que --cor-publico existe. */
+main.caminho {
+  padding: var(--espaco-5) 0 var(--espaco-7);
+  --sombra-publico: var(--desloca-sombra) var(--desloca-sombra) 0 var(--cor-publico);
+}
 
 .cabecalho-caminho { display: flex; flex-wrap: wrap; gap: var(--espaco-2); align-items: center; font-size: var(--texto-m); margin-bottom: var(--espaco-4); }
 .pilula {
@@ -167,9 +190,15 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .card h3 { margin: 0 0 var(--espaco-3); font-size: var(--texto-card-titulo); line-height: 1.3; }
 .card p { margin: 0; font-size: var(--texto-card); line-height: 1.5; }
 .card p + p { margin-top: var(--espaco-3); }
-/* Card numérico: pintado na cor do público, com o texto que a regra de
-   contraste manda (--cor-texto-pilula, de dados/vocabulario.json). */
+/* Os três cards de dados de "por que falar", na ordem: o primeiro pintado na
+   cor do público, o segundo em amarelo com texto preto, o terceiro off-white
+   com a sombra na cor do público. A cor do público e o texto que a regra de
+   contraste manda vêm de dados/vocabulario.json, escritos pelo build. */
 .card.numero { background: var(--cor, var(--cor-superficie)); color: var(--cor-texto-pilula, var(--cor-texto)); }
+.card.destaque { background: var(--amarelo); color: var(--sobre-amarelo); }
+/* Card off-white com a cor do público só na sombra: o terceiro card de dados,
+   os três de "como chegar nele" e o de texto de "quem é este público". */
+.card.publico { background: var(--cor-fundo); box-shadow: var(--sombra-publico); }
 .card.numero .n { font-size: var(--texto-numero); font-weight: var(--peso-forte); line-height: 1; margin-bottom: var(--espaco-2); }
 /* "O que funciona" e "o que não funciona": fundo off-white como os demais
    cards, borda e texto pretos. A cor da leitura vai para a sombra dura e para
@@ -196,8 +225,10 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .card .fonte { font-size: var(--texto-p); color: var(--cor-texto-suave); margin-top: var(--espaco-3); }
 .card.numero .fonte { color: inherit; opacity: .8; }
 
+/* Prosa de "por que falar": card off-white, para a leitura longa não ficar
+   sobre branco puro. */
 .prosa {
-  background: var(--cor-superficie); border: var(--borda-cartao) solid var(--cor-borda-forte);
+  background: var(--cor-fundo); border: var(--borda-cartao) solid var(--cor-borda-forte);
   border-radius: var(--raio-card); padding: var(--espaco-5);
   box-shadow: var(--sombra-dura); margin-bottom: var(--espaco-4);
 }
@@ -245,23 +276,38 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .explorar[data-ligado="nao"] button, .explorar[data-ligado="nao"] input { opacity: .5; cursor: not-allowed; }
 .explorar .em-breve { font-size: var(--texto-m); color: var(--cor-texto-suave); margin: var(--espaco-3) 0 0; font-style: italic; }
 
-/* ---------- Barra de compartilhamento ---------- */
-.compartilhar {
+/* ---------- Barra lateral: voltar e compartilhar ----------
+   Mesma peça, mesma regra de aparecer e sumir: o voltar é o primeiro botão da
+   coluna, e em telas até 900 px a coluna vira faixa horizontal no pé, com o
+   voltar à esquerda dos ícones de rede. */
+.barra-lateral {
   position: fixed; right: var(--espaco-4); top: 50%; transform: translateY(-50%);
   display: flex; flex-direction: column; gap: var(--espaco-2); z-index: 10;
   opacity: 0; pointer-events: none; transition: opacity .25s;
 }
-.compartilhar.visivel { opacity: 1; pointer-events: auto; }
-.compartilhar a, .compartilhar button {
+.barra-lateral.visivel { opacity: 1; pointer-events: auto; }
+.botao-redondo {
   width: var(--tamanho-share); height: var(--tamanho-share); border-radius: 50%;
   border: var(--borda-cartao) solid var(--cor-borda-forte); background: var(--cor-superficie);
   display: grid; place-items: center; cursor: pointer; color: var(--cor-texto);
   text-decoration: none; box-shadow: var(--sombra-dura-p);
   font: inherit; font-weight: var(--peso-forte); font-size: var(--texto-p);
+  transition: background-color .12s, color .12s;
 }
-.compartilhar a:hover, .compartilhar button:hover { background: var(--rosa); color: var(--sobre-rosa); }
+/* A cor de hover de cada rede vem de configuracao.json (compartilhar.redes),
+   escrita pelo build em --hover e --hover-icone. Sem valor, o hover é o rosa. */
+.botao-redondo:hover {
+  background: var(--hover, var(--rosa)); color: var(--hover-icone, var(--sobre-rosa));
+}
+/* O voltar é redondo como os demais, com a flecha maior e o hover em rosa. */
+.botao-redondo.voltar { font-size: var(--texto-card-titulo); line-height: 1; }
 @media (max-width: 900px) {
-  .compartilhar { top: auto; bottom: var(--espaco-3); right: var(--espaco-3); left: var(--espaco-3); flex-direction: row; justify-content: center; transform: none; }
+  .barra-lateral {
+    top: auto; bottom: var(--espaco-3); right: var(--espaco-3); left: var(--espaco-3);
+    flex-direction: row; justify-content: center; transform: none;
+  }
+  /* Na faixa horizontal, o voltar fica à esquerda e um pouco separado. */
+  .barra-lateral .voltar { margin-right: var(--espaco-3); }
 }
 
 /* ---------- Aviso de privacidade ---------- */
@@ -299,14 +345,6 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 }
 .video iframe { width: 100%; height: 100%; border: 0; display: block; }
 
-/* ---------- Janela do vídeo de abertura ---------- */
-.modal { position: fixed; inset: 0; background: var(--cor-veu); display: flex; align-items: center; justify-content: center; padding: var(--espaco-4); z-index: 50; }
-.modal .caixa { background: var(--cor-fundo); max-width: 920px; width: 100%; }
-.modal .pe { display: flex; justify-content: space-between; align-items: center; gap: var(--espaco-3); padding: var(--espaco-3); font-size: var(--texto-m); }
-.modal .pe button {
-  font: inherit; background: var(--cor-acao); color: var(--cor-acao-texto);
-  border: 0; border-radius: var(--raio-pilula); padding: var(--espaco-2) var(--espaco-4); cursor: pointer;
-}
 
 /* ---------- Rodapé ---------- */
 footer { background: var(--preto); color: var(--off-white); padding: var(--espaco-7) 0 var(--espaco-5); }
@@ -317,6 +355,8 @@ footer ul { list-style: none; margin: 0; padding: 0; }
 footer li { margin-bottom: var(--espaco-3); }
 footer a { color: var(--off-white); text-decoration: none; border-bottom: 1px solid var(--off-white); padding-bottom: var(--espaco-1); }
 footer a:hover { border-bottom-color: var(--rosa); }
+/* A marca no rodapé é logotipo, não link de leitura: sem o sublinhado. */
+footer .marca { border-bottom: 0; }
 .assinatura {
   font-family: var(--tipo-destaque); font-size: var(--texto-gg);
   font-weight: var(--peso-forte); letter-spacing: .02em; margin: 0 0 var(--espaco-2);

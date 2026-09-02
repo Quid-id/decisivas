@@ -2,7 +2,11 @@
 //
 // Tudo aqui é HTML estático, gerado no build a partir de `conteudo/*.json`:
 // nenhuma chamada de API para exibir página, nenhum texto escrito por código.
-// Referência visual: `referencia/decisivas_prototipo_v5.html`.
+// Rótulo de bloco, ícone, separador de título e os textos do "Explorar o
+// acervo" vêm de `dados/configuracao.json`; o texto das páginas, de
+// `conteudo/*.json`; nome, cor e slug de público e tema, de
+// `dados/vocabulario.json`. Referência visual:
+// `referencia/decisivas_prototipo_v5.html`.
 //
 // Endereços: `/caminhos/<slug do público>/<slug do tema>`, com os slugs de
 // `dados/vocabulario.json`. O servidor de assets serve a URL sem `.html`.
@@ -10,71 +14,62 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { escreveSeMudou } = require("./escreve-se-mudou");
-const { escapa, troca, confereMarcadores, leParciais, ehPendente, textoOuPendente } = require("./html");
+const { escapa, troca, confereMarcadores, ehPendente } = require("./html");
+const monta = require("./interface");
 const conteudo = require("./conteudo");
 const acervo = require("./acervo");
 
 const SAIDA = "public";
-const SEM_DATA = "texto em revisão";
-
-// O cabeçalho é o mesmo parcial de todas as telas, e marca na navegação a
-// página em que se está. Caminho não é Início nem Sobre: nenhuma das duas
-// fica marcada.
-function cabecalhoPara(parciais, atual) {
-  return troca(parciais.cabecalho, {
-    ATUAL_INICIO: atual === "inicio" ? ' aria-current="page"' : "",
-    ATUAL_SOBRE: atual === "sobre" ? ' aria-current="page"' : "",
-  });
-}
 
 // ---------------------------------------------------------------------------
 // Blocos da página de caminho
 // ---------------------------------------------------------------------------
 
-function cardDeDados(dado, corDoPublico, primeiro) {
-  // O primeiro card de dados usa a cor do público quando tem número: é o que
-  // dá o ponto de cor do bloco, como no protótipo v5.
-  const comCor = primeiro && dado.n;
-  const classe = comCor ? "card numero" : "card";
-  const estilo = comCor ? ` style="--cor: ${corDoPublico.cor}; --cor-texto-pilula: ${corDoPublico.texto}"` : "";
+// Os três cards de dados de "por que falar", na ordem em que estão escritos no
+// JSON: o primeiro na cor do público, o segundo em amarelo, o terceiro
+// off-white com a sombra na cor do público. A cor entra por variável, dos
+// tokens e de dados/vocabulario.json — nenhuma cor escrita aqui.
+const CLASSE_DO_CARD = ["card numero", "card destaque", "card publico"];
+
+function cardDeDados(dado, cor, posicao) {
+  const classe = CLASSE_DO_CARD[posicao] ?? "card";
+  const estilo =
+    classe === "card numero"
+      ? ` style="--cor: ${cor.cor}; --cor-texto-pilula: ${cor.texto}"`
+      : "";
   const numero = dado.n ? `<div class="n">${escapa(dado.n)}</div>` : "";
   return `        <div class="${classe}"${estilo}>${numero}<h3>${escapa(dado.titulo)}</h3><p>${escapa(dado.texto)}</p></div>`;
 }
 
-function blocoPorQue(pagina, corDoPublico) {
+function blocoPorQue(pagina, cor) {
   const prosa = pagina.por_que.texto.map((p) => `<p>${escapa(p)}</p>`).join("");
-  const cards = pagina.por_que.dados
-    .map((dado, i) => cardDeDados(dado, corDoPublico, i === 0))
-    .join("\n");
+  const cards = pagina.por_que.dados.map((dado, i) => cardDeDados(dado, cor, i)).join("\n");
   return `    <div class="prosa">${prosa}</div>\n    <div class="grade">\n${cards}\n    </div>`;
 }
 
-// Ícone dos cards de leitura: o ✓ e o ✕ ficam FORA do título, numa coluna
-// própria à esquerda, e são decoração — o leitor de tela não os anuncia, o
-// título do bloco já diz se é o que funciona ou o que não funciona.
-const ICONE = { funciona: "✓", evita: "✕" };
-
-function cardsDeLista(cards, classe) {
-  const icone = ICONE[classe] ? `<span class="icone" aria-hidden="true">${ICONE[classe]}</span>` : "";
+// Ícone dos cards de leitura: o ✓ e o ✕ vêm da configuração, ficam FORA do
+// título, numa coluna própria à esquerda, e são decoração — o leitor de tela
+// não os anuncia, o título do bloco já diz se é o que funciona ou o que não.
+function cardsDeLista(cards, classe, icone) {
+  const marca = icone ? `<span class="icone" aria-hidden="true">${escapa(icone)}</span>` : "";
   return cards
     .map((card) => {
       const fonte = card.fonte ? `<p class="fonte">${escapa(card.fonte)}</p>` : "";
-      return `      <div class="card ${classe}">${icone}<h3>${escapa(card.titulo)}</h3><p>${escapa(card.texto)}</p>${fonte}</div>`;
+      return `      <div class="card ${classe}">${marca}<h3>${escapa(card.titulo)}</h3><p>${escapa(card.texto)}</p>${fonte}</div>`;
     })
     .join("\n");
 }
 
-function grade(cards, classe) {
-  return `    <div class="grade">\n${cardsDeLista(cards, classe)}\n    </div>`;
+function grade(cards, classe, icone) {
+  return `    <div class="grade">\n${cardsDeLista(cards, classe, icone)}\n    </div>`;
 }
 
 // A lacuna vai logo abaixo do bloco a que se refere, e o próprio texto diz
-// qual é: "sobre o que funciona" ou "sobre o que afasta". Sem essa marca, ela
-// é da página inteira e entra depois do último dos dois blocos.
-function ondeVaiALacuna(texto) {
+// qual é: usa o rótulo do bloco, como ele está na configuração. Sem essa
+// marca, ela é da página inteira e entra depois do último dos dois blocos.
+function ondeVaiALacuna(texto, blocos) {
   const alvo = texto.toLowerCase();
-  if (alvo.includes("o que funciona")) return "funciona";
-  if (alvo.includes("o que afasta") || alvo.includes("não funciona")) return "nao_funciona";
+  if (alvo.includes(blocos.funciona.toLowerCase())) return "funciona";
   return "nao_funciona";
 }
 
@@ -82,12 +77,14 @@ function caixaDeLacuna(texto) {
   return `\n    <div class="lacuna">${escapa(texto)}</div>`;
 }
 
-function blocoQuemE(quemE, corDoPublico) {
+// "Quem é este público": o card de número na cor do público e, ao lado, o card
+// de texto off-white com a sombra na cor dele.
+function blocoQuemE(quemE, cor) {
   const destaque =
-    `      <div class="card numero" style="--cor: ${corDoPublico.cor}; --cor-texto-pilula: ${corDoPublico.texto}">` +
+    `      <div class="card numero" style="--cor: ${cor.cor}; --cor-texto-pilula: ${cor.texto}">` +
     `<div class="n">${escapa(quemE.destaque.n)}</div><h3>${escapa(quemE.destaque.titulo)}</h3>` +
     `<p>${escapa(quemE.destaque.texto)}</p></div>`;
-  const texto = `      <div class="card largo"><p>${escapa(quemE.texto)}</p></div>`;
+  const texto = `      <div class="card publico largo"><p>${escapa(quemE.texto)}</p></div>`;
   return `    <div class="grade">\n${destaque}\n${texto}\n    </div>`;
 }
 
@@ -96,60 +93,97 @@ function blocoResumo(linhas) {
   return `    <div class="resumo"><ul>${itens}</ul></div>`;
 }
 
-function botoesDePauta(pautas) {
-  if (!pautas.length) return `      <span class="meta">Sem pautas etiquetadas neste cruzamento.</span>`;
+// Botões de pauta do "Explorar o acervo": os nomes são o vocabulário fechado
+// das 59 pautas, lido do acervo — não são texto escrito aqui.
+function botoesDePauta(pautas, configuracao) {
+  if (!pautas.length) {
+    return `      <span class="meta">${escapa(configuracao.explorar.aviso_sem_pautas)}</span>`;
+  }
   return pautas
     .map((pauta) => `      <button type="button" disabled>${escapa(pauta)}</button>`)
     .join("\n");
 }
 
-function trechosDoCruzamento(resumoDoCruzamento) {
-  if (!resumoDoCruzamento) return "trechos";
-  const { trechos, achados } = resumoDoCruzamento;
-  return `${trechos} trechos, ${achados} deles achados,`;
+// O texto do "Explorar o acervo" traz o tamanho do acervo neste cruzamento.
+// Os dois números entram nos lugares marcados na configuração.
+function textoDoExplorar(configuracao, resumoDoCruzamento) {
+  const trechos = resumoDoCruzamento ? resumoDoCruzamento.trechos : 0;
+  const achados = resumoDoCruzamento ? resumoDoCruzamento.achados : 0;
+  return escapa(
+    configuracao.explorar.texto
+      .replace("{trechos}", String(trechos))
+      .replace("{achados}", String(achados))
+  );
 }
 
 // ---------------------------------------------------------------------------
 
-function montaCaminho(modelo, parciais, { publico, tema, dados, pagina, resumoDoCruzamento }) {
+function montaCaminho(modelo, comum, configuracao, { publico, tema, dados, pagina, resumoDoCruzamento }) {
   const cor = { cor: publico.cor, texto: publico.texto };
-  const lacunaEm = pagina.lacuna ? ondeVaiALacuna(pagina.lacuna) : null;
-  const titulo = `${dados.nome} × ${tema.nome}`;
+  const blocos = configuracao.caminho.blocos;
+  const lacunaEm = pagina.lacuna ? ondeVaiALacuna(pagina.lacuna, blocos) : null;
+  const titulo = `${dados.nome} ${configuracao.caminho.separador_titulo} ${tema.nome}`;
 
-  const html = troca(modelo, {
-    CABECA: troca(parciais.cabeca, {
-      TITULO: `${escapa(titulo)} · DECISIVAS`,
-      DESCRICAO: escapa(pagina.linha),
+  return troca(modelo, {
+    CABECA: comum.cabeca({
+      titulo: configuracao.meta.caminho.padrao_titulo
+        .replace("{publico}", dados.nome)
+        .replace("{tema}", tema.nome),
+      descricao: pagina.linha,
     }),
-    CABECALHO: cabecalhoPara(parciais, null),
-    RODAPE: parciais.rodape,
-    COMPARTILHAR: parciais.compartilhar,
+    CABECALHO: comum.cabecalho(null) + "\n" + comum.rodaBanner,
+    RODAPE: comum.rodape,
+    COMPARTILHAR: comum.compartilhar,
+    // A cor do público vale para a página inteira: é dela que sai a sombra dos
+    // cards off-white (--sombra-publico, em brand/tokens.css).
+    ESTILO_PUBLICO: `--cor-publico: ${cor.cor}`,
     PILULA_PUBLICO:
       `<span class="pilula" style="--cor: ${cor.cor}; --cor-texto-pilula: ${cor.texto}">${escapa(dados.nome)}</span>`,
     NOME_TEMA: escapa(tema.nome),
-    REVISADO_EM: dados.revisado_em ? `texto revisado em ${escapa(dados.revisado_em)}` : SEM_DATA,
+    REVISADO_EM: dados.revisado_em
+      ? `${escapa(configuracao.caminho.prefixo_revisado)} ${escapa(dados.revisado_em)}`
+      : escapa(configuracao.caminho.texto_em_revisao),
     TITULO_CAMINHO: escapa(pagina.titulo || titulo),
     LINHA: escapa(pagina.linha),
+    ROTULO_POR_QUE: escapa(blocos.por_que),
     POR_QUE: blocoPorQue(pagina, cor),
-    FUNCIONA: grade(pagina.funciona, "funciona") + (lacunaEm === "funciona" ? caixaDeLacuna(pagina.lacuna) : ""),
+    ROTULO_FUNCIONA: escapa(blocos.funciona),
+    FUNCIONA:
+      grade(pagina.funciona, "funciona", configuracao.caminho.icone_funciona) +
+      (lacunaEm === "funciona" ? caixaDeLacuna(pagina.lacuna) : ""),
+    ROTULO_NAO_FUNCIONA: escapa(blocos.nao_funciona),
     NAO_FUNCIONA:
-      grade(pagina.nao_funciona, "evita") + (lacunaEm === "nao_funciona" ? caixaDeLacuna(pagina.lacuna) : ""),
+      grade(pagina.nao_funciona, "evita", configuracao.caminho.icone_nao_funciona) +
+      (lacunaEm === "nao_funciona" ? caixaDeLacuna(pagina.lacuna) : ""),
+    ROTULO_QUEM_E: escapa(blocos.quem_e),
     QUEM_E: blocoQuemE(dados.quem_e, cor),
-    COMO_CHEGAR: grade(dados.como_chegar, ""),
+    ROTULO_COMO_CHEGAR: escapa(blocos.como_chegar),
+    COMO_CHEGAR: grade(dados.como_chegar, "publico", null),
+    ROTULO_RESUMO: escapa(blocos.resumo),
     RESUMO: blocoResumo(pagina.resumo),
-    TRECHOS_DO_CRUZAMENTO: trechosDoCruzamento(resumoDoCruzamento),
-    PAUTAS: botoesDePauta(resumoDoCruzamento ? resumoDoCruzamento.pautas : []),
-    EXEMPLO_PERGUNTA: escapa(`Ex.: o que a pesquisa mostra sobre ${tema.nome.toLowerCase()}`),
+    TITULO_EXPLORAR: escapa(configuracao.explorar.titulo),
+    TEXTO_EXPLORAR: textoDoExplorar(configuracao, resumoDoCruzamento),
+    PAUTAS: botoesDePauta(resumoDoCruzamento ? resumoDoCruzamento.pautas : [], configuracao),
+    ROTULO_CAMPO_EXPLORAR: escapa(configuracao.explorar.rotulo_campo),
+    EXEMPLO_CAMPO_EXPLORAR: escapa(configuracao.explorar.exemplo_campo),
+    BOTAO_EXPLORAR: escapa(configuracao.explorar.botao),
+    AVISO_EXPLORAR: escapa(configuracao.explorar.aviso_desligado),
   });
-  return html;
 }
 
-function montaSobre(parciais, sobre, vocabulario, publicos, configuracao) {
+// Texto do Sobre e da privacidade: o que a equipe escreveu, ou a pendência
+// dizendo qual campo de qual arquivo falta.
+function paragrafo(configuracao, valor, arquivo, campo) {
+  if (ehPendente(valor)) {
+    return `<div class="preencher">${monta.textoDaPendencia(configuracao, valor, arquivo, campo)}</div>`;
+  }
+  return `<p>${escapa(valor)}</p>`;
+}
+
+function montaSobre(comum, configuracao, sobre, vocabulario, publicos) {
   const modelo = fs.readFileSync("paginas/sobre.html", "utf8");
-  const idVideo = configuracao.video_youtube_id;
-  const video = ehPendente(idVideo)
-    ? "[preencher] vídeo de apresentação: identificador do YouTube em dados/configuracao.json"
-    : `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(idVideo)}?rel=0" title="Vídeo de apresentação do DECISIVAS" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+  const blocos = configuracao.sobre.blocos;
+  const ONDE = "conteudo/sobre.json";
 
   const listaDePublicos = vocabulario.publicos
     .map((p) => {
@@ -161,26 +195,30 @@ function montaSobre(parciais, sobre, vocabulario, publicos, configuracao) {
     .map((t) => `    <h3>${escapa(t.nome)}</h3>\n    <p>${escapa(sobre.temas[t.id])}</p>`)
     .join("\n");
 
-  const html = troca(modelo, {
-    CABECA: troca(parciais.cabeca, {
-      TITULO: "Sobre o projeto · DECISIVAS",
-      DESCRICAO: "O que é o DECISIVAS, como foi feito, os públicos, os temas e o uso de inteligência artificial.",
-    }),
-    CABECALHO: cabecalhoPara(parciais, "sobre"),
-    RODAPE: parciais.rodape,
-    VIDEO: video,
-    PROJETO: textoOuPendente(sobre.projeto, "texto sobre o projeto", "conteudo/sobre.json").html,
-    COMO_FOI_FEITO: textoOuPendente(sobre.como_foi_feito, "como foi feito", "conteudo/sobre.json").html,
-    PUBLICOS_INTRO: textoOuPendente(sobre.publicos_intro, "introdução dos públicos", "conteudo/sobre.json").html,
+  return troca(modelo, {
+    CABECA: comum.cabeca(configuracao.meta.sobre),
+    CABECALHO: comum.cabecalho("/sobre") + "\n" + comum.rodaBanner,
+    RODAPE: comum.rodape,
+    TITULO_SOBRE: escapa(configuracao.sobre.titulo),
+    // O vídeo de apresentação vive só aqui, pelo video_embed da configuração.
+    VIDEO: monta.video(configuracao),
+    ROTULO_PROJETO: escapa(blocos.projeto),
+    PROJETO: paragrafo(configuracao, sobre.projeto, ONDE, "projeto"),
+    ROTULO_COMO_FOI_FEITO: escapa(blocos.como_foi_feito),
+    COMO_FOI_FEITO: paragrafo(configuracao, sobre.como_foi_feito, ONDE, "como_foi_feito"),
+    ROTULO_PUBLICOS: escapa(blocos.publicos),
+    PUBLICOS_INTRO: paragrafo(configuracao, sobre.publicos_intro, ONDE, "publicos_intro"),
     PUBLICOS: listaDePublicos,
+    ROTULO_TEMAS: escapa(blocos.temas),
     TEMAS: listaDeTemas,
-    AVISO_IA: textoOuPendente(sobre.aviso_ia, "aviso sobre inteligência artificial", "conteudo/sobre.json").html,
-    QUEM_FAZ: textoOuPendente(sobre.quem_faz, "quem faz", "conteudo/sobre.json").html,
+    ROTULO_AVISO_IA: escapa(blocos.aviso_ia),
+    AVISO_IA: paragrafo(configuracao, sobre.aviso_ia, ONDE, "aviso_ia"),
+    ROTULO_QUEM_FAZ: escapa(blocos.quem_faz),
+    QUEM_FAZ: paragrafo(configuracao, sobre.quem_faz, ONDE, "quem_faz"),
   });
-  return html;
 }
 
-function montaPrivacidade(parciais, sobre) {
+function montaPrivacidade(comum, configuracao, sobre) {
   const modelo = fs.readFileSync("paginas/privacidade.html", "utf8");
   // O texto vem em um parágrafo por linha em branco, como foi escrito.
   const paragrafos = String(sobre.privacidade)
@@ -190,34 +228,40 @@ function montaPrivacidade(parciais, sobre) {
     .map((p) => `<p>${escapa(p)}</p>`)
     .join("\n    ");
   return troca(modelo, {
-    CABECA: troca(parciais.cabeca, {
-      TITULO: "Política de privacidade · DECISIVAS",
-      DESCRICAO: "O DECISIVAS não usa cookies de rastreamento nem coleta dados pessoais.",
-    }),
-    CABECALHO: cabecalhoPara(parciais, null),
-    RODAPE: parciais.rodape,
-    REVISADO_EM: sobre.revisado_em ? `Revisado em ${escapa(sobre.revisado_em)}` : SEM_DATA,
+    CABECA: comum.cabeca(configuracao.meta.privacidade),
+    CABECALHO: comum.cabecalho(configuracao.privacidade.destino) + "\n" + comum.rodaBanner,
+    RODAPE: comum.rodape,
+    TITULO_PRIVACIDADE: escapa(configuracao.pagina_privacidade.titulo),
+    REVISADO_EM: sobre.revisado_em
+      ? `${escapa(configuracao.pagina_privacidade.prefixo_revisado)} ${escapa(sobre.revisado_em)}`
+      : escapa(configuracao.caminho.texto_em_revisao),
     PRIVACIDADE: paragrafos,
   });
 }
 
-async function main({ parciais, vocabulario, configuracao }) {
+async function main({ comum, vocabulario, configuracao }) {
   const { publicos, sobre } = conteudo.carrega(vocabulario);
   const resumoDoAcervo = await acervo.resumo();
   const modelo = fs.readFileSync("paginas/caminho.html", "utf8");
 
   let escritos = 0;
   const gerados = [];
+  // Os nomes de pauta que foram para a tela: são o vocabulário fechado do
+  // acervo, e scripts/verifica-literais.js precisa deles para não acusar
+  // palavra de fora das fontes.
+  const pautas = new Set();
 
   for (const publico of vocabulario.publicos) {
     const dados = publicos[publico.id];
     for (const tema of vocabulario.macronarrativas) {
-      const html = montaCaminho(modelo, parciais, {
+      const doCruzamento = resumoDoAcervo.get(`${publico.id}|${tema.id}`);
+      for (const pauta of doCruzamento ? doCruzamento.pautas : []) pautas.add(pauta);
+      const html = montaCaminho(modelo, comum, configuracao, {
         publico,
         tema,
         dados,
         pagina: dados.paginas[tema.id],
-        resumoDoCruzamento: resumoDoAcervo.get(`${publico.id}|${tema.id}`),
+        resumoDoCruzamento: doCruzamento,
       });
       confereMarcadores(html, `caminho ${publico.slug}/${tema.slug}`);
       const destino = path.join(SAIDA, "caminhos", publico.slug, `${tema.slug}.html`);
@@ -227,15 +271,15 @@ async function main({ parciais, vocabulario, configuracao }) {
     }
   }
 
-  const paginaSobre = montaSobre(parciais, sobre, vocabulario, publicos, configuracao);
+  const paginaSobre = montaSobre(comum, configuracao, sobre, vocabulario, publicos);
   confereMarcadores(paginaSobre, "paginas/sobre.html");
   if (escreveSeMudou(path.join(SAIDA, "sobre.html"), paginaSobre)) escritos++;
 
-  const paginaPrivacidade = montaPrivacidade(parciais, sobre);
+  const paginaPrivacidade = montaPrivacidade(comum, configuracao, sobre);
   confereMarcadores(paginaPrivacidade, "paginas/privacidade.html");
   if (escreveSeMudou(path.join(SAIDA, "privacidade.html"), paginaPrivacidade)) escritos++;
 
-  return { caminhos: gerados.length, escritos };
+  return { caminhos: gerados.length, escritos, pautas: [...pautas] };
 }
 
 module.exports = { main };

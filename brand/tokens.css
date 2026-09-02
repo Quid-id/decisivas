@@ -68,10 +68,6 @@
   --cor-superficie:     var(--branco);      /* cartões */
   --cor-superficie-alt: #faf9f2;            /* blocos dentro do cartão */
 
-  /* Grade suave do fundo: linhas finas em preto a 6%, passo 22px. */
-  --grade-cor:  rgba(0, 0, 0, 0.06);
-  --grade-passo: 22px;
-
   /* ---------- Texto ---------- */
   --cor-texto:       var(--preto);
   --cor-texto-suave: #5a5a52;   /* metadados, legendas, rótulos */
@@ -80,13 +76,22 @@
   /* ---------- Cartões e sombra dura (protótipo v5) ----------
      A identidade não usa sombra difusa: o cartão tem borda preta e um
      deslocamento sólido, do mesmo preto. */
-  --sombra-dura:   4px 4px 0 var(--preto);
+  --desloca-sombra: 4px;   /* deslocamento da sombra dura padrão */
+  --sombra-dura:   var(--desloca-sombra) var(--desloca-sombra) 0 var(--preto);
   --sombra-dura-p: 3px 3px 0 var(--preto);
   --sombra-dura-g: 6px 6px 0 var(--preto);
   /* Cards de "o que funciona" e "o que não funciona": o fundo é off-white como
      os demais, e a cor vai para a sombra e para o ícone. */
   --sombra-funciona: 4px 4px 0 var(--verde);
   --sombra-evita:    4px 4px 0 var(--vermelho);
+  /* Sombra na cor do público: o terceiro card de dados, os três cards de "como
+     chegar nele" e o card de texto de "quem é este público". A cor entra por
+     --cor-publico, que o build escreve no <main> da página de caminho a partir
+     de dados/vocabulario.json. Aqui o valor é o preto: var() dentro de var()
+     se resolve onde a variável é DECLARADA, não onde é usada, então quem
+     recompõe a sombra com a cor do público é a regra de main.caminho em
+     paginas/estilos.css. Fora de uma página de caminho, fica esta. */
+  --sombra-publico:  var(--sombra-dura);
   --raio-card:   10px;
   --raio-card-g: 12px;
   --raio-card-icone: 16px;  /* cantos um pouco mais arredondados */
@@ -120,9 +125,6 @@
   --cor-aviso-fundo:  var(--cor-superficie-alt);
   --cor-aviso-texto:  var(--cor-texto-suave);
   --cor-aviso-borda:  var(--borda-tracejada);
-
-  /* Véu da janela de vídeo, sobre a página inteira. */
-  --cor-veu: rgba(0, 0, 0, 0.9);
 
   /* ---------- Erro (falha de operação, nunca lacuna) ---------- */
   --cor-erro:       var(--vermelho);
