@@ -1,7 +1,8 @@
 # Operação
 
 Passo a passo das tarefas de operação do DECISIVAS: o banco, as migrações e o
-build. Atualizado na etapa 8A, quando a geração de página por modelo saiu.
+build. Atualizado na etapa 8C, com a verificação de conteúdo que roda no
+build.
 
 Todos os comandos rodam na raiz do repositório. O `wrangler` (a ferramenta
 de linha de comando do Cloudflare) já está instalado como dependência do
@@ -485,6 +486,7 @@ arquivo está em `public/`, ele é saída de build; edite a fonte, nunca a cópi
 | `assets/*`, inclusive `assets/fonts/` | `public/assets/` | `gera-paginas.js` |
 | `dados/configuracao.json` + `parciais/*.html` | os marcadores de toda tela | `interface.js` |
 | `public/**/*.html` (conferência) | falha o build se houver literal | `verifica-literais.js` |
+| `conteudo/*.json`, `dados/configuracao.json` (conferência) | falha o build se houver termo bloqueado | `verifica-conteudo.js` |
 
 Saíram na etapa 8A: `public/versao-acervo.js`, que servia ao cache do
 navegador, e `prompts/gerado/*.txt`, os prompts do agente. Na 8B saiu
@@ -556,8 +558,84 @@ observado pelo `wrangler dev` dispara o watcher e o Worker reinicia no meio das
 requisições.
 
 Falha de build é dura, de propósito: marcador não substituído, cor de público
-fora da paleta de `brand/tokens.css` ou conteúdo com estrutura errada derrubam
-o build em vez de publicar tela pela metade.
+fora da paleta de `brand/tokens.css`, conteúdo com estrutura errada, texto de
+interface escrito em template ou termo bloqueado no conteúdo derrubam o build
+em vez de publicar tela pela metade.
+
+### Verificação de conteúdo: termos bloqueados (etapa 8C)
+
+`scripts/verifica-conteudo.js` roda no build **antes de escrever qualquer
+tela**, e faz duas coisas:
+
+1. **Estrutura.** Chama `scripts/conteudo.js`, a mesma validação descrita
+   acima, para que uma execução solta do script confira o que o build confere.
+2. **Termos bloqueados.** Varre todo o texto de `conteudo/*.json` e de
+   `dados/configuracao.json` contra a lista de `BLOCKED_TERMS`. O resultado
+   esperado é **zero ocorrências**: a regra 4 não admite nome de figura
+   política, partido ou direção de voto em nenhum texto. Achando qualquer um,
+   **o build falha nomeando arquivo, campo e termo**, com o trecho da frase:
+
+```
+FALHA na verificação de conteúdo: termo bloqueado no conteúdo (2 ocorrência(s)).
+  conteudo/jovens.json · paginas["dinheiro no bolso"].linha · "PT"
+    Teste: o PT e o petista, com Lula…
+```
+
+**Como a comparação funciona.** Sempre por **palavra inteira** — "PT" não casa
+em "parte", "PL" não casa em "plano". E de dois modos:
+
+| Tipo de termo | Exemplos | Comparação |
+|---|---|---|
+| **Sigla** (só maiúsculas, admitindo conector curto em minúscula) | `PT`, `PL`, `PSDB`, `MDB`, `PSOL`, `PDT`, `PSB`, `PSD`, `PRTB`, `PCdoB` | **sensível a maiúsculas**: casa `PT`, não casa `pt` |
+| **Nome** (pessoas, partidos por extenso, adjetivos) | `Lula`, `União Brasil`, `Nikolas Ferreira`, `petista` | **insensível a maiúsculas e a acentos**: casa `união brasil`, `Tarcisio` e `Tarcísio` |
+
+Sem a distinção, qualquer sigla de duas letras viraria falso positivo dentro do
+texto corrido; sem a insensibilidade nos nomes, bastaria escrever em minúscula
+para escapar.
+
+**Atenção à lista.** Alguns nomes de partido são também palavra comum do
+português — **Podemos**, **Cidadania**, **Solidariedade**, **Avante**. Como
+nome, a comparação ignora maiúsculas, então uma frase que use a palavra no
+sentido comum derruba o build. Hoje nenhuma das quatro aparece no conteúdo. Se
+aparecer, a saída mostra o campo e a frase: o caminho é **reescrever a frase**,
+não afrouxar a varredura.
+
+**Onde a lista vive.** Em variável de ambiente, `BLOCKED_TERMS`, com os termos
+separados por `|` — nunca em arquivo do repositório, que é público e não deve
+carregar uma lista de nomes de figuras e partidos.
+
+- **Em produção: variável de build no painel do Cloudflare**, em Workers →
+  `decisivas` → Settings → Build → Build variables. É lida pelo mesmo build que
+  publica o site, então uma mudança na lista vale a partir do próximo deploy.
+  Não é segredo de runtime: nenhuma rota a usa hoje, só o build (na etapa 10 a
+  rota `/api/explorar` volta a varrer a saída, e aí ela também será variável do
+  Worker).
+- **Na máquina de quem desenvolve:** exportada na sessão, com o mesmo valor do
+  painel.
+
+```
+BLOCKED_TERMS="Sobrenome|Outro Nome|SIGLA" node scripts/verifica-conteudo.js
+```
+
+Sem a variável, a varredura **não roda** e o build avisa em voz alta —
+`termos bloqueados: VARREDURA NÃO EXECUTADA` — em vez de passar em silêncio. É
+o que permite rodar `wrangler dev` sem a lista à mão; a linha no log do build
+do Cloudflare é o sinal de que a variável falta no painel.
+
+### A lista de pendências no fim do build
+
+O build termina imprimindo o que falta redigir e que asset falta, um por linha,
+para a equipe não precisar abrir tela para descobrir:
+
+```
+pendências na tela (6):
+  - dados/configuracao.json → email
+  - dados/configuracao.json → instagram
+  - /assets/logo-quid.svg
+  - /assets/logo-brief.svg
+  - dados/configuracao.json → video_embed
+  - conteudo/sobre.json → quem_faz
+```
 
 ### Assets
 
