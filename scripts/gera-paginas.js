@@ -25,10 +25,11 @@ const SAIDA = "public";
 const ASSETS = "assets";
 
 // Título e item de navegação ativo de cada tela. A lista é fechada: tela nova
-// entra aqui, senão não é publicada.
+// entra aqui, senão não é publicada. A tela de resultado saiu na etapa 8A com
+// a geração por modelo; as 20 páginas de caminho entram na 8B, geradas de
+// conteudo/*.json.
 const PAGINAS = [
   { arquivo: "index.html", titulo: "DECISIVAS — Com quem você quer falar hoje?", atual: "inicio" },
-  { arquivo: "resultado.html", titulo: "DECISIVAS — Caminhos para a mensagem", atual: "inicio" },
   { arquivo: "sobre.html", titulo: "DECISIVAS — Sobre o projeto", atual: "sobre" },
   { arquivo: "privacidade.html", titulo: "DECISIVAS — Política de privacidade", atual: null },
 ];

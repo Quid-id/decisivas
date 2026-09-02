@@ -14,15 +14,20 @@ faltando.
 | `logo-quid.svg` | logo da Quid, monocromático off-white | vetor, 24 px de altura na tela |
 | `logo-brief.svg` | logo do BRIEF, monocromático off-white | vetor, 24 px de altura na tela |
 | `card-jovens.png` | card semiótico do público jovens | 1000 × 1250 |
-| `card-60-mais.png` | card semiótico do público 60+ | 1000 × 1250 |
-| `card-beneficiarias.png` | card semiótico das mulheres beneficiárias | 1000 × 1250 |
-| `card-2-a-5-sm.png` | card semiótico das mulheres de 2 a 5 salários mínimos | 1000 × 1250 |
+| `card-70-mais.png` | card semiótico do público 70+ | 1000 × 1250 |
+| `card-mulheres-beneficiarias.png` | card semiótico das mulheres beneficiárias | 1000 × 1250 |
+| `card-mulheres-2-a-5-sm.png` | card semiótico das mulheres de 2 a 5 salários mínimos | 1000 × 1250 |
 | `favicon.svg` | favicon vetorial | vetor |
 | `favicon-512.png` | favicon rasterizado | 512 × 512 |
 
-O nome curto de cada público (`jovens`, `60-mais`, `beneficiarias`, `2-a-5-sm`)
-vem do campo `slug` de `dados/vocabulario.json`, que é a fonte única do
-vocabulário — se um slug mudar lá, o nome do arquivo muda junto.
+O nome curto de cada público (`jovens`, `70-mais`, `mulheres-beneficiarias`,
+`mulheres-2-a-5-sm`) vem do campo `slug` de `dados/vocabulario.json`, que é a
+fonte única do vocabulário — se um slug mudar lá, o nome do arquivo muda junto.
+É o mesmo slug que aparece na URL de cada caminho.
+
+A fonte Inclusive Sans passa a ser servida pelo próprio site (etapa 8B): os
+arquivos vão em `assets/fonts/`, e enquanto não chegarem as telas caem na pilha
+de fontes do sistema.
 
 Enquanto não houver nenhum `banner-*`, o build escreve no cabeçalho a faixa
 provisória com o padrão de linhas coloridas do protótipo v3.

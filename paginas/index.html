@@ -83,9 +83,15 @@
         : "Escolha um público e um tema.";
   }
 
+  // O caminho é uma página estática, gerada no build a partir de conteudo/:
+  // /caminhos/<slug do público>/<slug do tema>. Os slugs vêm do vocabulário,
+  // fonte única, e as 20 páginas entram na sub-etapa 8B.
   document.getElementById("btn-caminhos").addEventListener("click", () => {
-    const parametros = new URLSearchParams({ publico: selecao.publico, tema: selecao.tema });
-    window.location.href = `/resultado?${parametros}`;
+    const slugDe = (lista, id) => (lista.find((v) => v.id === id) ?? {}).slug;
+    const publico = slugDe(PUBLICOS, selecao.publico);
+    const tema = slugDe(TEMAS, selecao.tema);
+    if (!publico || !tema) return;
+    window.location.href = `/caminhos/${publico}/${tema}`;
   });
 
   // Pergunta em destaque: a primeira da configuração é a padrão; as demais

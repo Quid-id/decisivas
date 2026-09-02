@@ -5,26 +5,19 @@ name = "decisivas"
 main = "src/worker.js"
 compatibility_date = "2026-08-28"
 
-# Build: gera public/tokens.css a partir de brand/tokens.css (origem única).
-# Roda antes de `wrangler dev` e `wrangler deploy`, também no deploy por push.
+# Build: monta o site em public/ a partir de brand/, paginas/, parciais/ e
+# dados/ (docs/06, "O build, e o que ele gera"). Roda antes de `wrangler dev` e
+# `wrangler deploy`, também no deploy por push.
 [build]
 command = "node scripts/sincroniza-tokens.js"
-# Além de brand/, o build depende de prompts/ e dados/: mudar uma planilha de
-# regra ou o texto de um prompt tem de refazer prompts/gerado/ no dev.
-watch_dir = ["brand", "prompts", "dados"]
+# Diretórios de origem: mudar um token, um parcial, uma tela, a configuração ou
+# o conteúdo refaz o build no dev. `prompts/` saiu na etapa 8A.
+watch_dir = ["brand", "paginas", "parciais", "dados", "conteudo", "assets"]
 
 # Logs do Worker no painel (aba Logs). Declarado aqui porque o deploy
 # sobrescreve a configuração feita pelo painel.
 [observability]
 enabled = true
-
-# Permite ao Worker importar arquivos como texto: docs/08-regras-de-formato.md
-# entra no prompt direto do arquivo, e dados/versao-acervo.txt carimba as
-# respostas com a versão do acervo, a cada build.
-[[rules]]
-type = "Text"
-globs = ["**/*.md", "**/*.txt"]
-fallthrough = true
 
 # Site estático. run_worker_first garante que /api/* sempre passa pelo
 # Worker (e portanto pela checagem de AGENT_ENABLED) antes dos assets.
@@ -33,9 +26,9 @@ directory = "./public"
 binding = "ASSETS"
 run_worker_first = ["/api/*"]
 
-# Banco D1 com o acervo etiquetado (schema em docs/02-schema.sql).
-# O database_id é preenchido depois de `wrangler d1 create decisivas`
-# (tarefa 3 de docs/05-comandos-claude-code.md).
+# Banco D1 com o acervo etiquetado (schema em docs/02-schema.sql). O Worker
+# não consulta o banco nesta etapa: o binding fica para o "Explorar o acervo"
+# (etapa 10), que é o único a voltar a lê-lo.
 [[d1_databases]]
 binding = "DB"
 database_name = "decisivas"
@@ -44,18 +37,14 @@ database_id = "adaab799-bffa-4f43-88eb-1cf9607e732c"
 # Variáveis de ambiente NÃO secretas. Segredos (OPENROUTER_API_KEY etc.)
 # nunca entram aqui: local em .dev.vars, produção no painel do Cloudflare.
 [vars]
-# Interruptor de desligamento: "false" derruba toda rota do agente para a
-# resposta estática de indisponibilidade.
+# Interruptor de desligamento. Depois da etapa 8A ele governa uma coisa só: a
+# rota /api/explorar, o "Explorar o acervo", que a 8B cria desligada. As
+# páginas são estáticas e não passam por ele.
 AGENT_ENABLED = "true"
-# Modelo chamado via OpenRouter (id SEM o prefixo "openrouter/").
-# ATENÇÃO: cada deploy substitui as variáveis de texto do painel pelas
-# deste arquivo — mude o modelo AQUI, não no painel.
-MODEL_ID = "openai/gpt-5.6-sol"
-# Data da última carga do acervo, exibida na identificação da página.
-# Muda junto com dados/versao-acervo.txt, no mesmo commit da carga.
-ACERVO_ATUALIZADO_EM = "02/09/2026"
-# Cache de páginas geradas (docs/06): "false" ignora os dois níveis
-# (servidor e navegador) e gera tudo a cada requisição.
-# Ligado na etapa 7, antes do lote de geração: com "false" a geração é paga e
-# não grava nada, e a rota nem prepara os gatilhos das tags.
-CACHE_ENABLED = "true"
+
+# Saíram na etapa 8A, com a geração de página por modelo:
+# MODEL_ID              — não há chamada a modelo em nenhuma rota; volta na 10
+# CACHE_ENABLED         — as tabelas de cache saíram na migração 004
+# ACERVO_ATUALIZADO_EM  — a data que a página mostra é a da revisão do texto,
+#                         que vem de conteudo/; a versão do acervo continua em
+#                         dados/versao-acervo.txt
