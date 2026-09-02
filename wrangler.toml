@@ -9,7 +9,9 @@ compatibility_date = "2026-08-28"
 # Roda antes de `wrangler dev` e `wrangler deploy`, também no deploy por push.
 [build]
 command = "node scripts/sincroniza-tokens.js"
-watch_dir = "brand"
+# Além de brand/, o build depende de prompts/ e dados/: mudar uma planilha de
+# regra ou o texto de um prompt tem de refazer prompts/gerado/ no dev.
+watch_dir = ["brand", "prompts", "dados"]
 
 # Logs do Worker no painel (aba Logs). Declarado aqui porque o deploy
 # sobrescreve a configuração feita pelo painel.

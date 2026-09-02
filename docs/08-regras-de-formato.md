@@ -4,6 +4,8 @@ Este documento é a governança de formatos da plataforma. **O agente nunca inve
 
 Quem edita este arquivo é a equipe de conteúdo. Mudou aqui, muda o comportamento da plataforma inteira no próximo deploy.
 
+> **Precedência (etapa 5).** As regras gerais da planilha `dados/Regra_geral_formatos.xlsx` (RG) entram no mesmo prompt que este documento. **Em conflito entre as duas, a planilha prevalece.** Este documento continua sendo a fonte dos limites de cada formato — extensão, estrutura e cuidados próprios —, e a Parte 1 abaixo é o texto de origem das RG: divergiu, é sinal de que uma das duas ficou para trás.
+
 ---
 
 ## Parte 1 — Regras gerais

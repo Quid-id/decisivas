@@ -6,11 +6,11 @@ O filtro é camada de código, sem IA (etapa 4 de `docs/DECISIVAS_especificacao_
 
 | Bloco da página | Consulta no banco | Mínimo | Abaixo do mínimo |
 |---|---|---|---|
-| O gatilho | publico + macronarrativa, tipo achado (derivado dos achados) | 2, sendo 1 forte (o mesmo da pesquisa) | Lacuna declarada |
-| O que ancorar | publico + macronarrativa, tipo funciona | 3 | Lacuna declarada |
-| O que evitar | publico + macronarrativa, tipo afasta | 3 | Lacuna declarada |
-| Por que isso importa (contexto) | publico + macronarrativa, tipos contexto ou achado | 1 | Lacuna declarada |
-| O que a pesquisa mostra | publico + macronarrativa, tipo achado | 2, sendo 1 forte | Lacuna declarada |
+| O gatilho | publico + macronarrativa, tipo achado | 1 achado de **qualquer força** (RGT07) | Lacuna declarada |
+| O que ancorar | publico + macronarrativa, tipo funciona | 1; entrega **até 3**, pelas RS | Lacuna declarada |
+| O que evitar | publico + macronarrativa, tipo afasta | 1; entrega **até 3**, pelas RS | Lacuna declarada |
+| Por que falar (contexto) | publico + macronarrativa, tipo **contexto** | 1 (achado não substitui) | Lacuna declarada |
+| O que a pesquisa mostra | publico + macronarrativa, tipo achado | 1 achado de qualquer força | Lacuna declarada |
 | Tags de pauta | publico + macronarrativa, contagem de trechos por pauta | 3 trechos na pauta | A pauta não vira tag |
 | O gatilho de uma pauta | publico + macronarrativa, pauta selecionada + `comunicação e linguagem` | o mesmo do gatilho geral, aplicado ao recorte da pauta | Lacuna declarada naquela tag |
 | Hábitos de mídia | nenhuma: a consulta por pauta `consumo de mídia` saiu na etapa 4, porque essa pauta não existe entre as 59 da migração 003 | — | Lacuna declarada, sempre, até a planilha própria de hábitos de mídia chegar |
@@ -35,6 +35,14 @@ O filtro conta os trechos de cada pauta do cruzamento. **Pauta com 3 trechos ou 
 Para cada tag, o filtro monta um recorte próprio — os trechos daquela pauta mais os da `comunicação e linguagem` — do qual o agente entrega **só o gatilho**. A adaptação de formato por pauta fica para depois do beta.
 
 Cada recorte (o geral e o de cada pauta) tem entrada e validade de cache próprias: mexer numa pauta invalida aquela tag e o recorte geral, e não as outras tags.
+
+## Blocos de lista: até três, mais a lacuna
+
+`ancorar` e `evitar` entregam **o número de trechos elegíveis, no máximo três** (RS06). Quem decide quantos é o código, e o número vai na mensagem ao modelo; o modelo escolhe **quais**, pelas regras de seleção. Com menos de três, a página traz os itens que vieram **e** a caixa de lacuna abaixo deles — nunca no lugar deles.
+
+No acervo v5 isso aparece em 3 dos 20 cruzamentos, todos em `ancorar`: `60+` × `brasil e pertencimento` (1), `60+` × `dinheiro no bolso` (2) e `60+` × `trabalho digno` (2). Nenhum cruzamento tem menos de três em `evitar`.
+
+Com o mínimo de `contexto` restrito ao tipo `contexto`, três cruzamentos ficam com "por que falar" em lacuna: `jovens` × `brasil e pertencimento`, `mulheres beneficiárias` × `brasil e pertencimento` e `mulheres de 2 a 5 salários mínimos` × `família e cuidado`. É lacuna de acervo, não de código.
 
 ## Regras transversais
 

@@ -109,23 +109,29 @@
       return n;
     }
 
-    function caixaLacuna() {
-      return el("div", "lacuna", AVISO_LACUNA);
+    function caixaLacuna(aviso) {
+      return el("div", "lacuna", aviso ?? AVISO_LACUNA);
     }
 
     // Lacuna declarada: a caixa de aviso sempre aparece; o campo nunca some.
     function preencheTexto(idBloco, campo, classe) {
       const bloco = document.getElementById(idBloco);
-      if (!campo || campo.lacuna) { bloco.appendChild(caixaLacuna()); return; }
+      if (!campo || campo.lacuna) { bloco.appendChild(caixaLacuna(campo?.aviso)); return; }
       bloco.appendChild(el("p", classe ?? null, campo.texto));
     }
 
+    // Bloco de lista (ancorar, evitar): mostra os itens que vieram — de zero a
+    // três — e, quando são menos de três, a caixa de lacuna ABAIXO deles, nunca
+    // no lugar deles (contrato da etapa 5, RS06).
     function preencheItens(idBloco, campo) {
       const bloco = document.getElementById(idBloco);
-      if (!campo || campo.lacuna) { bloco.appendChild(caixaLacuna()); return; }
-      const lista = el("ul", "lista-limpa");
-      for (const item of campo.itens) lista.appendChild(el("li", null, item));
-      bloco.appendChild(lista);
+      const itens = campo?.itens ?? [];
+      if (itens.length) {
+        const lista = el("ul", "lista-limpa");
+        for (const item of itens) lista.appendChild(el("li", null, item));
+        bloco.appendChild(lista);
+      }
+      if (!campo || campo.lacuna) bloco.appendChild(caixaLacuna(campo?.aviso));
     }
 
     function renderiza(dados) {

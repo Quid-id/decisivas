@@ -6,6 +6,7 @@
 // public/tokens.css é gerado e está fora do versionamento.
 
 const fs = require("node:fs");
+const { escreveSeMudou } = require("./escreve-se-mudou");
 
 const ORIGEM = "brand/tokens.css";
 const DESTINO = "public/tokens.css";
@@ -15,7 +16,7 @@ const cabecalho =
   "   Edite brand/tokens.css; a cópia é refeita por scripts/sincroniza-tokens.js. */\n";
 
 const conteudo = fs.readFileSync(ORIGEM, "utf8");
-fs.writeFileSync(DESTINO, cabecalho + conteudo, "utf8");
+escreveSeMudou(DESTINO, cabecalho + conteudo);
 console.log(`tokens sincronizados: ${ORIGEM} → ${DESTINO}`);
 
 // Também gera public/versao-acervo.js, com os dois valores de que o cache do
@@ -43,12 +44,11 @@ function leCacheEnabled() {
   return "true";
 }
 const cacheHabilitado = leCacheEnabled() !== "false";
-fs.writeFileSync(
+escreveSeMudou(
   "public/versao-acervo.js",
   "// ARQUIVO GERADO no build (scripts/sincroniza-tokens.js) — NÃO EDITAR AQUI.\n" +
     `window.VERSAO_ACERVO = ${JSON.stringify(versao)};\n` +
-    `window.CACHE_HABILITADO = ${cacheHabilitado};\n`,
-  "utf8"
+    `window.CACHE_HABILITADO = ${cacheHabilitado};\n`
 );
 console.log(`versão do acervo publicada: ${versao} | cache no navegador: ${cacheHabilitado ? "ligado" : "desligado"}`);
 
@@ -56,12 +56,22 @@ console.log(`versão do acervo publicada: ${versao} | cache no navegador: ${cach
 // o Worker e os scripts leem (dados/vocabulario.json). É o que impede as listas
 // de divergirem entre servidor e tela.
 const vocabulario = JSON.parse(fs.readFileSync("dados/vocabulario.json", "utf8"));
-fs.writeFileSync(
+escreveSeMudou(
   "public/vocabulario.js",
   "// ARQUIVO GERADO no build a partir de dados/vocabulario.json — NÃO EDITAR AQUI.\n" +
-    `window.VOCABULARIO = ${JSON.stringify(vocabulario)};\n`,
-  "utf8"
+    `window.VOCABULARIO = ${JSON.stringify(vocabulario)};\n`
 );
 console.log(
   `vocabulário publicado: ${vocabulario.publicos.length} públicos, ${vocabulario.macronarrativas.length} temas`
 );
+
+// E monta os prompts do agente a partir das planilhas de regra e do documento
+// de formatos (etapa 5). O prompt de sistema vive num só lugar — prompts/ —, e
+// o build o compõe em prompts/gerado/, que é o que o Worker importa e o que
+// scripts/testa-modelos.js lê. Ver scripts/gera-prompts.js.
+require("./gera-prompts")
+  .main()
+  .catch((e) => {
+    console.error("FALHA ao gerar os prompts:", e.message);
+    process.exit(1);
+  });
