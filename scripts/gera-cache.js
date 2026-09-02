@@ -1,7 +1,7 @@
 // DECISIVAS — gera o cache de páginas em lote (nível 1, tabela paginas).
 //
-// Percorre todos os cruzamentos dos vocabulários fechados (7 públicos × 5
-// macronarrativas = 35) chamando POST /api/match no Worker indicado. O
+// Percorre todos os cruzamentos dos vocabulários fechados (4 públicos × 5
+// macronarrativas = 20) chamando POST /api/match no Worker indicado. O
 // próprio Worker guarda cada página gerada no cache; cruzamento sem acervo
 // suficiente vira página de lacunas, sem custo de modelo.
 //

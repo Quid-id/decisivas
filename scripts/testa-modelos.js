@@ -14,7 +14,7 @@
 // O que o script faz:
 // 1. Confere o saldo de créditos da conta (GET /api/v1/credits).
 // 2. Envia o MESMO prompt de teste — o prompt de sistema real de
-//    docs/03-regras-do-agente.md com três trechos de data/amostra.csv
+//    docs/03-regras-do-agente.md com três trechos da amostra antiga
 //    (match idosos × dinheiro no bolso) — para cada modelo da lista MODELOS.
 // 3. Imprime por modelo: nome, tempo de resposta, tokens de entrada e
 //    saída, custo informado pela API e se a resposta é o JSON esperado.
@@ -86,7 +86,9 @@ Formato: {"gatilho": {"texto": "...", "ids": []},
           "contexto": {"texto": "...", "ids": []},
           "pesquisa": {"texto": "...", "ids": []}}`;
 
-// Três trechos reais de data/amostra.csv (match: idosos × dinheiro no bolso).
+// Três trechos da amostra antiga, com a taxonomia ANTIGA (idosos × dinheiro no
+// bolso). Este script é reescrito na etapa 5, quando o prompt passa a viver num
+// só lugar; até lá o exemplo aqui não reflete a taxonomia em uso.
 // Poucos trechos de propósito: mede o caso real, incluindo o dever de
 // devolver LACUNA nos campos sem evidência suficiente.
 const PROMPT_USUARIO = `Match: publico = "idosos", macronarrativa = "dinheiro no bolso".

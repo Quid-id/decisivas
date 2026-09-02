@@ -2,6 +2,8 @@
 
 Cole um por vez, confira o resultado, siga para o próximo. Cada comando assume que o anterior foi concluído. O Claude Code lê o `CLAUDE.md` e os `docs/` sozinho; os comandos fazem referência a eles.
 
+> **Registro histórico.** Esta é a sequência original, das tarefas 1 a 8. A partir da etapa 0 a sequência em vigor é a de `docs/DECISIVAS_especificacao_claude_code.md` (versão 2), e é ela que manda. Duas coisas citadas aqui saíram do projeto na etapa 3: a amostra de desenvolvimento (`data/amostra.csv`) e o script que gerava o `seed.sql` a partir dela (`scripts/csv-para-seed.js`) — a carga oficial agora é `scripts/carga-acervo.js` lendo `dados/DECISIVAS_acervo_v5.xlsx`, e a pasta `data/` passou a ser `dados/`. Os caminhos nos comandos abaixo estão como foram escritos na época; não os siga ao pé da letra.
+
 ## 1. Estrutura do projeto
 
 > Leia o CLAUDE.md e os arquivos de docs/. Crie a estrutura inicial do projeto: site estático em `public/` (por enquanto uma página placeholder), Worker em `src/worker.js` com as rotas `/api/match` e `/api/formato` respondendo um JSON de exemplo, e o `wrangler.toml` configurado para servir o site e o Worker juntos, já com a declaração do banco D1 chamado `decisivas` e as variáveis de ambiente `AGENT_ENABLED` e `MODEL_ID`. Crie o `.gitignore` incluindo `.dev.vars` e o arquivo `.dev.vars.example` mostrando quais variáveis existem sem os valores. Não coloque nenhuma chave em nenhum arquivo.

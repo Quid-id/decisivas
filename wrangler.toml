@@ -17,7 +17,7 @@ watch_dir = "brand"
 enabled = true
 
 # Permite ao Worker importar arquivos como texto: docs/08-regras-de-formato.md
-# entra no prompt direto do arquivo, e data/versao-acervo.txt carimba as
+# entra no prompt direto do arquivo, e dados/versao-acervo.txt carimba as
 # respostas com a versão do acervo, a cada build.
 [[rules]]
 type = "Text"
@@ -49,6 +49,9 @@ AGENT_ENABLED = "true"
 # ATENÇÃO: cada deploy substitui as variáveis de texto do painel pelas
 # deste arquivo — mude o modelo AQUI, não no painel.
 MODEL_ID = "openai/gpt-5.6-sol"
+# Data da última carga do acervo, exibida na identificação da página.
+# Muda junto com dados/versao-acervo.txt, no mesmo commit da carga.
+ACERVO_ATUALIZADO_EM = "02/09/2026"
 # Cache de páginas geradas (docs/06): "false" ignora os dois níveis
 # (servidor e navegador) e gera tudo a cada requisição.
 # ATENÇÃO: em "false" toda requisição chama o modelo pago. Voltar para

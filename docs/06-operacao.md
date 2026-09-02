@@ -42,46 +42,89 @@ npx wrangler d1 execute decisivas --remote --file=docs/02-schema.sql
 O schema só é aplicado em banco vazio. Para recriar o banco local do zero,
 apague a pasta `.wrangler/` e rode o comando de novo.
 
-### Gerar o seed a partir da planilha
+### Gerar os blocos de carga a partir da planilha
 
 ```sh
-# desenvolvimento: usa a amostra do repositório (documentos ficam A PREENCHER)
-node scripts/csv-para-seed.js data/amostra.csv
-
-# carga oficial: CSV da Fila de revisão + CSV da aba Cabeçalhos
-node scripts/csv-para-seed.js export-trechos.csv export-cabecalhos.csv
+node scripts/carga-acervo.js
 ```
 
-O script filtra apenas linhas com decisão `aceitar` ou `corrigir e aceitar`
-(quando a coluna existir), valida os vocabulários fechados, recusa
-macronarrativa `CONFERIR` e alerta `VETO`, nunca inclui o motivo interno de
-restrição, e imprime o relatório do que aceitou e recusou. O resultado é o
-arquivo `seed.sql` (gerado, fora do versionamento), que começa limpando as
-tabelas `trechos` e `documentos` antes dos INSERTs — aplicá-lo substitui a
-carga anterior por inteiro.
+O script lê `dados/DECISIVAS_acervo_v5.xlsx` (aba `acervo`) e
+`dados/DECISIVAS_pautas_de_para_v1.xlsx` (aba `pautas_de_para`, só para
+conferir a chave estrangeira), valida cada linha contra as **restrições da
+migração 003** e grava os blocos em `carga-003/`. O que é verificado, com o
+número da linha da planilha em cada recusa:
 
-### Aplicar o seed
+- `id` presente e único no arquivo;
+- `texto` presente;
+- `publico` e `tipo` nos vocabulários fechados de `dados/vocabulario.json`;
+- `macronarrativa` e `pauta` vazias **somente** quando `tipo = 'perfil'`;
+- `pauta` existente na tabela `pautas` (as 59 da planilha de/para);
+- `forca` preenchida **somente** em `tipo = 'achado'`, e obrigatória nele;
+- `link` vazio (nesta versão não há links na página — regra 2 do `CLAUDE.md`).
+
+Qualquer problema **aborta** a geração e lista todas as linhas recusadas: não
+existe carga parcial. Sem problema nenhum, o script imprime o relatório de
+contagens (por público, tema, tipo e força; perfil por público; cruzamentos
+cobertos; pautas usadas) e escreve os arquivos.
+
+O primeiro bloco (`01-limpeza.sql`) apaga `trechos`, `paginas` e `formatos`:
+a carga **substitui** o acervo por inteiro, e página em cache da carga
+anterior não sobrevive a ela. O último (`09-verificacao.sql`) é o `SELECT` de
+conferência; para o acervo v5 ele devolve:
+
+```
+trechos 2405 | cruzamentos 20 | perfil 91 | achados_forte 94 | pautas_usadas 59 | paginas 0 | formatos 0
+```
+
+### Tamanho dos blocos, e por que são nove
+
+O D1 recusa comando acima de **96 KiB** com `statement too long:
+SQLITE_TOOBIG` (medido nesta base: 94,8 KB passa, 97,8 KB falha). Por isso os
+INSERTs saem agrupados em blocos de até 90 KB — margem sobre o teto —, o que
+dá sete blocos para as 2.405 linhas, mais a limpeza e a verificação: nove
+arquivos, o menor número que o console aceita.
+
+Para mudar o alvo: `KB_POR_BLOCO=80 node scripts/carga-acervo.js`. Subir muito
+acima de 90 encosta no teto do D1 e a carga falha no meio.
+
+### Aplicar a carga
+
+Com terminal:
 
 ```sh
 # local
-npx wrangler d1 execute decisivas --local --file=seed.sql
+for f in carga-003/*.sql; do npx wrangler d1 execute decisivas --local --file="$f"; done
 
 # remoto (carga oficial — confira o relatório do script antes)
-npx wrangler d1 execute decisivas --remote --file=seed.sql
+for f in carga-003/*.sql; do npx wrangler d1 execute decisivas --remote --file="$f"; done
 ```
 
-### Sem terminal: pelo painel do Cloudflare
-
-O painel tem um console SQL que dispensa o wrangler:
+Sem terminal, pelo console do painel:
 
 1. dash.cloudflare.com → **Storage & Databases → D1 SQL Database → decisivas** → aba **Console**.
-2. Cole o conteúdo de `docs/02-schema.sql` e execute (uma vez só, em banco vazio).
-3. Cole o `seed.sql` em partes (o console não aceita arquivos grandes de uma
-   vez; use blocos de ±60 comandos) e execute as partes **na ordem**. A parte 1
-   começa com os `DELETE`, então recomeçar do zero é executar de novo a partir
-   da parte 1 — nunca reexecutar uma parte do meio isolada, porque os INSERTs
-   duplicados falham por chave primária.
-4. Confira com `SELECT COUNT(*) FROM trechos;`.
+2. Cole **um arquivo por vez**, na ordem numerada, do `01` ao `09`, e confira
+   que não houve erro antes de passar ao próximo.
+3. Recomeçar é executar de novo **a partir do `01`** — nunca reexecutar um
+   bloco do meio isolado, porque os INSERTs duplicados falham por chave
+   primária.
+4. A conferência é o bloco `09`, com os números da seção anterior.
+
+Sobre o "um comando por vez" da seção de migrações, mais abaixo: lá a regra
+existe porque a ordem entre os comandos é que importa e cada um tem de ser
+conferido sozinho antes do seguinte. Aqui o conteúdo é homogêneo — INSERTs
+independentes —, então cada arquivo vai colado inteiro. Se o console recusar a
+colagem inteira, o limite é dele e não do D1: corte o arquivo em pedaços
+menores, sempre em uma linha que **comece** com `INSERT`, mantendo a ordem.
+Nunca corte no meio de um comando.
+
+### Registro de cargas do acervo
+
+| Acervo | Blocos | Linhas | Remoto |
+|---|---|---|---|
+| v5 (`dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`) | `carga-003/01` a `09` | 2.405 trechos | **Não aplicada ainda.** Os blocos estão validados contra uma réplica local do schema pós-003 (os nove rodaram, o bloco 09 devolveu os números esperados, e a segunda passada não duplicou nada) |
+
+A linha só vira "aplicada" com a saída do bloco `09` do remoto em mãos, como no
+registro de migrações — a regra de quem aplica é a mesma, mais abaixo.
 
 ### Conferir a carga
 
@@ -93,13 +136,18 @@ npx wrangler d1 execute decisivas --local --command="SELECT COUNT(*) AS trechos 
 
 ### Depois de CADA carga: versão do acervo e regeneração do cache
 
-A carga muda o acervo, e duas coisas dependem dele:
+A carga muda o acervo, e três coisas dependem dele:
 
-1. **Atualize `data/versao-acervo.txt`** com uma marca nova (ex.:
-   `2026-09-15-carga-oficial-1`) **no mesmo commit do seed**. Essa marca vai
-   para o site no deploy e é o que faz o navegador das pessoas descartar
-   páginas guardadas da carga anterior.
-2. **Regenere o cache de páginas** (obrigatório — ver seção Cache abaixo):
+1. **Atualize `dados/versao-acervo.txt`** com uma marca nova (ex.:
+   `2026-09-15-carga-oficial-1`) **no mesmo commit dos blocos de carga**. Essa
+   marca vai para o site no deploy e é o que faz o navegador das pessoas
+   descartar páginas guardadas da carga anterior.
+2. **Atualize `ACERVO_ATUALIZADO_EM`** em `[vars]` do `wrangler.toml`, no
+   mesmo commit, com a data em `dd/mm/aaaa`. É o que a página mostra na
+   identificação — a marca do item 1 é técnica, esta é a que a pessoa lê. As
+   duas mudam juntas, sempre; separadas, a tela diz uma data e o cache
+   raciocina com outra.
+3. **Regenere o cache de páginas** (obrigatório — ver seção Cache abaixo):
 
 ```sh
 BASE_URL=https://SEU-DOMINIO node scripts/gera-cache.js
@@ -134,8 +182,10 @@ dados, e a antiga é removida em uma migração posterior, depois do deploy.
 
 ### Procedimento pelo console do painel (sem terminal)
 
-O console SQL do painel executa **um comando por vez**, então cada comando da
-migração vai sozinho, em uma linha, sem comentários:
+Na migração, **cada comando vai sozinho** no console, em uma linha, sem
+comentários. A ordem entre eles é que importa e cada um precisa ser conferido
+antes do seguinte — é a diferença em relação aos blocos de carga, acima, que
+são INSERTs independentes e vão colados inteiros:
 
 1. dash.cloudflare.com → **Storage & Databases → D1 SQL Database → decisivas**
    → aba **Console**.
@@ -397,7 +447,7 @@ Limitação conhecida: mudanças de **prompt** não entram na validade. Editar
 nada — nesses deploys, limpe o cache à mão (ver o fim desta seção).
 
 **Nível 2 — navegador (localStorage).** A página de resultado guarda as
-páginas já vistas com a marca de versão de `data/versao-acervo.txt`
+páginas já vistas com a marca de versão de `dados/versao-acervo.txt`
 (publicada no site no build como `/versao-acervo.js`). Versão igual: exibe
 imediatamente, sem chamar o servidor. Versão diferente: descarta e busca.
 Guarda somente conteúdo de página (nunca dado da pessoa), com teto de 12
@@ -411,7 +461,7 @@ mesmo ciclo que regenera o arquivo, então os dois lados nunca discordam. Com
 o cache desligado, o front não lê nada guardado e **apaga todas** as páginas
 que tinha, não só a do match atual.
 
-**Gerar o cache em lote** (`scripts/gera-cache.js`): percorre os 35
+**Gerar o cache em lote** (`scripts/gera-cache.js`): percorre os 20
 cruzamentos chamando `/api/match`; cruzamento sem acervo suficiente vira
 página de lacunas, sem custo de modelo. Reporta quantas páginas gerou,
 quantas já estavam em cache, quantas ficaram em lacuna e o custo total do
