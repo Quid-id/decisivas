@@ -172,14 +172,19 @@ linha só vira "aplicada" com o resultado da verificação em mãos.
 | Nº | Commit | O que mudou | Remoto |
 |---|---|---|---|
 | 001 | schema inicial | Tabelas `documentos`, `trechos`, `recursos`, `registros`; índices `idx_trechos_match`, `idx_trechos_midia`, `idx_recursos_match` | Aplicada em 08/2026, pelo console |
-| 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Aguardando aplicação.** Comandos abaixo revalidados em 02/09/2026 contra réplica local do schema remoto: os três aplicam sem erro e o bloco de verificação devolve `1, 1, 1`. Foi a ausência desta migração que causou `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
+| 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Aplicada em 02/09/2026, pelo console.** Verificação devolveu `1, 1, 1`. Foi a ausência desta migração que causou `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
 
-A migração 002 é a **etapa 0** de `docs/DECISIVAS_especificacao_claude_code.md`:
-o código publicado já a espera, e ela não muda nenhuma linha de código. Assim que
-o bloco de verificação devolver `1, 1, 1` no remoto, trocar a coluna de estado da
-linha 002 por `Aplicada em <data>, pelo console` e commitar a mudança.
+A migração 002 foi a **etapa 0** de `docs/DECISIVAS_especificacao_claude_code.md`:
+o código publicado já a esperava, e ela não mudou nenhuma linha de código.
 
-Ela entra **como está**, com a chave sem `pauta`. A coluna `pauta` nas duas
+O que muda em produção com ela aplicada: a gravação em `registros` volta a
+funcionar, e a linha `FALHA AO GRAVAR REGISTRO` deve parar de aparecer nos logs.
+As tabelas `paginas` e `formatos` passam a existir, mas seguem intocadas
+enquanto `CACHE_ENABLED` estiver em `"false"` — o interruptor evita o banco antes
+de qualquer consulta, então as linhas `cache de páginas indisponível` e
+`cache de formatos indisponível` já não apareciam por esse motivo.
+
+Ela entrou **como está**, com a chave sem `pauta`. A coluna `pauta` nas duas
 tabelas de cache é assunto da migração 003 (etapa 2), que é aditiva sobre estas.
 
 Comandos da migração 002, um por bloco:
