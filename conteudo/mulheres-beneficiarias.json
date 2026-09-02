@@ -1,0 +1,126 @@
+{
+"publico": "mulheres beneficiárias",
+"nome": "Mulheres beneficiárias",
+"quem_e": {
+ "destaque": {"n": "84%", "titulo": "dos lares do Bolsa Família", "texto": "têm uma mulher como responsável. São 15,8 milhões de mulheres, e 74,8% delas são negras."},
+ "texto": "Mulheres são 52,84% do eleitorado brasileiro, 83,8 milhões de eleitoras. Chefiam mais de 41 milhões de lares e concentram mais de 84% da titularidade dos programas de transferência de renda, por isso sentem primeiro qualquer variação na qualidade dos serviços públicos. Costumam decidir nas semanas finais, por critérios práticos de estabilidade familiar, não por identidade política. Na faixa de até 2 salários mínimos, a reação é ao custo de vida imediato: alimento, gás, transporte. Os programas sociais são lidos como direito adquirido. Essas mulheres não se contentam com a sobrevivência: aspiram a uma vida com lazer, descanso e consumo. Só o Bolsa Família alcança 18,7 milhões de famílias, 84% delas chefiadas por mulher; a escolaridade mais frequente é o ensino médio completo, e um terço tem fundamental incompleto."
+},
+"como_chegar": [
+ {"titulo": "Onde estão", "texto": "Televisão e internet empatadas na renda de até 2 salários mínimos: 45% contra 44%, o único recorte em que isso acontece. Quem tem só o fundamental incompleto vive na televisão (56%). WhatsApp é o canal, e é familiar: 72,6% das conversas em que as mulheres se informam são com parentes e 68% dos grupos são de família. Instagram é a plataforma delas (39% a apontam como principal); TikTok chega a 46,9%; Facebook e Kwai ainda funcionam neste público, e só nele.", "fonte": "DataSenado 2025; Painel TIC 2025; Aláfia Lab 2025"},
+ {"titulo": "Como decidem no que acreditar", "texto": "É o público que menos confia na mídia e que menos se interessa por política: 27,6% se dizem nada interessadas. Em política, a televisão assume: 46,3% contra 45% das redes. Portal de notícia praticamente não entra (27% nas classes D e E). Nenhuma pesquisa de mídia identifica quem recebe benefício; o retrato vem dos recortes de renda e escolaridade mais próximos.", "fonte": "Aláfia Lab 2025; Painel TIC 2025"},
+ {"titulo": "O que isso pede do material", "texto": "WhatsApp em conversa e grupo de família é o caminho mais curto: o material precisa funcionar encaminhado por uma parenta, não publicado por uma instituição. Instagram e TikTok em vídeo curto e falado. Link para portal e texto longo não chegam. Entrar pelo tema político perde a pessoa: o gancho é a situação concreta, com a política aparecendo como consequência.", "fonte": "Hábitos de mídia dos quatro públicos, 2026"}
+],
+"paginas": {
+"dinheiro no bolso": {
+ "titulo": "Mulheres beneficiárias × Dinheiro no bolso",
+ "linha": "Dinheiro é o que permite organizar a casa antes que a falta vire emergência.",
+ "por_que": {
+  "texto": ["Mais de 41 milhões de lares brasileiros são chefiados por mulheres. Elas gerenciam o orçamento doméstico e sentem primeiro qualquer variação de preço e de serviço público. Mais de 84% das titularidades dos programas de transferência de renda são delas.", "A força do benefício, na pesquisa, vem da regularidade: saber que o dinheiro cai permite planejar. Ele não elimina a dificuldade, mas cria margem mínima de previsibilidade para organizar a casa. \"Você chega no final do mês e tem aquela certeza que o dinheiro do gás já está reservado.\" A comparação com quatro ou cinco anos atrás é ambivalente: há avanços em renda, trabalho e serviços, e eles convivem com custo alto e a sensação de que a vida ainda exige esforço."],
+  "dados": [
+   {"n": "84%", "titulo": "das titularidades", "texto": "dos programas de transferência de renda são de mulheres. Elas administram o orçamento e transformam política pública em proteção real para os filhos."},
+   {"titulo": "Regularidade é o valor", "texto": "Saber que o dinheiro cai na data permite planejar antes de a falta virar emergência. O benefício transforma aperto em alguma margem de controle."},
+   {"titulo": "Medo de perder", "texto": "O medo de perder o benefício existe, e é mais por burocracia (bloqueio, suspensão, cadastro) do que por mudança política. Perder o benefício é ameaça à organização da casa inteira."}
+  ]},
+ "funciona": [
+  {"titulo": "Dinheiro que segura, organiza e abre margem", "texto": "Prometer menos \"dinheiro que resolve\" e mais dinheiro que ajuda a segurar e a planejar. Dinheiro não é sobra nem consumo: é sustentação da vida."},
+  {"titulo": "Demonstrar o alívio, não declarar", "texto": "Compra feita, conta paga, gás reservado, remédio, atendimento dos filhos. A transformação a narrar é a estabilidade mínima, não a virada drástica."},
+  {"titulo": "A beneficiária como gestora", "texto": "Apresentar a mulher como quem organiza escolhas e prioridades e sabe explicar o peso de cada uma. Não como suspeita, não como assistida."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Afirmação ampla sobre um cotidiano apertado", "texto": "Dizer que a vida melhorou, em geral, soa falso para quem segue contando cada real. Quando a experiência contradiz a frase, a mensagem vira contestação."},
+  {"titulo": "Só dificuldade, sem saída", "texto": "Mensagens que reconhecem apenas o aperto parecem incompletas. O reconhecimento precisa vir com caminho: o que fazer, onde, como."},
+  {"titulo": "Dado sem caminho de acesso", "texto": "Citar quantas políticas existem chama atenção, mas fica vazio se não disser quais são, para quem valem e como acessar."}
+ ],
+ "resumo": ["A regularidade do benefício é o valor: permite planejar.", "Dinheiro segura e organiza; não resolve nem sobra.", "Demonstrar alívio com cena concreta: gás, conta, remédio, filhos.", "A beneficiária é gestora, não suspeita.", "Sem afirmação ampla, sem dificuldade sem saída, sem dado sem acesso."]
+},
+"trabalho digno": {
+ "titulo": "Mulheres beneficiárias × Trabalho digno",
+ "linha": "O corre merece suporte, não romantização. Proteção só vale quando vira caminho para continuar.",
+ "por_que": {
+  "texto": ["Entre as mulheres com vínculo formal, a queixa principal é a falta de tempo: escala 6x1, jornada dupla, deslocamento e ausência de folga aparecem em quase todos os relatos. O fim da escala 6x1 é o estímulo mais forte, com apoio quase unânime. Entre as que trabalham por conta própria, a autonomia depende do improviso e vira medo quando algo sai do controle.", "A ideia de proteção do trabalhador é pouco clara e distante da realidade dos dois regimes. Há uma régua própria para avaliar qualquer proposta: ela é útil quando poupa tempo e aumenta o salário, no regime formal, ou quando reduz risco financeiro, no trabalho por conta própria. \"Mesmo trabalhando em casa, eu não vejo descanso.\""],
+  "dados": [
+   {"n": "6x1", "titulo": "O estímulo mais forte", "texto": "Entre as mulheres com vínculo formal, o fim da escala 6x1 tem apoio quase unânime e abre espaço para sonhar."},
+   {"titulo": "Autonomia em estado de falta", "texto": "Há trabalho, cuidado, venda, cálculo e resolução de problemas, mas sem tempo, descanso, previsibilidade, informação ou rede de proteção."},
+   {"titulo": "A régua da utilidade", "texto": "Proposta boa é a que poupa tempo e aumenta salário, no formal, ou reduz risco, no conta própria. Proteção abstrata não passa nessa régua."}
+  ]},
+ "funciona": [
+  {"titulo": "Do \"se virar sozinha\" para ter condições de continuar", "texto": "A proteção transforma autonomia solitária em autonomia com suporte. Direito, crédito, informação e rede entram como apoio, não como tutela."},
+  {"titulo": "Direito explicado vira poder de agir", "texto": "Regra, acesso, documentação, carência, canal e benefício em linguagem simples. O que é, para quem vale, como acessar."},
+  {"titulo": "Trabalhar sem perder a vida", "texto": "A proteção reorganiza a relação entre trabalho, descanso e cuidado. É isso que a escala 6x1 traduz em experiência vivida."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Mensagem genérica sobre sobrecarga", "texto": "Não fala com nenhum dos dois regimes. Quem tem carteira e quem trabalha por conta própria vivem faltas diferentes."},
+  {"titulo": "Segurança formal como resposta suficiente", "texto": "Há mais segurança no vínculo CLT, mas ela não é suficiente diante do custo de vida. Prometer estabilidade não resolve o mês."},
+  {"titulo": "Romantizar o corre", "texto": "Exaltar o esforço de quem se vira sozinha, sem oferecer condição para continuar, soa como abandono elogiado."}
+ ],
+ "lacuna": "O acervo tem poucos trechos sobre o que afasta neste cruzamento; os três acima vêm de mulheres com vínculo formal e de renda próxima.",
+ "resumo": ["Falta tempo: 6x1, jornada dupla, sem folga.", "A régua é utilidade: tempo, salário, risco.", "Proteção é sair do se virar sozinha para ter condições de continuar.", "Direito explicado em linguagem simples vira poder de agir.", "Sem mensagem genérica, sem estabilidade como resposta única, sem romantizar o corre."]
+},
+"família e cuidado": {
+ "titulo": "Mulheres beneficiárias × Família e cuidado",
+ "linha": "Cuidar é fazer funcionar sem aumentar a incerteza. A maternidade é a régua que mede qualquer política.",
+ "por_que": {
+  "texto": ["A mulher aparece como quem organiza, antecipa riscos, administra o orçamento e transforma políticas públicas em proteção real para os filhos. A maternidade funciona como régua moral: o que importa é se a política ajuda a proteger os filhos e a criar com dignidade. Proteção significa comida, segurança, saúde, escola e futuro, e não cabe só na chave da renda.", "O medo da violência é universal e nenhuma resposta institucional convence. A saúde é vivida entre gratidão, espera e risco: quando consulta, exame ou diagnóstico demoram, resta aguardar, pagar particular ou conviver com a angústia. Cuidado, para esse público, é estabilidade cotidiana, não promessa grandiosa."],
+  "dados": [
+   {"titulo": "A régua da maternidade", "texto": "A política é boa se ajuda a proteger os filhos e a criar com dignidade. Tudo o mais é avaliado a partir daí."},
+   {"titulo": "Cuidado é conjunto", "texto": "Segurança nas ruas, na escola e na creche; segurança das crianças nas redes; acesso a saúde e educação; estabilidade financeira. Falta um, o resto balança."},
+   {"titulo": "Saúde entre gratidão e espera", "texto": "Agradece-se o serviço público e sofre-se com a fila. Quando exame e diagnóstico demoram, o cuidado vira angústia."}
+  ]},
+ "funciona": [
+  {"titulo": "Cuidar é fazer funcionar", "texto": "Benefício, atendimento, regra clara, proteção, serviço e solução quando algo falha. O cuidado é lido como acolhimento e alívio concreto."},
+  {"titulo": "Regra em passo a passo", "texto": "Transformar o medo de bloqueio em orientação: como manter o benefício, atualizar o cadastro, onde ser atendida. Medo vira caminho."},
+  {"titulo": "Devolver o direito de fazer planos", "texto": "Quando o cuidado funciona, sobra espaço para estudar, descansar e sonhar além da sobrevivência. Cuidar de quem cuida, sem a imagem da mãe heroica que dá conta de tudo sozinha."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Cuidado sem reconhecer a sobrecarga", "texto": "Narrativas que falam de cuidado e ignoram o peso que essa mulher carrega têm baixa credibilidade."},
+  {"titulo": "Serviço como se estivesse sempre disponível", "texto": "Afirmar que vacina, remédio e proteção estão sempre lá perde força diante de quem viveu a falta."},
+  {"titulo": "Campanha bonita sem resposta concreta", "texto": "Em violência, segurança e proteção das crianças, fala bonita sem caminho enfraquece a mensagem. E o cuidado que vira burocracia ou espera sem resposta aparece como sistema difícil, não como proteção."}
+ ],
+ "resumo": ["A maternidade é a régua: protege os filhos ou não protege.", "Cuidado é conjunto: segurança, saúde, escola, renda.", "Cuidar é fazer funcionar e transformar medo de bloqueio em orientação.", "Cuidar de quem cuida, sem mãe heroica.", "Sem serviço idealizado, sem campanha bonita sem resposta."]
+},
+"brasil e pertencimento": {
+ "titulo": "Mulheres beneficiárias × Brasil e pertencimento",
+ "linha": "Dá para amar o Brasil sem fingir que ele é perfeito.",
+ "por_que": {
+  "texto": ["A escuta digital mostra um patriotismo lúcido: amar o país apesar das falhas. A mulher aparece como quem reconhece as dificuldades e preserva o vínculo afetivo com o país. O amor pelo Brasil nasce de experiências concretas, próximas e afetivas: cenas do dia a dia, laços familiares, estados, humor.", "O trajeto que a pesquisa descreve vai do desencanto com o país real ao reencantamento com um Brasil possível. \"O Pix é nosso, o SUS pode ser melhor, e o Brasil presta.\" O orgulho aparece quando o país mostra o que é capaz de fazer; perde credibilidade quando vira propaganda ou patriotismo abstrato."],
+  "dados": [
+   {"titulo": "Patriotismo lúcido", "texto": "Reconhecer as dificuldades e manter o vínculo. O desencanto com o país real convive com o reencantamento com o país possível."},
+   {"titulo": "Brasil do cotidiano", "texto": "O amor pelo país aparece em cenas do dia a dia, laços de família, estados, humor e experiências compartilhadas, não em símbolo oficial."},
+   {"titulo": "A mancha que incomoda", "texto": "A violência contra a mulher aparece como mancha na autoimagem coletiva do país. Falar de orgulho sem reconhecer isso soa falso para elas."}
+  ]},
+ "funciona": [
+  {"titulo": "Mostrar o que o país é capaz de fazer", "texto": "Realizações concretas que provam capacidade coletiva. Sinais de potência e melhora possível, com exemplo, não com adjetivo."},
+  {"titulo": "Amar sem fingir perfeição", "texto": "O Brasil dá orgulho quando se pode reconhecer o problema e a conquista na mesma frase."},
+  {"titulo": "Pertencimento cotidiano", "texto": "Casa, família, comida, humor, o estado de origem. O país reconhecível é o que se compartilha, não o que se hasteia."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Símbolo nacional genérico", "texto": "Bandeira, hino e verde-amarelo sem consequência prática não geram pertencimento. Soa propaganda."},
+  {"titulo": "Orgulho capturado pela disputa", "texto": "Quando o orgulho nacional soa abstrato ou tomado pela briga política, ele afasta quem rejeita a briga."},
+  {"titulo": "Estigma do brasileiro", "texto": "A associação do brasileiro a \"preguiçoso\" é rejeitada com força, inclusive em tom de piada."}
+ ],
+ "resumo": ["Patriotismo lúcido: amar apesar das falhas.", "O país que dá orgulho é o do cotidiano e das realizações concretas.", "Reconhecer a violência contra a mulher como mancha, sem fingir.", "Sem símbolo genérico, sem orgulho capturado pela disputa.", "Sem estigma do brasileiro."]
+},
+"participação e voz": {
+ "titulo": "Mulheres beneficiárias × Participação e voz",
+ "linha": "Quem cuida da casa, dos filhos e das contas sabe avaliar quando a vida melhora ou piora.",
+ "por_que": {
+  "texto": ["Mulheres são 53% dos votos ainda em aberto. A pesquisa encontra uma base potente de autoestima política: quem cuida da casa, dos filhos e das contas sabe avaliar quando a vida melhora ou piora. Essa autoridade cotidiana pode ser ativada como pertencimento, não falando por elas, mas reconhecendo que têm critério, experiência e leitura própria.", "A política se torna relevante quando explica o que melhora ou piora a vida da família. A desconfiança vem de promessa que não chega: a mulher compara discurso e resultado pelo que muda no trabalho, nos filhos, no custo de vida e nos direitos. \"Quem está lá em cima nem sempre sabe o que a gente passa aqui embaixo.\""],
+  "dados": [
+   {"n": "53%", "titulo": "dos votos em aberto", "texto": "são de mulheres. Elas decidem tarde e por critérios práticos, não por identidade."},
+   {"titulo": "Autoridade cotidiana", "texto": "Quem decide tanta coisa na vida também sabe decidir politicamente. A autoestima política aparece quando a mulher é reconhecida como quem sabe avaliar a própria realidade."},
+   {"titulo": "Reclamar é participar", "texto": "A reclamação convertida em ação cívica é o trajeto que a pesquisa descreve: da política feita por outros, em outro lugar, ao reconhecimento de que ela já está na vida delas."}
+  ]},
+ "funciona": [
+  {"titulo": "Legitimar a voz e o julgamento", "texto": "Reconhecer critério, experiência e leitura própria. Não falar por elas nem ensinar o que já sabem."},
+  {"titulo": "Validar a reclamação como participação", "texto": "A queixa sobre preço, fila e serviço é leitura política. Tratá-la assim aproxima."},
+  {"titulo": "Pertencimento e identificação", "texto": "Uma voz que se soma a outras sem perder a experiência singular. Não partir da oposição entre mulher engajada e desengajada."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Gratidão a uma liderança", "texto": "Valorizar o pertencimento sem reduzir a mulher à gratidão. Tratá-la só como eleitora, apoiadora ou beneficiária grata enfraquece a conversa cívica."},
+  {"titulo": "Tom celebratório e promessa absoluta", "texto": "Junto com a cobrança de gratidão, são as formas que mais afastam. Ela confere o que muda na vida, não o que se promete."},
+  {"titulo": "Briga, maniqueísmo, doutrinação", "texto": "Afastam quem rejeita a polarização. E circulam conteúdos que a tratam como fora do debate ou incapaz de opinar; a resposta é reconhecer, não rebater."}
+ ],
+ "resumo": ["53% dos votos em aberto; decisão tardia e prática.", "Autoridade cotidiana: quem decide a casa sabe decidir politicamente.", "Reclamação é participação.", "Voz que se soma sem perder a singularidade.", "Sem gratidão cobrada, sem tom celebratório, sem briga."]
+}
+}
+}

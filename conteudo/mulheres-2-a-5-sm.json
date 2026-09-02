@@ -1,0 +1,126 @@
+{
+"publico": "mulheres de 2 a 5 salários mínimos",
+"nome": "Mulheres de 2 a 5 SM",
+"quem_e": {
+ "destaque": {"n": "10,4 mi", "titulo": "de mulheres donas de negócio", "texto": "Recorde histórico. O empreendedorismo feminino cresceu 27% em dez anos, com base majoritária de mulheres negras, mães e de classes populares."},
+ "texto": "Mulheres microempreendedoras, com renda de 2 a 5 salários mínimos, não se enxergam como beneficiárias de auxílio nem como celetistas, e sim como trabalhadoras autônomas. Não recebem impacto direto do Bolsa Família, mas sentem o peso dos impostos, dos preços e das mensalidades. O empreendedorismo feminino cresceu 27% em dez anos e chegou a 10,4 milhões de mulheres donas de negócio, em maioria negras, mães e de classes populares. É a faixa que começa a perceber o efeito da isenção do Imposto de Renda até R$ 5 mil e da redução até R$ 7 mil, com o custo de vida como barreira para sentir esse alívio."
+},
+"como_chegar": [
+ {"titulo": "Onde estão", "texto": "Internet na frente com folga: 64% contra 29% de televisão. Instagram no teto (77,8%) e YouTube forte (67,4%). É o único público em que portal de notícia disputa a liderança (56,9%), praticamente empatado com televisão e redes. Rádio (26%) e podcast (21%) pesam mais aqui do que em qualquer outra faixa de renda. Vídeo curto é o ponto baixo: TikTok 28,5%, Kwai 16,7%.", "fonte": "DataSenado 2025; Aláfia Lab 2025 (recorte 2 a 5 SM)"},
+ {"titulo": "Como decidem no que acreditar", "texto": "É o público que mais ancora a confiança no veículo (54,5% citam a fonte reconhecida), o que mais checa (49,3% sempre) e o mais exigente com transparência sobre inteligência artificial: 64,7% já deixaram de compartilhar algo por ser feito por IA. Em política, a televisão lidera (48,1%), com portal e redes quase empatados.", "fonte": "Painel TIC 2025; Aláfia Lab 2025"},
+ {"titulo": "O que isso pede do material", "texto": "É o público que aceita e cobra link, fonte e dado. Carrossel de Instagram com fonte visível e matéria de portal linkada funcionam aqui e não funcionam nos outros três. TikTok é o formato de menor retorno. Declarar o uso de inteligência artificial, longe de atrapalhar, é ativo de credibilidade com este público.", "fonte": "Hábitos de mídia dos quatro públicos, 2026"}
+],
+"paginas": {
+"dinheiro no bolso": {
+ "titulo": "Mulheres de 2 a 5 SM × Dinheiro no bolso",
+ "linha": "Dinheiro no bolso é recebido como aspiração distante. Convence o número real, não a frase de efeito.",
+ "por_que": {
+  "texto": ["Este público administra o orçamento da casa e sente primeiro o peso dos preços, dos impostos e das mensalidades. A noção de dinheiro no bolso é recebida com ceticismo generalizado, tratada como aspiração distante: \"é um sonho distante\". Cansaço e falta de tempo e dinheiro limitam qualquer percepção de melhora, e o presente é descrito como pior.", "A defasagem do salário mínimo frente à inflação é frustração recorrente: \"aumenta o salário, aumenta tudo, então dá no mesmo\". Crédito com juros menores chama atenção, mas exige prova operacional: taxa, critério, valor e forma de acesso. A faixa começa a sentir o efeito da isenção do Imposto de Renda até R$ 5 mil, com o custo de vida como barreira para perceber o alívio."],
+  "dados": [
+   {"titulo": "Ceticismo como ponto de partida", "texto": "Dinheiro no bolso é aspiração, não realidade vivida. Qualquer exagero transforma alívio em propaganda: é o efeito migalha."},
+   {"titulo": "Salário que não acompanha", "texto": "A crítica de quem tem vínculo formal recai na defasagem do salário frente à inflação. A descrença é no ganho real, não na palavra."},
+   {"titulo": "Crédito com prova", "texto": "Juros menores e ausência de garantia despertam interesse, mas o Programa Acredita quase não é lembrado. Sem taxa, critério e caminho, soa bom demais para ser verdade."}
+  ]},
+ "funciona": [
+  {"titulo": "Número real no lugar de frase genérica", "texto": "Trocar \"juros mais baixos\" por uma taxa. Quanto mais concreto o número, mais crível a oferta."},
+  {"titulo": "Controle do mês, não dinheiro extra", "texto": "Falar de isenção e de imposto como o que sobra para fechar o mês, não como bônus. O engajamento nasce de caminho prático."},
+  {"titulo": "Terminar na informação", "texto": "A peça funciona melhor quando acaba no dado útil (onde, como, quanto), sem fechamento de efeito."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Gíria e diminutivo", "texto": "\"Salarinho\", \"uma graninha\": soam forçados para quem tem salário fixo e condescendentes diante de um tema sentido com gravidade."},
+  {"titulo": "Ganho anunciado sem credibilidade", "texto": "Prometer aumento real que a pessoa não vê no mercado é rejeitado na hora."},
+  {"titulo": "Frase de efeito no fechamento", "texto": "\"Quem cuida do país cuida até do que parece pequeno\" e similares soam genéricos, mesmo sem pedir voto."}
+ ],
+ "resumo": ["O público parte do ceticismo: dinheiro no bolso é sonho distante.", "Número real, taxa real, critério real.", "Controle do mês, não dinheiro extra.", "Terminar na informação prática.", "Sem gíria, sem diminutivo, sem frase de efeito."]
+},
+"trabalho digno": {
+ "titulo": "Mulheres de 2 a 5 SM × Trabalho digno",
+ "linha": "Ela se vira. O que falta é garantia para não ficar desamparada quando algo sai do controle.",
+ "por_que": {
+  "texto": ["São 10,4 milhões de mulheres donas de negócio, e a base é de mulheres negras, mães e de classes populares. A autonomia delas opera em estado de falta: há trabalho, cuidado, venda, cálculo e resolução de problemas, mas sem tempo, descanso, previsibilidade, informação ou rede de proteção. \"Um mês vem bem, no outro quase não vem nada. A gente vive se planejando pro pior.\"", "Abrir o cadastro de MEI não significa dominar benefícios, regras de acesso ou crédito. Parte deixou o vínculo formal para empreender por falta de rede de apoio, sem clareza de como se organizaria. Entre as que têm carteira, a queixa é tempo: escala 6x1, hora extra para fechar o mês, \"meu tempo não é meu\". A exaustão prevalece em todos os grupos."],
+  "dados": [
+   {"titulo": "Autonomia com medo", "texto": "A autonomia depende do improviso e vira medo quando algo sai do controle. A empreendedora se vira, mas precisa de garantia para não ficar desamparada."},
+   {"titulo": "Cadastro não é conhecimento", "texto": "Ter MEI não significa saber dos benefícios, das regras nem do crédito. A informação sobre direitos é percebida como útil e nova."},
+   {"titulo": "Tempo que não é dela", "texto": "Entre as formais, a queixa é falta de tempo: 6x1, dupla jornada, hora extra. O fim da escala é o estímulo mais forte, com apoio quase unânime."}
+  ]},
+ "funciona": [
+  {"titulo": "Direito como descoberta", "texto": "Falar de auxílio-doença, carência, canal e documentação funciona como descoberta de direito. Quando a informação chega clara, dá para decidir, acessar, cobrar e planejar."},
+  {"titulo": "Regra, acesso e passo a passo", "texto": "Explicar em linguagem simples o que existe para quem trabalha por conta própria e para quem tem carteira. Cada regime tem a sua lista."},
+  {"titulo": "Rede como apoio, não tutela", "texto": "Direitos, crédito, informação e rede entram como adjuvantes: transformam autonomia solitária em autonomia com suporte."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Mensagem genérica sobre sobrecarga", "texto": "Não fala com nenhum dos dois regimes. A microempreendedora e a mulher com carteira vivem faltas diferentes."},
+  {"titulo": "Comunicação institucional", "texto": "Soa distante, genérica ou manipuladora mesmo quando a política é aprovada. O conteúdo passa; o tom não."},
+  {"titulo": "Segurança formal como resposta única", "texto": "Há mais segurança no vínculo CLT, mas ela não é suficiente diante do custo de vida, e quem tem carteira lembra que também paga pela proteção."}
+ ],
+ "lacuna": "O acervo tem poucos trechos sobre o que afasta neste cruzamento.",
+ "resumo": ["10,4 milhões de donas de negócio, em maioria negras e mães.", "Autonomia em estado de falta: se vira, mas sem rede.", "Direito explicado é descoberta e vira poder de agir.", "Uma lista para cada regime: conta própria e carteira.", "Sem mensagem genérica, sem tom institucional."]
+},
+"família e cuidado": {
+ "titulo": "Mulheres de 2 a 5 SM × Família e cuidado",
+ "linha": "Ela já protege. A política fortalece o que ela faz; não inaugura o cuidado.",
+ "por_que": {
+  "texto": ["A falta de vaga em creche e escola é barreira concreta e recorrente, com fila de espera e programas complementares cortados sem substituto. E vaga não basta: a política só cumpre a promessa de autonomia quando garante profissionais formados e horário compatível com quem trabalha. \"Não tem mãe que consiga fazer esse horário de trabalho sem rede de apoio, para ter que levar e buscar.\"", "O medo da violência é universal e transversal, e nenhuma resposta institucional convence. A proteção contra a violência doméstica é reconhecida como relevante em todos os grupos e é o tema mais sensível do estudo: a reação recorrente é que o problema não é falta de cuidado, mas falta de lei que funcione e seja aplicada com rigor."],
+  "dados": [
+   {"titulo": "Creche é condição de trabalho", "texto": "Sem vaga, horário compatível e profissional formado, não há autonomia possível para a mãe que trabalha."},
+   {"titulo": "Lei, não cuidado", "texto": "Em violência contra a mulher, o público quer instrumento legal, não intenção de cuidado. Medida protetiva e Delegacia da Mulher são termos conhecidos e próximos."},
+   {"titulo": "Segurança como tema transversal", "texto": "O medo atravessa todos os grupos e define a rotina: caminho da escola, volta do trabalho, criança nas redes."}
+  ]},
+ "funciona": [
+  {"titulo": "Trocar o sujeito da frase", "texto": "Sair de \"governo\" para \"lei\" ou \"punição\". A proteção que convence é a que se aplica com rigor."},
+  {"titulo": "Reconhecer quem já protege", "texto": "A mulher não recebe proteção; ela a exerce todo dia. A política fortalece o que ela já faz."},
+  {"titulo": "Provar que alguma coisa mudou", "texto": "Não é anunciar mais uma lei nem mais um programa. É mostrar a vaga aberta, o horário estendido, a medida protetiva que funcionou."}
+ ],
+ "nao_funciona": [
+  {"titulo": "\"Governos que cuidam da gente\"", "texto": "O enquadramento é rejeitado como passivo. Cuidado, dito assim, é lido como reconhecimento da própria falha de quem devia ter feito."},
+  {"titulo": "Proteção alegada sem prova", "texto": "Há desconfiança geral quanto à validade da proteção que a mensagem anuncia. Sem instrumento e resultado, vira gatilho negativo."},
+  {"titulo": "Cuidado sem reconhecer a sobrecarga", "texto": "Falar de cuidado sem ver o peso que essa mulher carrega tem baixa credibilidade."}
+ ],
+ "resumo": ["Creche com vaga, horário e profissional é condição de trabalho.", "Em violência, o público quer lei aplicada, não cuidado declarado.", "Ela já protege: a política fortalece o que ela faz.", "Provar mudança concreta, não anunciar programa.", "Sem governo que cuida, sem proteção sem prova."]
+},
+"brasil e pertencimento": {
+ "titulo": "Mulheres de 2 a 5 SM × Brasil e pertencimento",
+ "linha": "O orgulho pelo país é o tema mais transversal, e atravessa até as mais céticas. Desde que ninguém finja que o país é perfeito.",
+ "por_que": {
+  "texto": ["Mesmo diante de pessimismo generalizado, o sentimento de brasilidade é predominantemente positivo, ancorado em cultura, acolhimento e resiliência. O orgulho pelo país é a macronarrativa mais transversal do estudo: atravessa o público mais cético e as mais desengajadas.", "O amor pelo país nasce de experiências concretas, próximas e afetivas: cenas do dia a dia, laços de família, estados, humor. A combinação de meio de pagamento nacional, saúde pública e soberania suscita orgulho e reconhecimento, com ressalvas. \"O Pix é nosso, o SUS pode ser melhor, e o Brasil presta.\" O argumento de soberania ressoa quando ligado a episódios internacionais recentes."],
+  "dados": [
+   {"titulo": "Orgulho apesar do pessimismo", "texto": "Brasilidade positiva, ancorada em cultura, acolhimento e resiliência. É o tema que alcança até quem está desengajado."},
+   {"titulo": "O que o país é capaz de fazer", "texto": "Pix, SUS, soberania: realizações concretas que provam capacidade coletiva geram orgulho e reconhecimento, com ressalvas."},
+   {"titulo": "Brasil do cotidiano", "texto": "Casa, família, humor, o estado de origem. O país reconhecível é o que se compartilha, não o que se hasteia."}
+  ]},
+ "funciona": [
+  {"titulo": "Amor apesar das falhas", "texto": "A narrativa mais crível reconhece o problema e a conquista na mesma frase. Fantasia de país perfeito não convence."},
+  {"titulo": "Orgulho ligado a soberania e realização", "texto": "O orgulho funciona quando mostra o que o país faz e decide por conta própria, com exemplo concreto."},
+  {"titulo": "Pertencimento cotidiano", "texto": "Cenas do dia a dia, laços familiares, regionalidade, humor. É por aí que o país deixa de ser problema ou disputa."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Símbolo nacional genérico", "texto": "Bandeira e verde-amarelo sem consequência prática soam propaganda e perdem credibilidade."},
+  {"titulo": "Orgulho capturado pela disputa", "texto": "Quando o orgulho nacional soa abstrato ou tomado pela briga política, afasta quem rejeita a briga."},
+  {"titulo": "Ignorar a mancha", "texto": "A violência contra a mulher aparece como mancha na autoimagem do país. Falar de orgulho sem reconhecê-la soa falso para elas; e o rótulo de \"preguiçoso\" é rejeitado com força."}
+ ],
+ "resumo": ["Orgulho é o tema mais transversal, inclusive entre as céticas.", "Amar apesar das falhas, sem fingir perfeição.", "Realizações concretas e soberania geram orgulho.", "País do cotidiano, não do símbolo.", "Sem propaganda, sem disputa, sem ignorar a violência contra a mulher."]
+},
+"participação e voz": {
+ "titulo": "Mulheres de 2 a 5 SM × Participação e voz",
+ "linha": "Quem decide tanta coisa na vida também sabe decidir politicamente. O problema é não ser ouvida.",
+ "por_que": {
+  "texto": ["Mulheres são 53% dos votos ainda em aberto. À pergunta se a voz das mulheres é ouvida politicamente, a maioria responde que não, ou que depende. \"Nós, mulheres, não somos ouvidas como deveríamos.\" A decisão feminina é colocada sob suspeita, com formulações como \"não sabe votar\" e \"não entende\".", "A competência política, na pesquisa, nasce da vida cotidiana: escolher, comparar, cuidar, priorizar e sustentar consequências. A autoestima política aparece quando a mulher é reconhecida como quem sabe avaliar a própria realidade, e arrefece quando o discurso soa distante de quem vive a rotina. A informação sobre a origem das políticas raramente chega: \"eu não paro para pensar essa associação de programas com governo\"."],
+  "dados": [
+   {"titulo": "Não ouvidas", "texto": "A maioria diz que a voz das mulheres não é ouvida politicamente, ou que depende. Circulam conteúdos que as tratam como fora do debate."},
+   {"titulo": "Competência que vem da rotina", "texto": "Escolher, comparar, cuidar, priorizar e sustentar consequências. É a mesma competência que se exige para decidir o voto."},
+   {"titulo": "Política sem autoria", "texto": "Programas de longa duração perdem a marca de quem os criou. Para o público, isso pouco importa no dia a dia; o que importa é se funciona."}
+  ]},
+ "funciona": [
+  {"titulo": "Legitimar a voz e o julgamento", "texto": "Reconhecer critério e leitura própria. Quem decide tanta coisa na vida também sabe decidir politicamente."},
+  {"titulo": "Na chave do \"você decide\"", "texto": "O engajamento funciona quando fala de escolha, não de dever. Empatia, não condescendência."},
+  {"titulo": "Escolha explicada pelo efeito na rotina", "texto": "A política se torna relevante quando explica o que melhora ou piora a vida da família. É esse o critério."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Engajamento como obrigação", "texto": "\"Seu voto é seu cuidado\" e variantes fracassam. Soa cobrança, não escolha."},
+  {"titulo": "Apelo emocional isolado", "texto": "Emoção sem informação converte pouco neste público, que checa e cobra fonte."},
+  {"titulo": "Promessa que não encosta na rotina", "texto": "Gera desconfiança. E qualquer discurso que ridicularize o voto feminino ou o coloque sob suspeita afasta de imediato."}
+ ],
+ "resumo": ["53% dos votos em aberto; a maioria não se sente ouvida.", "Competência política vem da rotina.", "Na chave do você decide, com empatia e sem condescendência.", "Explicar pelo efeito na vida da família.", "Sem obrigação, sem emoção solta, sem promessa longe da rotina."]
+}
+}
+}

@@ -1,206 +1,141 @@
 # DECISIVAS — Contexto do projeto
 
-**Versão 2, 01/09/2026.** Atualizada com as decisões do dia: taxonomia final, pauta como tag, blocos da página, rótulo de IA, links adiados, acervo consolidado sem revisão linha a linha. As mudanças em relação à versão 1 estão marcadas ao longo do texto pelas próprias frases; a versão anterior fica no histórico do repositório.
+**Versão 3, 02/09/2026.** Reescrita após a decisão de trocar páginas geradas por modelo por páginas fixas escritas pela equipe. Substitui as versões 1 e 2, que ficam no histórico do repositório.
 
-**Como usar este documento.** Cole o conteúdo inteiro no início de uma conversa nova com o Claude, antes de qualquer pedido. Ele carrega o contexto técnico e o vocabulário do projeto, para que qualquer pessoa da equipe trabalhe a partir das mesmas definições.
-
-Se você é novo no projeto, leia antes de colar. As seções 1 a 4 explicam o que estamos construindo; as seções 5 e 6 explicam por que algumas decisões foram tomadas do jeito que foram, e evitam reabrir discussões já fechadas.
+**Como usar este documento.** Cole o conteúdo inteiro no início de uma conversa nova com o Claude, antes de qualquer pedido. Se a resposta contradisser algo daqui, o documento vale. Avise para corrigirmos.
 
 ---
 
 ## 1. O que é
 
-DECISIVAS é uma plataforma pública e gratuita. A pessoa escolhe **um público** e **um tema**, e recebe o material para construir uma mensagem para aquele público sobre aquele tema.
+DECISIVAS é uma plataforma pública e gratuita da Quid para o período eleitoral de 2026. A pessoa escolhe **um público** e **um tema** e recebe uma página fixa com o que a pesquisa mostra sobre essa conversa: por que ela importa, o que funciona, o que não funciona, quem é esse público, como chegar nele e um resumo.
 
-Quem usa: comunicadoras comunitárias, lideranças locais, gente que precisa falar com essas pessoas e não tem equipe de pesquisa atrás.
+Quem usa: comunicadoras comunitárias, lideranças locais, organizações e gente que precisa falar com esses públicos sem ter uma equipe de pesquisa atrás.
 
-**A plataforma não escreve a mensagem.** Ela entrega o gatilho, o que ancorar, o que evitar e como adaptar por formato. Quem escreve é a pessoa.
+**A plataforma entrega dados e achados. Não escreve a mensagem.** Quem escreve é a pessoa.
 
-Essa distinção é a decisão de produto mais importante do projeto. Reduz risco (não distribuímos texto pronto e idêntico) e aumenta utilidade (devolve autoria a quem comunica).
+### A regra máxima de conteúdo
 
-### O que podemos e o que não podemos dizer
+A plataforma fala de eleições e de **com quem falar, sobre o que falar e como falar**. Não pede voto e não fala de candidatos. Pode citar pesquisas e fontes que mencionem candidatos, parafraseando sem nomeá-los nem preteri-los. Exemplo: "pesquisas recentes, como a Quaest, contrariam o senso comum de que idosos tendem a ser mais conservadores". Sem nome, sem preferência, com a fonte.
 
-Pode: falar de eleições e se apresentar como ferramenta para construir mensagens para públicos decisivos no período eleitoral.
-
-Não pode, em nenhuma circunstância: citar ou aludir a candidatura, partido ou figura política, mesmo sem nome próprio; pedir voto ou sugerir rejeição; produzir material sob encomenda para campanha.
+Ficam fora também: avaliação ou aprovação de governo ou gestão específica, e alusão a figura política sem nome ("o pai", "quem está no poder").
 
 ---
 
 ## 2. Vocabulário
 
-Cada termo tem um significado, e apenas um.
-
 | Termo | Significado |
 |---|---|
-| **Acervo** | O conjunto de trechos de pesquisa revisados que alimenta a plataforma |
+| **Acervo** | Os 2.405 trechos de pesquisa, revisados e etiquetados, que vivem no banco e são a base das páginas e do recurso Explorar |
 | **Trecho** | A unidade do acervo: uma informação, com origem, que se entende sozinha |
 | **Público** | Um dos quatro grupos abaixo |
-| **Macronarrativa** | Um dos cinco temas abaixo. Na tela aparece como "tema" |
-| **Pauta** | O assunto concreto dentro de uma macronarrativa. São 59, lista fechada (ver `dados/DECISIVAS_pautas_de_para_v1.xlsx`). Na tela aparece como tag de ângulo, só quando tem 3 ou mais trechos no cruzamento |
-| **Cruzamento** | A combinação de um público com uma macronarrativa. São 20 possíveis, cada um é uma página |
-| **Tipo** | A função do trecho: achado, funciona, afasta, contexto, exemplo, verbatim, perfil. Nesta versão, exemplo não é usado |
-| **Força** | Se o achado é recorrente (`forte`) ou pontual (`indício`) |
-| **Bloco** | Cada seção da página de resultado |
-| **Gatilho** | O ângulo que mobiliza um público num tema. É um bloco da página, não um tipo de trecho |
+| **Tema** | Uma das cinco macronarrativas abaixo |
+| **Pauta** | O assunto concreto dentro de um tema. São 59, lista fechada em `dados/DECISIVAS_pautas_de_para_v1.xlsx` |
+| **Caminho** | A página fixa de um público com um tema. São 20 |
+| **Tipo** | A função do trecho: achado, funciona, afasta, contexto, verbatim, perfil |
+| **Bloco** | Cada seção de um caminho |
 | **Lacuna** | O aviso de que o acervo não sustenta um bloco. É conteúdo, não erro |
-| **Veto** e **CONFERIR** | Marcações da fase de extração. Deixaram de existir no acervo carregado: tudo entrou, exceto trechos que citam ou aludem a figura política, partido, candidatura ou avaliação de governo específico, removidos pela regra 4 |
+| **Explorar o acervo** | Recurso, ainda desligado, que devolve trechos do acervo para uma pauta ou pergunta. Não redige |
 
 ### Os quatro públicos
 
-| Identificador | Nome na tela | Abrange |
-|---|---|---|
-| `jovens` | Jovens | Estudo, trabalho, renda e construção de autonomia |
-| `60+` | 60+ | Vida, trabalho, cuidado e participação depois dos 60 |
-| `mulheres beneficiárias` | Mulheres beneficiárias | Renda, cuidado e políticas de proteção social |
-| `mulheres de 2 a 5 salários mínimos` | Mulheres de 2 a 5 SM | Trabalho, renda e cuidado entre 2 e 5 salários mínimos |
+| Identificador no banco | Nome na tela | Cor | Abrange |
+|---|---|---|---|
+| `jovens` | Jovens | azul claro | 16 a 34 anos. Estudo, trabalho, renda e autonomia |
+| `60+` | 70+ | verde | Pessoas de 70 anos ou mais. O acervo vem de grupos de 70 a 78; dados de mídia usam o recorte nacional 60+ |
+| `mulheres beneficiárias` | Mulheres beneficiárias | laranja | Até 2 salários mínimos, inclusive CLT. Renda, cuidado e proteção social |
+| `mulheres de 2 a 5 salários mínimos` | Mulheres de 2 a 5 SM | roxo | Microempreendedoras e trabalhadoras de renda média. Trabalho, renda e cuidado |
 
-### As cinco macronarrativas
+O identificador `60+` no banco muda para `70+` na migração 005, depois do beta. A regra de renda que separa os dois públicos femininos é interna e não vai para a tela.
 
-| Identificador | Nome na tela | Abrange |
-|---|---|---|
-| `dinheiro no bolso` | Dinheiro no bolso | Renda, custo de vida, endividamento, benefícios e impostos |
-| `trabalho digno` | Trabalho digno | Jornada, CLT, MEI, proteção, autonomia e tempo |
-| `família e cuidado` | Família e cuidado | Educação, saúde, segurança, moradia e redes de proteção |
-| `brasil e pertencimento` | Brasil e pertencimento | Identidade, soberania, orgulho, comunidade e país |
-| `participação e voz` | Participação e voz | Engajamento, confiança, voto e presença no debate público |
+### Os cinco temas
 
-As duas listas são **fechadas**. Nenhum valor novo pode ser criado durante a revisão ou o desenvolvimento.
+`dinheiro no bolso` · `trabalho digno` · `família e cuidado` · `brasil e pertencimento` · `participação e voz`. Temas não têm cor. As duas listas são fechadas.
 
 ---
 
-## 3. Como funciona, em quatro camadas
+## 3. Como funciona
 
-**Camada 1, o acervo.** Trechos de pesquisa qualitativa recortados e etiquetados por público, macronarrativa, pauta e tipo. Vive num banco de dados. Toda linha passou por revisão humana antes de entrar.
+**Conteúdo fixo.** As 20 páginas vivem em `conteudo/*.json`, um arquivo por público. Foram escritas pela equipe a partir do acervo e da justificativa de públicos e macronarrativas da Quid, revisadas e validadas pelo jurídico. O build monta o HTML. Não há modelo de linguagem no acesso.
 
-**Camada 2, o filtro.** Quando alguém escolhe um cruzamento, o sistema trava o subconjunto de trechos com aquelas duas etiquetas. O agente só enxerga esse recorte. É código, sem IA.
+**Acervo no banco.** Os trechos ficam no D1 (`trechos`, `pautas`). Servem de base para escrever e revisar as páginas e para o recurso Explorar o acervo.
 
-**Camada 3, o agente.** Um modelo de linguagem compõe cinco campos usando **apenas** os trechos recebidos. Não tem acesso ao banco inteiro, não faz busca, não usa conhecimento próprio.
+**Explorar o acervo (desligado no beta).** Dentro de cada caminho, botões com as pautas do cruzamento e um campo de texto. A resposta é uma lista de trechos do acervo com etiquetas legíveis (Achado, Depoimento, O que funciona, O que afasta) e a origem de cada um. O modelo pode escolher e ordenar trechos; não escreve texto. Rótulo de IA, cache por pergunta, limite por pessoa.
 
-**Camada 4, a montagem.** Hábitos de mídia, links, notas e rótulos são anexados por código, depois da geração. O modelo nunca os vê.
-
-### A fronteira entre IA e código
-
-Isso é central e vale decorar:
-
-| Escrito pelo agente | Anexado por código |
-|---|---|
-| Gatilho da mensagem | Hábitos de mídia do público |
-| O que ancorar | (links e materiais: adiados para depois do beta) |
-| O que evitar | |
-| Por que falar com este público sobre este tema | Caracterização do público |
-| O que a pesquisa mostra | Rótulo de IA e avisos de lacuna |
-| Versões do gatilho e da adaptação de formato por pauta (tag) | Tags de pauta e card semiótico do público |
-
-**Por quê:** modelo de linguagem inventa URL com naturalidade. Ao anexar links por código, a partir de tabelas curadas por pessoas, essa classe inteira de erro deixa de existir.
+**Edição.** No beta, pela interface do GitHub. Depois, por um CMS de arquivos ligado ao repositório (etapa 9). Cada edição é um commit.
 
 ---
 
-## 4. Os blocos da página de resultado
+## 4. Os blocos de um caminho
 
-Na ordem em que aparecem:
+1. **Cabeçalho**: público, tema, data da revisão do texto, título e uma linha de resumo.
+2. **Por que falar com este público sobre este tema**: dois parágrafos e três cards de dados.
+3. **O que funciona**: até três cards.
+4. **O que não funciona**: até três cards.
+5. **Quem é este público**: texto fixo por público, com um número em destaque.
+6. **Como chegar nele**: três cards de hábitos de mídia, com fonte.
+7. **Resumo**: cinco linhas.
+8. **Explorar o acervo**: presente, desligado no beta.
 
-1. **Identificação** — público, tema e data da última atualização do acervo. Sem contador nem chips de fonte
-2. **Tags de pauta** — "Ajustar o ângulo da mensagem". Trocam só o gatilho e a adaptação de formato
-3. **Por que falar com este público sobre este tema** — vem dos trechos de tipo `contexto`
-4. **O que a pesquisa mostra** — vem dos trechos de tipo `achado`, de qualquer força
-5. **O gatilho da mensagem** — composto a partir dos achados, pelas regras de gatilho
-6. **O que ancorar** — até três itens, dos trechos de tipo `funciona`, pelas regras de seleção
-7. **O que evitar** — até três itens, dos trechos de tipo `afasta`, pelas regras de seleção
-8. **Quem é este público** — dos trechos de tipo `perfil`
-9. **Hábitos de mídia** — card semiótico do público e planilha própria, filtrada só por público
-10. **Adaptar formato** — WhatsApp, carrossel, roteiro de vídeo
-11. **Rótulo de IA** — em itálico, pequeno, abaixo da saída gerada e anexado ao texto copiado
-
-O bloco de exemplos e materiais (links curados, especial BRIEF) está adiado para depois do beta. Quando um bloco tem menos de três itens, mostra os que existem e declara a lacuna.
-
-Quando o acervo não sustenta um bloco, a página **declara a lacuna** em vez de preencher por aproximação. Várias páginas terão dois ou três blocos assim. Isso é comportamento correto.
+Quando o acervo não sustenta um bloco, a página mostra o que existe e declara a lacuna. Hoje isso acontece em 70+ com dinheiro, trabalho e Brasil, e em trabalho digno para os dois públicos femininos.
 
 ---
 
 ## 5. Decisões já tomadas, e por quê
 
-Estas estão fechadas. Reabrir só com motivo novo.
+**Páginas fixas escritas por pessoas.** A geração por modelo no acesso produziu texto genérico. Texto fixo permite revisão, validação jurídica e edição.
 
-**A plataforma orienta, não escreve.** Mudamos de "gerar a mensagem pronta" para "entregar o material e ensinar a construir". Reduz risco e devolve autoria.
+**O acervo fica.** É a base auditável de tudo o que está escrito e do recurso Explorar.
 
-**Cache de páginas.** Cada cruzamento é gerado uma vez e servido indefinidamente, até o acervo mudar. Isso trocou "custo proporcional ao tráfego" por "custo proporcional aos 20 cruzamentos". Com cache, a plataforma custa poucos dólares por mês em qualquer volume de acesso; sem cache, com 5.000 acessos diários, custaria centenas.
+**Explorar o acervo devolve trechos, não prosa.** O que quebrou foi o modelo redigindo. Escolher e ordenar trechos é seguro; escrever não é.
 
-**Sem painel de edição de conteúdo.** Os textos fixos vivem como arquivos no repositório, editáveis pela interface do GitHub. Construir um painel consumiria semanas e cada mudança já fica registrada no histórico, o que serve de salvaguarda.
+**Sem cookie, sem rastreamento, sem script de terceiro.** Fonte tipográfica servida pelo site. Vídeo do YouTube em modo sem cookie. Compartilhamento por link simples. Por isso o aviso de privacidade é informativo, não um pedido de consentimento.
 
-**Links nunca são gerados pelo modelo.** Vêm de planilha curada e verificada por pessoas, e são anexados por código. Nesta versão não há links na página; a planilha entra depois do beta.
+**Identidade em tokens.** Cores, fonte e espaçamentos em `brand/tokens.css`. Cor por público; temas sem cor. Verde-claro e vermelho para funciona e não funciona, porque não são cores de público.
 
-**Regras de formato são escritas por nós.** O que funciona no WhatsApp, no carrossel e no roteiro está num documento do repositório. O agente aplica essas regras ao acervo daquele cruzamento; ele não inventa técnica de comunicação.
-
-**O modelo é fixo e auditável.** Não usamos roteamento automático entre modelos, porque isso tornaria o custo imprevisível e a resposta irreprodutível.
-
-**Sem revisão humana linha a linha do acervo.** O acervo v5 foi consolidado por regras aprovadas em lote por Lucas em 01/09/2026. Tudo o que estava nas extrações entrou, exceto o que a regra 4 veda.
-
-**Regras vivem em planilha.** Regra_geral_formatos (RG), Regra_gatilho (RGT) e Regra_selecao (RS), em `dados/`, entram no prompt como texto no build. Em conflito com `docs/08-regras-de-formato.md`, a planilha prevalece; os limites numéricos por formato continuam no docs/08.
+**Repositório como fonte de verdade.** Conteúdo, configuração e regras vivem em arquivo. O que não usamos mais fica em `arquivo/`, não é apagado.
 
 ---
 
 ## 6. As regras que não se quebram
 
-Valem para código, conteúdo e qualquer peça.
-
-1. **Nenhuma chave de API em código.** Segredos vivem no painel do provedor, nunca em arquivo versionado.
-2. **O modelo só responde a partir dos trechos recuperados.** Sem conhecimento geral, sem completar lacuna.
-3. **O modelo nunca escreve URL.**
-4. **Nunca mencionar candidatura, partido ou figura política.** Vale também para alusão sem nome ("quem está no poder", "o pai", "proximidade com o governo") e para avaliação ou aprovação de governo ou gestão específica.
-5. **Não coletar dados pessoais.** Sem cadastro, sem rastreamento. O registro interno guarda o que foi entregue, nunca quem pediu.
-6. **Rótulo de IA visível** em toda saída gerada, em itálico e tamanho pequeno, com a explicação completa na página Sobre. Texto: "Texto organizado por inteligência artificial a partir do banco de pesquisa próprio do DECISIVAS. Não usa fontes externas, não indica voto e não menciona candidaturas."
-7. **Lacuna declarada, nunca preenchimento por aproximação.**
-8. **Interface usa apenas os tokens da identidade.** Nenhuma cor, fonte ou espaçamento escrito à mão.
-9. **Todo texto em português do Brasil.**
+1. Nenhuma chave de API em código.
+2. Nenhum texto publicado sem revisão humana e validação do jurídico.
+3. Não pedir voto. Não nomear candidato, partido ou figura política, nem aludir sem nome. Não avaliar governo ou gestão específica.
+4. Não coletar dados pessoais. Sem cadastro, sem cookie de rastreamento, sem script de terceiro.
+5. Rótulo de IA visível onde a inteligência artificial participou (Sobre e, quando ligado, Explorar o acervo).
+6. Lacuna declarada, nunca preenchida por aproximação.
+7. Interface só com os tokens da identidade.
+8. Todo texto em português do Brasil.
+9. Dados citados têm fonte nomeada.
 
 ---
 
 ## 7. Como trabalhamos
 
-**O repositório é a fonte de verdade.** O Claude Code não lê conversas anteriores; ele lê os arquivos. Tudo que precisa persistir vira arquivo.
-
-**Variáveis de configuração vivem no arquivo de configuração, não no painel.** Valor digitado no painel do provedor é sobrescrito no próximo deploy. Só segredos sobrevivem.
-
-**Toda alteração de estrutura do banco exige migração no ambiente remoto** antes do deploy. Alterar o schema sem entregar os comandos de migração é entrega incompleta.
-
-**Um comando por vez, conferindo o resultado.** Comandos empilhados produzem trabalho que ninguém revisou.
-
-**Ao pedir algo ao Claude:** diga o que quer, o critério de aceitação, e o que não pode acontecer. Peça para ele explicar as decisões que tomou, não só entregar o código.
+O repositório é a fonte de verdade; o Claude Code lê arquivos, não conversas. Uma etapa por vez, com "o que vai mudar" antes e "o que mudou e como testar" depois. Migração no remoto antes do deploy, um comando por bloco, registro no `docs/06`. Comandos SQL se copiam de arquivo, nunca de conversa. Quem aplica no banco é uma pessoa, pelo console.
 
 ---
 
 ## 8. Estado atual
 
-**Funcionando:** infraestrutura, banco, filtro, agente, telas, adaptação de formatos, cache, identidade provisória. A plataforma está no ar, protegida por login enquanto o acervo não é revisado.
+**No ar (atrás de login):** telas da etapa 6, acervo v5 no banco, Worker ainda com geração por modelo (a ser removida na etapa 8A).
 
-**Em migração:** a taxonomia nova (4 públicos, 5 temas, 7 tipos, 59 pautas) e o acervo v5 (2.405 linhas), conforme `docs/DECISIVAS_especificacao_claude_code.md`. Sem páginas de Metodologia e Transparência: só Sobre, com o vídeo de apresentação.
+**Em produção de conteúdo:** as 20 páginas escritas (`DECISIVAS_20_paginas_v1.docx`), em revisão pela equipe e pelo jurídico.
 
-**Pendente de código:** proteção anti-abuso (verificação anti-robô e limite de requisições por pessoa), correção do cache do navegador, revisão final de segurança.
+**Próximas etapas:** 8A limpeza e migração 004; 8B páginas fixas em cards, compartilhamento, privacidade, responsivo; 8C verificação e publicação. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (70+).
 
-**Pendente de conteúdo:** textos da página Sobre (projeto, públicos, temas, quem faz, aviso de IA), planilha de hábitos de mídia, cards semióticos e demais assets da identidade, assinatura e contato do rodapé, política de privacidade. Planilha de links: depois do beta.
+**Pendente de conteúdo:** "quem faz" no Sobre, assinatura e contato do rodapé, id do vídeo, assets da identidade (banner, cards, logos, fontes).
 
----
-
-## 9. O que estamos construindo agora
-
-**Regras de gatilho.** Uma planilha com as regras que orientam o agente a formular o gatilho de cada cruzamento. Segue a mesma lógica das regras de formato: nós escrevemos a regra, o agente a aplica ao acervo. Ele não inventa o critério.
-
-Ao contribuir com essa planilha, três princípios:
-
-- A regra descreve **como pensar**, não o que dizer. "Comece pela situação concreta que a pessoa reconhece" é regra; "diga que o preço subiu" não é.
-- A regra vale para qualquer cruzamento. Se só serve para um público específico, isso é conteúdo de acervo, não regra.
-- A regra precisa ser verificável. Se ninguém consegue dizer se foi cumprida, ela não orienta nada.
+**Datas:** beta em 04/09/2026, lançamento em 14/09/2026.
 
 ---
 
-## 10. Quando pedir ajuda ao Claude
+## 9. Quando pedir ajuda ao Claude
 
-Depois de colar este documento, exemplos de pedidos que funcionam bem:
+Exemplos que funcionam bem depois de colar este documento:
 
-- "Explique como o filtro decide quais trechos entram numa página"
-- "Revise esta regra de gatilho: ela é verificável? Vale para qualquer cruzamento?"
-- "Este trecho está bem etiquetado? Público X, macronarrativa Y, tipo Z"
-- "O que acontece se um cruzamento não tiver nenhum trecho do tipo afasta?"
-- "Escreva o comando para o Claude Code fazer [tarefa], considerando as regras da seção 6"
-
-Se a resposta contradisser algo deste documento, **o documento vale**. Avise para corrigirmos.
+- "Revise o texto do caminho jovens × trabalho digno contra a regra máxima de conteúdo."
+- "Este trecho do acervo cabe em qual pauta?"
+- "Escreva a sub-etapa 8B para o Claude Code a partir da especificação."
+- "O que muda no CONTEXTO se ligarmos o Explorar o acervo?"

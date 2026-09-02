@@ -1,0 +1,291 @@
+<!-- DECISIVAS. Protótipo v5, referência oficial para a etapa 8 do Code: página fixa em cards, agente consultor do acervo,
+     barra lateral de compartilhamento, público 70+, home refinada.
+     Conteúdo da página de exemplo: jovens × dinheiro no bolso, texto proposto
+     por Claude a partir do acervo, aguardando revisão. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DECISIVAS · protótipo v5 (oficial)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rosa:#ff5aac;--verde:#16c172;--azul-claro:#26cbff;--laranja:#ffb23d;--verde-claro:#b4db00;
+    --amarelo:#ffcc32;--azul:#0f02fd;--vermelho:#ff3131;--roxo:#7e2dff;--off:#f7f7ed;--preto:#000;
+    --pub-jovens:var(--azul-claro);--pub-70:var(--verde);--pub-mb:var(--laranja);--pub-m25:var(--roxo);
+    --publico:var(--pub-jovens);
+    --texto:#000;--fraco:#5a5a52;--borda:#000;
+    --tipo:"Inclusive Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--off) linear-gradient(#0000000f 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,#0000000f 1px,transparent 1px) 0 0/22px 22px;
+    background-color:var(--off);color:var(--texto);font-family:var(--tipo);font-size:17px;line-height:1.5}
+  .larg{max-width:1040px;margin:0 auto;padding:0 20px}
+
+  /* banner rotativo */
+  .banner{position:relative;height:220px;overflow:hidden;border-bottom:3px solid var(--preto)}
+  .banner figure{position:absolute;inset:0;margin:0;opacity:0;transition:opacity .9s}
+  .banner figure.on{opacity:1}
+  .banner svg{width:100%;height:100%}
+  .barra{background:var(--preto);color:var(--off);position:sticky;top:0;z-index:20}
+  .barra .larg{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .marca{font-weight:700;font-size:22px;letter-spacing:.03em;display:flex;gap:10px;align-items:center}
+  .barra nav a{color:var(--off);text-decoration:none;margin-left:24px;font-size:15px;border-bottom:1px solid transparent}
+  .barra nav a:hover{border-bottom-color:var(--off)}
+
+  /* painel de teste */
+  .painel{background:#e9e9de;border-bottom:1px dashed #a9a99c;font-size:13px}
+  .painel .larg{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 20px}
+  .painel button{font:inherit;background:#fff;border:1px solid #a9a99c;border-radius:99px;padding:3px 12px;cursor:pointer}
+  .painel button[aria-pressed="true"]{background:var(--preto);color:var(--off);border-color:var(--preto)}
+
+  /* home */
+  #home{padding:56px 0 80px}
+  .pergunta{font-size:clamp(30px,5vw,52px);font-weight:700;line-height:1.05;margin:0 0 14px;max-width:16ch}
+  .sub{color:var(--fraco);margin:0 0 36px;max-width:52ch}
+  .rot{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--fraco);margin:26px 0 12px}
+  .pilulas{display:flex;flex-wrap:wrap;gap:10px}
+  .pil{font:inherit;font-weight:700;border-radius:99px;padding:12px 22px;border:3px solid var(--preto);background:#fff;cursor:pointer;transition:transform .08s}
+  .pil:hover{transform:translateY(-2px)}
+  .pil[aria-pressed="true"]{outline:3px solid var(--preto);outline-offset:3px}
+  .pil.tema{background:transparent}
+  .pil.tema[aria-pressed="true"]{background:var(--preto);color:var(--off)}
+  .acao{margin-top:34px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .ver{font:inherit;font-weight:700;font-size:15px;letter-spacing:.06em;padding:11px 22px;border-radius:99px;border:3px solid var(--preto);
+       background:var(--rosa);color:var(--preto);cursor:pointer;box-shadow:4px 4px 0 var(--preto);transition:transform .08s,box-shadow .08s}
+  .ver:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--preto)}
+  .ver:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
+  .acao .dica{font-size:14px;color:var(--fraco)}
+
+  /* resultado */
+  #resultado{padding:36px 0 80px}
+  .cab{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:14px;margin-bottom:18px}
+  .chip{border-radius:99px;padding:5px 14px;font-weight:700;background:var(--publico)}
+  .chip.t{background:transparent;border:2px solid var(--preto)}
+  .meta{color:var(--fraco)}
+  h1.tit{font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0 0 10px}
+  .linha{font-size:20px;color:var(--fraco);margin:0 0 34px;max-width:60ch}
+  section.bloco{margin:0 0 44px}
+  .bloco h2{font-size:15px;letter-spacing:.1em;text-transform:uppercase;margin:0 0 14px;display:flex;align-items:center;gap:12px}
+  .bloco h2::after{content:"";flex:1;height:2px;background:var(--preto)}
+  .grade{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:760px){.grade{grid-template-columns:1fr}}
+  .card{background:#fff;border:2px solid var(--preto);border-radius:10px;padding:18px;position:relative;box-shadow:4px 4px 0 var(--preto)}
+  .card h3{margin:0 0 8px;font-size:18px;line-height:1.25}
+  .card p{margin:0;font-size:15px}
+  .card.num{background:var(--publico)}
+  .card.num .n{font-size:40px;font-weight:700;line-height:1;margin-bottom:8px}
+  .card.funciona{background:var(--verde-claro);color:var(--preto)}
+  .card.funciona h3::before{content:"✓ "}
+  .card.evita{background:var(--vermelho);color:var(--off)}
+  .card.evita h3::before{content:"✕ "}
+  .prosa{background:#fff;border:2px solid var(--preto);border-radius:10px;padding:22px 24px;box-shadow:4px 4px 0 var(--preto);margin-bottom:14px}
+  .prosa p{margin:0 0 10px;font-size:17px}
+  .fonte{font-size:13px;color:var(--fraco)}
+  .resumo{background:var(--preto);color:var(--off);border-radius:10px;padding:22px 26px}
+  .resumo ul{margin:0;padding-left:20px}.resumo li{margin:6px 0}
+
+  /* agente */
+  .agente{background:#fff;border:3px solid var(--preto);border-radius:12px;padding:22px;box-shadow:6px 6px 0 var(--preto)}
+  .agente h2{font-size:20px;margin:0 0 6px;text-transform:none;letter-spacing:0}
+  .agente h2::after{display:none}
+  .agente .exp{margin:0 0 14px;color:var(--fraco);font-size:15px}
+  .atalhos{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .atalhos button{font:inherit;font-size:14px;border:2px solid var(--preto);background:transparent;border-radius:99px;padding:6px 14px;cursor:pointer}
+  .atalhos button[aria-pressed="true"]{background:var(--preto);color:var(--off)}
+  .campo{display:flex;gap:8px}
+  .campo input{flex:1;font:inherit;padding:11px 14px;border:2px solid var(--preto);border-radius:8px;background:var(--off)}
+  .campo button{font:inherit;font-weight:700;border:2px solid var(--preto);background:var(--amarelo);border-radius:8px;padding:0 18px;cursor:pointer}
+  .resp{margin-top:16px;display:grid;gap:10px}
+  .resp .item{border-left:4px solid var(--publico);background:var(--off);padding:10px 14px;font-size:15px}
+  .resp .tag{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--fraco);display:block;margin-bottom:4px}
+  .resp .item.lac{border-left-color:#b4b4a4;color:var(--fraco);font-style:italic}
+  .aviso-ia{font-size:12px;font-style:italic;color:var(--fraco);margin-top:12px}
+
+  /* compartilhar */
+  .share{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:10;opacity:0;pointer-events:none;transition:opacity .25s}
+  .share.visivel{opacity:1;pointer-events:auto}
+  .share a,.share button{width:44px;height:44px;border-radius:50%;border:2px solid var(--preto);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--preto);text-decoration:none;box-shadow:3px 3px 0 var(--preto);font:inherit;font-weight:700;font-size:13px}
+  .share a:hover,.share button:hover{background:var(--rosa)}
+  @media (max-width:900px){.share{top:auto;bottom:14px;right:14px;flex-direction:row;transform:none}}
+
+  footer{background:var(--preto);color:var(--off);padding:56px 0 24px;margin-top:40px}
+  .grade-r{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px}
+  @media (max-width:760px){.grade-r{grid-template-columns:1fr}}
+  footer h4{font-size:12px;letter-spacing:.12em;color:#9b9b90;margin:0 0 16px;font-weight:400}
+  footer ul{list-style:none;margin:0;padding:0}footer li{margin-bottom:12px}
+  footer a{color:var(--off);text-decoration:none;border-bottom:1px solid var(--off)}
+  .base{border-top:1px solid #35352f;margin-top:40px;padding-top:20px;display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:center;font-size:12px;color:#9b9b90}
+  .logos{display:flex;gap:14px;align-items:center}.logo{border:1px dashed #55554c;padding:6px 14px;color:#c9c9bd}
+  .privac{position:fixed;left:16px;bottom:16px;max-width:520px;background:#fff;border:2px solid var(--preto);border-radius:10px;padding:12px 14px;display:flex;gap:14px;align-items:center;font-size:14px;box-shadow:4px 4px 0 var(--preto);z-index:40}
+  .privac a{color:var(--preto)}
+  .privac button{font:inherit;font-weight:700;border:2px solid var(--preto);background:var(--amarelo);border-radius:99px;padding:6px 14px;cursor:pointer;white-space:nowrap}
+  @media (max-width:900px){.privac{left:12px;right:12px;bottom:72px;max-width:none}}
+  [hidden]{display:none!important}
+  button:focus-visible,a:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+</style>
+
+<div class="painel"><div class="larg"><strong>Teste:</strong>
+  <button data-tela="home" aria-pressed="true">home</button>
+  <button data-tela="resultado" aria-pressed="false">página fixa</button><span style="margin-left:14px;color:#55556b">v5 · referência oficial</span>
+  <span style="margin-left:14px">agente</span>
+  <button data-agente="botoes" aria-pressed="true">botões + campo</button>
+  <button data-agente="campo" aria-pressed="false">só campo</button>
+  <button data-agente="off" aria-pressed="false">desligado (beta)</button>
+</div></div>
+
+<div class="banner" id="banner">
+  <figure class="on"><svg viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="9" stroke-linecap="square"><path d="M40 220V120H190V40" stroke="#0f02fd"/><path d="M300 0V90H450V220" stroke="#ff5aac"/><path d="M580 220V150H720V60H860" stroke="#16c172"/><path d="M930 0V100H1060V220" stroke="#ff3131"/><path d="M1090 30H1170V160" stroke="#ffb23d"/></g><g fill="none" stroke-width="9"><circle cx="190" cy="40" r="14" stroke="#0f02fd"/><circle cx="450" cy="200" r="14" stroke="#ff5aac"/><circle cx="860" cy="60" r="14" stroke="#16c172"/><circle cx="1170" cy="160" r="14" stroke="#ffb23d"/></g></svg></figure>
+  <figure><svg viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke-width="9" stroke-linecap="square"><path d="M0 60H140V160H300V40H420" stroke="#7e2dff"/><path d="M520 220V80H700V180H820" stroke="#ffcc32"/><path d="M900 0V70H1040V190H1200" stroke="#26cbff"/></g><g fill="none" stroke-width="9"><circle cx="420" cy="40" r="14" stroke="#7e2dff"/><circle cx="820" cy="180" r="14" stroke="#ffcc32"/></g></svg></figure>
+</div>
+<div class="barra"><div class="larg"><span class="marca"><svg width="18" height="18" viewBox="0 0 24 24" fill="#ff5aac"><path d="M12 0l2.4 6.6L21 4.2l-3.6 5.4L24 12l-6.6 2.4L21 19.8l-6.6-2.4L12 24l-2.4-6.6L3 19.8l3.6-5.4L0 12l6.6-2.4L3 4.2l6.6 2.4z"/></svg>DECISIVAS</span><nav><a href="#" data-ir="home">Início</a><a href="#">Sobre</a></nav></div></div>
+
+<!-- HOME -->
+<main id="home"><div class="larg">
+  <h1 class="pergunta">Com quem você quer falar hoje?</h1>
+  <p class="sub">Escolha um público e um tema. Você recebe o que a pesquisa mostra, o que funciona, o que afasta e como chegar nessas pessoas. A mensagem, quem escreve é você.</p>
+  <div class="rot">Público</div>
+  <div class="pilulas" id="pubs">
+    <button class="pil" data-pub="jovens" style="background:var(--pub-jovens)">Jovens</button>
+    <button class="pil" data-pub="70+" style="background:var(--pub-70);color:var(--off)">70+</button>
+    <button class="pil" data-pub="mulheres beneficiárias" style="background:var(--pub-mb)">Mulheres beneficiárias</button>
+    <button class="pil" data-pub="mulheres de 2 a 5 salários mínimos" style="background:var(--pub-m25);color:var(--off)">Mulheres de 2 a 5 SM</button>
+  </div>
+  <div class="rot">Tema</div>
+  <div class="pilulas" id="temas">
+    <button class="pil tema" data-tema="dinheiro no bolso">Dinheiro no bolso</button>
+    <button class="pil tema" data-tema="trabalho digno">Trabalho digno</button>
+    <button class="pil tema" data-tema="família e cuidado">Família e cuidado</button>
+    <button class="pil tema" data-tema="brasil e pertencimento">Brasil e pertencimento</button>
+    <button class="pil tema" data-tema="participação e voz">Participação e voz</button>
+  </div>
+  <div class="acao"><button class="ver" id="ver" disabled>VER CAMINHOS</button><span class="dica" id="dica">Escolha um público e um tema.</span></div>
+</div></main>
+
+<!-- PÁGINA FIXA -->
+<main id="resultado" hidden><div class="larg">
+  <div class="cab"><span class="chip">Jovens</span><span class="chip t">Dinheiro no bolso</span><span class="meta">texto revisado em [preencher]</span></div>
+  <h1 class="tit">Jovens × Dinheiro no bolso</h1>
+  <p class="linha">Dinheiro, para este público, é margem para respirar no fim do mês e continuar construindo a vida.</p>
+
+  <section class="bloco"><h2>Por que falar com este público sobre este tema</h2>
+    <div class="prosa"><p>Jovens de 16 a 34 anos já vivem cobranças de adulto: curso, primeiro emprego, transporte, internet, ajuda em casa, contas. Nesse arranjo, dinheiro não aparece como desejo de consumo, e sim como previsibilidade: fechar o mês, estudar, circular, ajudar a família sem que tudo vire urgência.</p><p>A pesquisa mostra que o tema tem alto potencial quando conecta renda a estudo, casa, família e alívio do aperto, e perde força quando fala de prosperidade genérica.</p></div>
+    <div class="grade">
+      <div class="card num"><div class="n">2×</div><h3>Custo de vida pesa o dobro</h3><p>É o maior impacto isolado na avaliação que esse público faz do país, com peso cerca de duas vezes maior que o do segundo tema. "A gente está vivendo o básico dos básicos."</p></div>
+      <div class="card"><h3>Margem, não luxo</h3><p>A melhora que convence é o respiro possível: pagar as contas, reduzir o improviso e voltar a planejar.</p></div>
+      <div class="card"><h3>Dívida como bloqueio</h3><p>Para o jovem, a dívida pesa mais porque compromete crédito, autonomia e planos logo no começo da trajetória, e chega com vergonha e angústia.</p></div>
+    </div>
+  </section>
+
+  <section class="bloco"><h2>O que funciona</h2>
+    <div class="grade">
+      <div class="card funciona"><h3>Partir da vida concreta</h3><p>Mercado, remédio, gasolina, passagem, mensalidade. A mensagem começa no que a pessoa reconhece, não no indicador.</p></div>
+      <div class="card funciona"><h3>Mostrar a reorganização possível</h3><p>Pequenas viradas que devolvem controle, alívio e continuidade valem mais que promessa de prosperidade.</p></div>
+      <div class="card funciona"><h3>Formato curto e real</h3><p>Relato, bastidor, tutorial, comparação, antes e depois, dica prática. Linguagem direta aproxima mais que peça institucional.</p></div>
+    </div>
+  </section>
+
+  <section class="bloco"><h2>O que não funciona</h2>
+    <div class="grade">
+      <div class="card evita"><h3>Cara de propaganda</h3><p>Peça institucional, slogan de superação e tom de comunicado são lidos como distância.</p></div>
+      <div class="card evita"><h3>Narrativa de ascensão</h3><p>Do "pobre" ao "rico" não convence. O dinheiro que faz sentido leva do sufoco à margem, não à riqueza.</p></div>
+      <div class="card evita"><h3>Falar com um "jovem" abstrato</h3><p>Este público se mede por responsabilidade, tempo curto, dinheiro e família, e quer ser tratado como jovem adulto. "Linguagem jovem" sem esse reconhecimento afasta.</p></div>
+    </div>
+  </section>
+
+  <section class="bloco"><h2>Quem é este público</h2>
+    <div class="grade">
+      <div class="card num"><div class="n">41%</div><h3>dos eleitores indecisos</h3><p>têm entre 16 e 34 anos. É o público mais volátil do eleitorado.</p></div>
+      <div class="card" style="grid-column:span 2"><p>O afastamento não é rejeição à política em si, mas a um certo tipo de política: polarização, promessa vazia, briga e teatro eleitoral. Pesam os temas econômicos concretos: custo de vida, endividamento, emprego e apostas. São cobrados como adultos, com trabalho, conta e rotina, mas se sentem desqualificados como jovens quando tentam opinar.</p></div>
+    </div>
+  </section>
+
+  <section class="bloco"><h2>Como chegar nele</h2>
+    <div class="grade">
+      <div class="card"><h3>Onde estão</h3><p>Instagram e WhatsApp são centrais em todo o país. No interior, a informação circula mais por redes sociais, TikTok e WhatsApp, inclusive sobre política.</p><p class="fonte">Aláfia Lab, Caminhos da Informação, 2026</p></div>
+      <div class="card"><h3>Como falam</h3><p>A crítica social deste público circula por humor, trend e experiência concreta, mais do que por explicação institucional longa.</p></div>
+      <div class="card"><h3>O que carregam</h3><p>Conteúdo que se sustenta sozinho quando reencaminhado, com uma ideia por peça.</p></div>
+    </div>
+  </section>
+
+  <section class="bloco"><h2>Resumo</h2>
+    <div class="resumo"><ul>
+      <li>Dinheiro é previsibilidade, não consumo.</li>
+      <li>Começar pela despesa concreta que a pessoa reconhece.</li>
+      <li>Prometer reorganização possível, nunca prosperidade.</li>
+      <li>Formato curto e real; sem propaganda, sem "jovem" abstrato.</li>
+      <li>Reconhecer a dívida como bloqueio, não como culpa.</li>
+    </ul></div>
+  </section>
+
+  <section class="bloco agente" id="agente">
+    <h2>Explorar o acervo</h2>
+    <p class="exp">Esta página é um recorte. O acervo tem 51 achados de pesquisa sobre jovens e dinheiro. Escolha um assunto ou escreva o que procura: a resposta traz só trechos da pesquisa, com a origem de cada um.</p>
+    <div class="atalhos" id="atalhos">
+      <button data-p="custo de vida">custo de vida</button><button data-p="orçamento e planejamento">orçamento e planejamento</button><button data-p="endividamento e crédito">endividamento e crédito</button><button data-p="salário mínimo">salário mínimo</button><button data-p="impostos">impostos</button>
+    </div>
+    <div class="campo" id="campo"><input id="pergunta" placeholder="Ex.: apostas e dívida entre jovens"><button id="perguntar">Quero explorar mais</button></div>
+    <div class="resp" id="resp" hidden></div>
+    <p class="aviso-ia" id="aviso-ia" hidden>Seleção feita com apoio de inteligência artificial, apenas com trechos do acervo de pesquisa do DECISIVAS. Não indica voto nem menciona candidaturas.</p>
+  </section>
+</div></main>
+
+<aside class="share" id="share" hidden aria-label="Compartilhar">
+  <a href="#" title="WhatsApp">W</a><a href="#" title="X">X</a><a href="#" title="Facebook">f</a><a href="#" title="LinkedIn">in</a><a href="#" title="Bluesky">B</a><button title="Copiar link" id="copiar">⧉</button>
+</aside>
+
+<div class="privac" id="privac"><span>Este site não usa cookies de rastreamento nem coleta dados pessoais. <a href="#">Política de privacidade</a></span><button id="fechar-privac" aria-label="Fechar aviso">Entendi</button></div>
+<footer><div class="larg">
+  <div class="grade-r">
+    <div><p style="font-size:22px;font-weight:700;margin:0 0 8px">DECISIVAS</p><p style="color:#c9c9bd;margin:0;max-width:34ch">[assinatura do projeto a preencher]</p></div>
+    <div><h4>NAVEGAÇÃO</h4><ul><li><a href="#">Início</a></li><li><a href="#">Sobre o projeto</a></li><li><a href="#">Política de privacidade</a></li></ul></div>
+    <div><h4>CONTATO</h4><ul><li><a href="#">[e-mail]</a></li><li><a href="#">[Instagram]</a></li><li style="color:#c9c9bd">São Paulo · Brasil</li></ul></div>
+  </div>
+  <div class="base"><div class="logos"><span>ORGANIZAÇÃO</span><span class="logo">[Quid]</span><span>REALIZAÇÃO</span><span class="logo">[BRIEF]</span></div><span>© 2026 · Todos os direitos reservados</span></div>
+</div></footer>
+
+<script>
+(function(){
+  var st={pub:null,tema:null,agente:"botoes"};
+  var TREC={
+   "custo de vida":[["Achado","Dinheiro importa porque reduz improviso: permite estudar, circular, ajudar em casa, pagar contas e sustentar planos."],["Achado","Dinheiro no bolso convence quando significa respirar no fim do mês."],["Depoimento","“Mercado, remédio, gasolina. Está complicado hoje em dia. A gente está vivendo o básico dos básicos.”"],["O que afasta","Narrativa de ascensão social, do “pobre” ao “rico”, afasta: o dinheiro que faz sentido leva do sufoco à margem, não à riqueza."]],
+   "endividamento e crédito":[["Achado","A dívida aparece como vergonha, angústia e vida bloqueada. Para jovens, pesa ainda mais porque compromete crédito, autonomia e planos logo no início da trajetória."],["Achado","Na escuta digital, ganham força relatos de dívida, corte de gastos, organização financeira e reconstrução depois do aperto, enquanto a ostentação perde centralidade."],["O que afasta","Tratar a dívida como culpa individual afasta: o que aproxima é mostrar caminhos concretos de renegociação."]],
+   "orçamento e planejamento":[["Achado","“Margem para continuar e projetar futuro”: a melhora aparece como respiro possível, não como luxo."],["O que funciona","Trocar prosperidade genérica por reorganização possível: pequenas viradas que mostram controle, alívio e continuidade."]],
+   "salário mínimo":[["",  "O acervo tem poucos trechos sobre salário mínimo neste cruzamento. Veja Jovens × Trabalho digno."]],
+   "impostos":[["","O acervo tem poucos trechos sobre impostos para este público."]]
+  };
+  function grupo(sel,attr,v){document.querySelectorAll(sel).forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset[attr]===v));});}
+  function tela(t){document.getElementById("home").hidden=t!=="home";document.getElementById("resultado").hidden=t!=="resultado";document.getElementById("share").hidden=t!=="resultado";grupo("[data-tela]","tela",t);window.scrollTo(0,0);setTimeout(posShare,50);}
+  document.querySelectorAll("[data-tela]").forEach(function(b){b.onclick=function(){tela(b.dataset.tela);};});
+  document.querySelectorAll("[data-ir]").forEach(function(a){a.onclick=function(e){e.preventDefault();tela(a.dataset.ir);};});
+  document.querySelectorAll("[data-pub]").forEach(function(b){b.onclick=function(){st.pub=b.dataset.pub;grupo("[data-pub]","pub",st.pub);prontos();};});
+  document.querySelectorAll("[data-tema]").forEach(function(b){b.onclick=function(){st.tema=b.dataset.tema;grupo("[data-tema]","tema",st.tema);prontos();};});
+  function prontos(){var ok=st.pub&&st.tema;document.getElementById("ver").disabled=!ok;document.getElementById("dica").textContent=ok?(st.pub+" × "+st.tema):(st.pub?"Agora escolha um tema.":st.tema?"Agora escolha um público.":"Escolha um público e um tema.");}
+  document.getElementById("ver").onclick=function(){tela("resultado");};
+  function agente(){st.agente=document.querySelector('[data-agente][aria-pressed="true"]').dataset.agente;
+    document.getElementById("agente").hidden=st.agente==="off";document.getElementById("atalhos").hidden=st.agente==="campo";}
+  document.querySelectorAll("[data-agente]").forEach(function(b){b.onclick=function(){grupo("[data-agente]","agente",b.dataset.agente);agente();};});
+  function responde(chave){var r=document.getElementById("resp");r.innerHTML="";var itens=TREC[chave]||[["","O acervo não tem trechos sobre isso para este cruzamento. Tente um dos assuntos acima."]];
+    itens.forEach(function(x){var d=document.createElement("div");d.className="item";d.innerHTML=(x[0]?'<span class="tag">'+x[0]+'</span>':'')+x[1];if(!x[0])d.classList.add('lac');r.appendChild(d);});
+    r.hidden=false;document.getElementById("aviso-ia").hidden=false;}
+  document.querySelectorAll("#atalhos button").forEach(function(b){b.onclick=function(){grupo("#atalhos button","p",b.dataset.p);responde(b.dataset.p);};});
+  document.getElementById("perguntar").onclick=function(){var q=document.getElementById("pergunta").value.toLowerCase();var chave=Object.keys(TREC).find(function(k){return q.indexOf(k.split(" ")[0])>-1;})||(q.indexOf("dívida")>-1||q.indexOf("aposta")>-1?"endividamento e crédito":null);responde(chave);};
+  document.getElementById("copiar").onclick=function(){var b=this;if(navigator.clipboard)navigator.clipboard.writeText(location.href);b.textContent="✓";setTimeout(function(){b.textContent="⧉";},1200);};
+  // compartilhamento só aparece depois que o banner e a barra saem da tela, e nunca por cima do menu fixo
+  var share=document.getElementById("share");
+  function posShare(){
+    var h=share.offsetHeight,alturaBarra=60,vh=window.innerHeight;
+    var banner=document.getElementById("banner").getBoundingClientRect().bottom;
+    var rodape=document.querySelector("footer").getBoundingClientRect().top;
+    // mesma regra nas duas pontas: só aparece quando o banner já saiu por cima com folga,
+    // e some assim que o rodapé começa a entrar por baixo com a mesma folga
+    var folga=60;
+    var vis=!document.getElementById("resultado").hidden && banner+folga<0 && rodape-folga>vh;
+    share.classList.toggle("visivel",vis);
+    share.style.top=Math.max(vh/2,alturaBarra+24+h/2)+"px";}
+  window.addEventListener("scroll",posShare,{passive:true});window.addEventListener("resize",posShare);
+  var figs=document.querySelectorAll("#banner figure"),i=0;if(!matchMedia("(prefers-reduced-motion: reduce)").matches)setInterval(function(){figs[i].classList.remove("on");i=(i+1)%figs.length;figs[i].classList.add("on");},5000);
+  document.getElementById("fechar-privac").onclick=function(){document.getElementById("privac").hidden=true;};
+  agente();
+})();
+</script>

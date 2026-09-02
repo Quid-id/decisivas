@@ -1,0 +1,329 @@
+{
+ "publico": "jovens",
+ "nome": "Jovens",
+ "quem_e": {
+  "destaque": {
+   "n": "41%",
+   "titulo": "dos eleitores indecisos",
+   "texto": "têm entre 16 e 34 anos. É o público mais volátil do eleitorado."
+  },
+  "texto": "Jovens de 16 a 34 anos são o público mais volátil do eleitorado e representam 41% dos eleitores ainda indecisos. Pesquisas de 2026 mostram que o humor político dessa faixa mudou mais rápido do que o de qualquer outra nos últimos meses, sem que isso se traduza em voto definido: seguem sendo a faixa mais dividida. O afastamento não é rejeição à política em si, mas a um certo tipo de política: polarização, promessa vazia, briga e teatro eleitoral. Pesam os temas econômicos concretos: custo de vida, endividamento, emprego e apostas. São cobrados como adultos, com trabalho, conta e rotina, mas se sentem desqualificados como jovens quando tentam opinar."
+ },
+ "como_chegar": [
+  {
+   "titulo": "Onde estão",
+   "texto": "Sete em cada dez se informam principalmente pela internet. Instagram é a casa: 47% o apontam como plataforma principal, o maior índice de qualquer grupo. TikTok é a segunda porta (47,5% entre 18 e 24 anos). WhatsApp segue dominante: 82% entre 18 e 24, 91% entre 25 e 34. YouTube e televisão quase não alcançam.",
+   "fonte": "DataSenado 2025; Aláfia Lab 2025"
+  },
+  {
+   "titulo": "Como decidem no que acreditar",
+   "texto": "É o único público em que as redes superam a televisão quando o assunto é política. Confiam mais no que parece real (pessoa concreta, situação reconhecível) do que na marca de um veículo, e consomem menos jornalismo que a média: 46% contra 65%.",
+   "fonte": "Aláfia Lab 2025; Painel TIC 2025"
+  },
+  {
+   "titulo": "O que isso pede do material",
+   "texto": "Vertical, com legenda, feito para sobreviver ao som desligado. Instagram e TikTok primeiro. A credibilidade precisa estar na cara do conteúdo, não numa assinatura institucional que ninguém vai procurar. Humor, trend e relato carregam a crítica social deste público melhor do que explicação longa.",
+   "fonte": "Acervo DECISIVAS; Aláfia Lab 2025"
+  }
+ ],
+ "paginas": {
+  "dinheiro no bolso": {
+   "titulo": "Jovens × Dinheiro no bolso",
+   "linha": "Dinheiro, para este público, é margem para respirar no fim do mês e continuar construindo a vida.",
+   "por_que": {
+    "texto": [
+     "Jovens de 16 a 34 anos já vivem cobranças de adulto: curso, primeiro emprego, transporte, internet, ajuda em casa, contas. Nesse arranjo, dinheiro não aparece como desejo de consumo, e sim como previsibilidade: fechar o mês, estudar, circular, ajudar a família sem que tudo vire urgência.",
+     "A pesquisa mostra que o tema tem alto potencial quando conecta renda a estudo, casa, família e alívio do aperto, e perde força quando fala de prosperidade genérica."
+    ],
+    "dados": [
+     {
+      "n": "2×",
+      "titulo": "Custo de vida pesa o dobro",
+      "texto": "É o maior impacto isolado na avaliação que esse público faz do país, com peso cerca de duas vezes maior que o do segundo tema. \"A gente está vivendo o básico dos básicos.\""
+     },
+     {
+      "titulo": "Margem, não luxo",
+      "texto": "A melhora que convence é o respiro possível: pagar as contas, reduzir o improviso e voltar a planejar."
+     },
+     {
+      "titulo": "Dívida como bloqueio",
+      "texto": "Para o jovem, a dívida pesa mais porque compromete crédito, autonomia e planos logo no começo da trajetória, e chega com vergonha e angústia."
+     }
+    ]
+   },
+   "funciona": [
+    {
+     "titulo": "Partir da vida concreta",
+     "texto": "Mercado, remédio, gasolina, passagem, mensalidade. A mensagem começa no que a pessoa reconhece, não no indicador."
+    },
+    {
+     "titulo": "Mostrar a reorganização possível",
+     "texto": "Pequenas viradas que devolvem controle, alívio e continuidade valem mais que promessa de prosperidade."
+    },
+    {
+     "titulo": "Formato curto e real",
+     "texto": "Relato, bastidor, tutorial, comparação, antes e depois, dica prática. Linguagem direta aproxima mais que peça institucional."
+    }
+   ],
+   "nao_funciona": [
+    {
+     "titulo": "Cara de propaganda",
+     "texto": "Peça institucional, slogan de superação e tom de comunicado são lidos como distância."
+    },
+    {
+     "titulo": "Narrativa de ascensão",
+     "texto": "Do \"pobre\" ao \"rico\" não convence. O dinheiro que faz sentido leva do sufoco à margem, não à riqueza."
+    },
+    {
+     "titulo": "Falar com um \"jovem\" abstrato",
+     "texto": "Este público se mede por responsabilidade, tempo curto, dinheiro e família, e quer ser tratado como jovem adulto. \"Linguagem jovem\" sem esse reconhecimento afasta."
+    }
+   ],
+   "resumo": [
+    "Dinheiro é previsibilidade, não consumo.",
+    "Começar pela despesa concreta que a pessoa reconhece.",
+    "Prometer reorganização possível, nunca prosperidade.",
+    "Formato curto e real; sem propaganda, sem \"jovem\" abstrato.",
+    "Reconhecer a dívida como bloqueio, não como culpa."
+   ]
+  },
+  "trabalho digno": {
+   "titulo": "Jovens × Trabalho digno",
+   "linha": "Trabalhar não é o problema. O problema é trabalhar muito e a vida não melhorar.",
+   "por_que": {
+    "texto": [
+     "Muitos jovens estão entrando ou se firmando no mercado de trabalho: primeiro emprego, CLT, bico, MEI, aplicativo, loja, shopping, informalidade. Para eles, trabalho é o tema que organiza quase todos os outros: dinheiro, cansaço, família, estudo, saúde mental, futuro e voto.",
+     "A crítica que aparece na pesquisa não é ao trabalho em si. É ao modelo em que trabalhar muito não garante descanso, perspectiva nem qualidade de vida. Proteção, para este público, não é linguagem jurídica: é ter vida fora do trabalho, poder estudar, cuidar da família e não adoecer."
+    ],
+    "dados": [
+     {
+      "n": "6x1",
+      "titulo": "A escala como atalho",
+      "texto": "A escala 6x1 traduz uma discussão institucional em experiência vivida. Vida, tempo, escala e dias estruturam a sensação de que o trabalho ocupa o centro da existência."
+     },
+     {
+      "titulo": "Esforço sem recompensa",
+      "texto": "O esforço é aceito, mas gera frustração quando não vem acompanhado de remuneração, respeito, estabilidade ou chance de crescer. \"Por ser mulher e por ser jovem, eu preciso lutar muito mais para me provar.\""
+     },
+     {
+      "titulo": "Proteção em disputa",
+      "texto": "Os direitos trabalhistas aparecem entre valorização e desconfiança, atravessados por polarização e pela oposição entre CLT e empreendedorismo. O jovem avalia pela consequência prática: melhora salário, descanso, estabilidade, oportunidade?"
+     }
+    ]
+   },
+   "funciona": [
+    {
+     "titulo": "Traduzir proteção em situação concreta",
+     "texto": "O que é, para quem vale, como acessar, onde checar. Direito vira orientação prática, não texto de lei."
+    },
+    {
+     "titulo": "Proteção como condição para trabalhar melhor",
+     "texto": "Não como privilégio, acomodação ou favor. A pergunta que o público faz é se a medida melhora salário, descanso e condições reais."
+    },
+    {
+     "titulo": "Partir da rotina que já existe",
+     "texto": "Escala, primeiro emprego, aplicativo, estudo à noite, transporte. Relato, bastidor e comparação aproximam mais do que peça institucional."
+    }
+   ],
+   "nao_funciona": [
+    {
+     "titulo": "Estigma de geração",
+     "texto": "\"Essa geração não quer trabalhar\", \"é acomodada\", \"não aguenta pressão\". Deslegitima a demanda por descanso, jornada justa e saúde mental, e é rejeitado com força."
+    },
+    {
+     "titulo": "Enquadrar como briga política",
+     "texto": "Governo contra populismo, CLT contra empreendedorismo. Quando a proteção vira torcida, o tema sai da experiência de quem trabalha e perde o jovem."
+    },
+    {
+     "titulo": "Explicação institucional longa e slogan",
+     "texto": "Nem um nem outro. A mensagem precisa mostrar quem ganha, como funciona, que problema resolve e por que importa para quem trabalha hoje."
+    }
+   ],
+   "resumo": [
+    "Trabalho organiza os outros temas: dinheiro, cansaço, família, estudo, futuro.",
+    "A escala 6x1 é o atalho que todo mundo entende.",
+    "Proteção como condição para trabalhar melhor, nunca como privilégio.",
+    "Direito traduzido em orientação prática: o que é, para quem, como acessar.",
+    "Sem estigma de geração, sem briga política, sem slogan."
+   ]
+  },
+  "família e cuidado": {
+   "titulo": "Jovens × Família e cuidado",
+   "linha": "Família, para este público, não é valor abstrato. É mãe, filho, casa, escola e volta segura para casa.",
+   "por_que": {
+    "texto": [
+     "A família reorganiza a vida do jovem em torno de cuidado, provisão, expectativa e medo de falhar. Aparece como apoio e referência, e também como responsabilidade concreta: estágio, escola do filho, cuidado e custo precisando caber juntos.",
+     "Cuidar, na pesquisa, é um conjunto de coisas ao mesmo tempo: segurança nas ruas, na escola e na creche, segurança das crianças nas redes, acesso a saúde e educação, estabilidade financeira. O medo da violência é universal e visceral, e define até onde a vida pode circular."
+    ],
+    "dados": [
+     {
+      "titulo": "Medo que limita",
+      "texto": "O medo da violência é transversal e nenhuma resposta institucional convence. Não é medo abstrato: é limitação concreta de onde ir, a que hora e com quem. \"A gente é mulher e nova, então a gente é alvo de muitas coisas.\""
+     },
+     {
+      "titulo": "Família como apoio e cobrança",
+      "texto": "Afeto, energia e referência, e ao mesmo tempo responsabilidade, papel de provedor e futuro dos filhos. As duas faces aparecem juntas."
+     },
+     {
+      "titulo": "Cuidado tem endereço",
+      "texto": "Escola, creche, posto de saúde, internet das crianças, dinheiro no fim do mês. Quando o tema vira lista de serviços concretos, ele deixa de soar moral."
+     }
+    ]
+   },
+   "funciona": [
+    {
+     "titulo": "Entrar pela família concreta",
+     "texto": "Mãe, filho, irmã, esposa, casa, escola, saúde, dinheiro, internet e volta segura para casa. É a entrada mais potente do tema."
+    },
+    {
+     "titulo": "Provar que alguma coisa mudou",
+     "texto": "Em segurança, anunciar mais uma lei não convence. Convence mostrar o efeito na rua, na escola, no caminho de casa."
+    },
+    {
+     "titulo": "Formato curto e real",
+     "texto": "Relato, bastidor, comparação, antes e depois. A cena de uma família reconhecível vale mais que a palavra família."
+    }
+   ],
+   "nao_funciona": [
+    {
+     "titulo": "Família como valor abstrato",
+     "texto": "Sem a concretude do dia a dia, a mensagem soa moralista ou distante, e pode ser lida como uso político da família."
+    },
+    {
+     "titulo": "Futuro só inspiracional",
+     "texto": "Futuro crível mostra caminho, condição e proteção. Discurso de esperança sem chão não pega."
+    },
+    {
+     "titulo": "Convocação abstrata",
+     "texto": "A comunicação precisa começar nos temas que já organizam a rotina: estudo, transporte, primeiro emprego, escala, família e segurança."
+    }
+   ],
+   "resumo": [
+    "Família é cena, não valor: mãe, filho, casa, escola, volta segura.",
+    "Segurança é o medo que organiza o resto e ninguém convence com lei nova.",
+    "Cuidado é lista de serviços concretos: creche, posto, escola, internet das crianças.",
+    "Sem tom moral, sem futuro só inspiracional.",
+    "Formato curto e real, com gente reconhecível."
+   ]
+  },
+  "brasil e pertencimento": {
+   "titulo": "Jovens × Brasil e pertencimento",
+   "linha": "O Brasil que mobiliza é o vivido: comida, música, Nordeste, periferia, trabalho, alegria e resistência.",
+   "por_que": {
+    "texto": [
+     "O pertencimento nacional deste público não passa por símbolos oficiais. Passa por cultura, comida, Carnaval, Bahia, povo, reconhecimento externo e orgulho de uma identidade popular. \"O Pix é nosso, o SUS pode ser melhor, e o Brasil presta.\"",
+     "O tema tem potencial emocional alto, mas com uma condição: aparecer como cultura vivida. Quando soa propaganda patriótica, verde-amarelo genérico ou símbolo vazio, perde credibilidade com quem se quer mobilizar. É o cruzamento com menos material no acervo, e a página diz isso onde for o caso."
+    ],
+    "dados": [
+     {
+      "titulo": "Orgulho de identidade popular",
+      "texto": "Cultura, comida, música, Nordeste, periferia, trabalho, alegria e resistência são o que faz o jovem se reconhecer no país. Símbolo oficial não faz esse trabalho."
+     },
+     {
+      "titulo": "Rejeição ao estigma",
+      "texto": "A associação do brasileiro a \"preguiçoso\" é rejeitada com força. O \"jeitinho\" como justificativa de desonestidade é ponto de desconforto na identidade."
+     },
+     {
+      "titulo": "Reconhecimento externo conta",
+      "texto": "O que o mundo reconhece no Brasil (cultura, tecnologia do dia a dia, gente) entra como motivo de orgulho quando vem com exemplo concreto."
+     }
+    ]
+   },
+   "funciona": [
+    {
+     "titulo": "Brasil vivido, não simbólico",
+     "texto": "Acarajé, cultura, música, Nordeste, periferia, trabalho, alegria e resistência. O território ganha força quando fala do país que a pessoa conhece."
+    },
+    {
+     "titulo": "Partir da vida concreta",
+     "texto": "Uma cena reconhecível vale mais que um conceito de nação. Relato e bastidor aproximam mais do que peça institucional."
+    },
+    {
+     "titulo": "Traduzir quem faz o quê",
+     "texto": "Quando a comunicação mostra quem aprova, quem executa e quem responde, o país deixa de parecer um bloco distante e vira algo em que a pessoa participa."
+    }
+   ],
+   "nao_funciona": [
+    {
+     "titulo": "Propaganda e verde-amarelo genérico",
+     "texto": "Nacionalismo sem consequência prática perde força e é lido como propaganda."
+    },
+    {
+     "titulo": "Estigma do brasileiro",
+     "texto": "Preguiçoso, malandro, jeitinho: qualquer eco desses rótulos afasta, mesmo em tom de brincadeira."
+    },
+    {
+     "titulo": "Futuro só inspiracional",
+     "texto": "Falar de um país melhor sem mostrar caminho, condição e proteção soa vazio para quem começa a vida no aperto."
+    }
+   ],
+   "resumo": [
+    "Pertencimento é cultura vivida, não símbolo oficial.",
+    "Orgulho popular: comida, música, Nordeste, periferia, trabalho.",
+    "Reconhecimento externo entra com exemplo concreto.",
+    "Sem propaganda, sem verde-amarelo genérico, sem estigma.",
+    "Acervo menor neste cruzamento: onde faltar, a página declara."
+   ]
+  },
+  "participação e voz": {
+   "titulo": "Jovens × Participação e voz",
+   "linha": "O jovem sabe que o voto importa. O que pesa é que participar pode significar se expor, tomar lado e brigar.",
+   "por_que": {
+    "texto": [
+     "Jovens de 16 a 34 anos são 32% dos votos ainda em aberto. Entre os de 16 e 17 anos que ainda não tinham título em 2025, 94% pretendiam tirar o documento e votar em 2026. Não é apatia. É um público que avalia política pelo efeito concreto sobre trabalho, dinheiro, família, segurança e futuro.",
+     "A tensão que a pesquisa encontra é entre participação como pertencimento e participação como exposição ao conflito. \"Jovem tem poder\" divide: soa frase vazia até virar ação concreta, cobrança, informação e voto com consequência. A política chega misturada ao feed, com meme, corte, entretenimento e desinformação, e engajar também é aprender a verificar antes de aderir."
+    ],
+    "dados": [
+     {
+      "n": "32%",
+      "titulo": "dos votos em aberto",
+      "texto": "são de jovens de 16 a 34 anos. Entre os de 16 e 17 sem título, 94% pretendiam votar em 2026."
+     },
+     {
+      "titulo": "Vida real como critério",
+      "texto": "Quando a política entra no cotidiano, ela ganha concretude e deixa de ser disputa distante. Família e fé são os valores que mais mobilizam o voto."
+     },
+     {
+      "titulo": "Participação sob pressão",
+      "texto": "Participar pode significar se expor e entrar em conflito. \"Eu acho que os jovens realmente têm poder. Mas nos fizeram acreditar que não.\""
+     }
+    ]
+   },
+   "funciona": [
+    {
+     "titulo": "Política que parece melhorar a vida",
+     "texto": "Cenas e temas reconhecíveis: taxa das blusinhas, Pix, escala 6x1, transporte, escola, faculdade, primeiro emprego, segurança, custo de vida."
+    },
+    {
+     "titulo": "Reconhecer antes de pedir",
+     "texto": "Experiência vivida, esforço e capacidade de avaliação vêm antes de qualquer convite. O jovem quer ser tratado como quem sabe checar, comparar e decidir."
+    },
+    {
+     "titulo": "Engajamento como aprendizado, não cobrança",
+     "texto": "Entender, comparar, verificar, escolher e participar no próprio tempo. Mostrar quem aprova, quem bloqueia e quem responde tira a política do bloco distante."
+    }
+   ],
+   "nao_funciona": [
+    {
+     "titulo": "Promessa abstrata, julgamento moral, obrigação de se posicionar",
+     "texto": "As três formas mais comuns de afastar este público. Apelar ao dever moral não mobiliza; a mobilização nasce da consequência prática."
+    },
+    {
+     "titulo": "Tom professoral ou condescendente",
+     "texto": "Explicar de cima para baixo, ou pedir esperança e participação antes de reconhecer cansaço e pressão, perde quem chega cansado."
+    },
+    {
+     "titulo": "Política como disputa distante",
+     "texto": "Líderes, partidos, cortes e memes sem conexão com a rotina. O \"nós contra eles\" reduz quem discorda a inimigo e gera medo de se indispor."
+    }
+   ],
+   "resumo": [
+    "Não é apatia: 32% dos votos em aberto e 94% dos novos eleitores querendo votar.",
+    "Vida real como critério: Pix, 6x1, transporte, primeiro emprego.",
+    "Reconhecer esforço e capacidade de decidir antes de pedir qualquer coisa.",
+    "Engajamento como aprendizado, no tempo da pessoa.",
+    "Sem dever moral, sem tom professoral, sem nós contra eles."
+   ]
+  }
+ }
+}

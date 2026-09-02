@@ -1,0 +1,125 @@
+{
+"publico": "70+",
+"nome": "70+",
+"quem_e": {
+ "destaque": {"n": "1 em 4", "titulo": "eleitores tem 70 anos ou mais", "texto": "36,2 milhões de pessoas. O eleitorado que mais cresce no país: 74% desde 2010."},
+ "texto": "Pessoas com 70 anos ou mais são o eleitorado que mais cresce no país: 74% desde 2010, cinco vezes mais rápido que o eleitorado geral, quase um em cada quatro eleitores, 36,2 milhões de pessoas. Pesquisas recentes, como a Quaest de abril de 2026, contrariam o senso comum de que idosos tendem a ser mais conservadores. Para eles o voto é facultativo, e a abstenção, embora em queda desde 2014, segue alta: 58,9% em 2022, o equivalente a 8,8 milhões de pessoas que não foram às urnas. É o público que mais precisa ser mobilizado a efetivamente votar. Os achados desta plataforma vêm de grupos com pessoas de 70 a 78 anos; os dados de mídia usam o recorte nacional de 60 anos ou mais."
+},
+"como_chegar": [
+ {"titulo": "Onde estão", "texto": "Dois em cada três se informam principalmente pela televisão (66%); só 21% pela internet, o menor índice entre todas as idades. Quatro em cada dez nem estão na rede: dos 28 milhões de brasileiros desconectados, 16 milhões têm 60 anos ou mais. Metade deste público não é alcançável por nenhuma peça digital.", "fonte": "DataSenado 2025; TIC Domicílios 2025 (recorte 60+)"},
+ {"titulo": "Quem está conectado", "texto": "Usa WhatsApp (83%) mais que rede social (57%), e YouTube (21%) mais que Instagram (9%), o inverso dos jovens. No WhatsApp, amigos vêm antes da família: a confiança está em quem mandou, não no que está escrito. Em período eleitoral, os debates televisivos são o principal espaço de validação, assistidos sem intermediários.", "fonte": "TIC Domicílios 2025; Painel TIC 2025; acervo DECISIVAS"},
+ {"titulo": "O que isso pede do material", "texto": "WhatsApp e YouTube, nessa ordem. Áudio e vídeo com narração funcionam melhor que texto denso ou carrossel. A peça precisa ser encaminhável por uma pessoa conhecida sem perder o sentido. Depoimentos de gente comum, com cabelo branco e cenário real, convencem; celebridades e influenciadores não. Para a metade fora da rede, o caminho é rádio, impresso e a boca de alguém.", "fonte": "Acervo DECISIVAS; hábitos de mídia dos quatro públicos, 2026"}
+],
+"paginas": {
+"dinheiro no bolso": {
+ "titulo": "70+ × Dinheiro no bolso",
+ "linha": "A aposentadoria que se sonhou a vida inteira chega e não dá para viver dela.",
+ "por_que": {
+  "texto": ["Aposentadoria e custo de remédios comprometem o orçamento exatamente na fase em que a saúde exige mais gastos. Quem não consegue viver do benefício segue trabalhando, se ainda puder, ou depende de filhos e netos. O valor das aposentadorias está no centro dos problemas que esse público descreve, e a recomposição está entre as principais demandas.", "A frustração com a aposentadoria é quase unânime nos grupos ouvidos: relatos de satisfação são raros. O custo de vida é o tema de maior peso na avaliação que as pessoas fazem do país, e o mercado é onde a conta aparece. \"O salário da gente não dá para comprar nada.\""],
+  "dados": [
+   {"titulo": "A aposentadoria que decepciona", "texto": "\"A gente passa a vida sonhando com ela e quando ela chega é uma droga.\" A recomposição do valor está entre as principais demandas dos 70+."},
+   {"titulo": "Remédio e saúde no orçamento", "texto": "O custo dos remédios e as falhas de distribuição na rede pública pesam no mês justamente quando a saúde exige mais."},
+   {"titulo": "Trabalhar ou depender", "texto": "Quem não vive da aposentadoria segue em bicos e atividades informais, ou depende de filhos e netos. Muitos querem trabalhar e não encontram quem contrate pela idade."}
+  ]},
+ "funciona": [
+  {"titulo": "Caminho prático, não slogan", "texto": "Mostrar como uma política pública alivia o dia a dia: remédio, conta, transporte, atendimento. O engajamento nasce do concreto, nunca de frase de superação."},
+  {"titulo": "Reconhecer a vida de trabalho", "texto": "Quem dedicou a vida ao trabalho e ao sustento da família quer respeito e reconhecimento. Falar de renda depois dos 70 começa por aí."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Aposentadoria como descanso merecido", "texto": "Apresentar a aposentadoria como conquista feliz afasta: para a maioria, o valor não permite viver dela."},
+  {"titulo": "Os 70+ como bloco único", "texto": "Há idosos ativos e passivos, quem trabalha e quem depende. A heterogeneidade é a regra, e generalizar afasta."},
+  {"titulo": "Velhice como passividade", "texto": "A imagem do idoso trancado em casa diante da televisão é rejeitada. Para muitos, manter-se ativo é resistência ao papel de descarte."}
+ ],
+ "lacuna": "O acervo tem poucos trechos sobre o que funciona neste cruzamento. A pesquisa disponível para 70+ trata de motivação de voto e quase não prescreve como comunicar renda.",
+ "resumo": ["A aposentadoria é frustração, não conquista.", "Remédio e custo de vida são onde a conta aparece.", "Caminho prático e reconhecimento da vida de trabalho.", "Sem descanso merecido, sem bloco único, sem velhice passiva.", "Acervo menor neste cruzamento: onde faltar, a página declara."]
+},
+"trabalho digno": {
+ "titulo": "70+ × Trabalho digno",
+ "linha": "Depois dos 70, o trabalho é reconhecimento e utilidade. Falta quem contrate e falta respeito por quem já trabalhou a vida inteira.",
+ "por_que": {
+  "texto": ["Idosos ativos seguem em atividades produtivas informais e bicos para se manterem úteis. Outros querem trabalhar e não encontram quem contrate pela idade. A inclusão de idosos ativos no mercado e o combate ao etarismo nas empresas aparecem entre as principais demandas dos grupos ouvidos.", "O que falta, para esse público, é respeito e reconhecimento por quem dedicou a vida ao trabalho e ao sustento da família. Quando o tema do trabalho é apresentado de forma concreta, associado a salário, escala e direitos, o tom muda de indiferença para indignação."],
+  "dados": [
+   {"titulo": "Quem dá emprego a quem tem a minha idade?", "texto": "Muitos querem trabalhar e não encontram vaga. O etarismo nas contratações é barreira concreta, e o combate a ele é demanda declarada."},
+   {"titulo": "Utilidade e autonomia", "texto": "O bico e a atividade informal são forma de se manter útil e ativo, não só necessidade. A perda dessa possibilidade é sentida como perda de lugar."},
+   {"titulo": "Reconhecimento em falta", "texto": "A frase que resume: o que falta à sociedade é respeito por quem dedicou a vida ao trabalho e ao sustento da família."}
+  ]},
+ "funciona": [
+  {"titulo": "Reconhecer a contribuição", "texto": "Nomear explicitamente a vida de trabalho e de sustento da família antes de falar de qualquer medida. É o que este público sente que lhe falta."},
+  {"titulo": "Trabalho em termos concretos", "texto": "Salário, escala, direitos e quem decide sobre eles. Formulado assim, o tema tira o público da indiferença."},
+  {"titulo": "Trabalho depois dos 70 como escolha", "texto": "Falar de inclusão de idosos ativos e de etarismo nas empresas como demanda real, não como caridade."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Benefício sem reconhecimento", "texto": "Falar de aposentadoria ou auxílio sem reconhecer a vida de trabalho soa como esmola e afasta."},
+  {"titulo": "Os 70+ como bloco único", "texto": "Há quem trabalha, quem quer trabalhar e quem não pode. Generalizar afasta."},
+  {"titulo": "Velhice como passividade", "texto": "A imagem do idoso parado diante da televisão é rejeitada por quem se mantém ativo justamente para não ser descartado."}
+ ],
+ "lacuna": "O acervo tem poucos trechos sobre este cruzamento. A pesquisa disponível para 70+ trata de motivação de voto.",
+ "resumo": ["Trabalho depois dos 70 é utilidade e reconhecimento.", "Etarismo nas contratações é barreira concreta e demanda declarada.", "Reconhecer a vida de trabalho antes de falar de medida.", "Salário, escala e direitos em termos concretos.", "Sem esmola, sem bloco único, sem velhice passiva."]
+},
+"família e cuidado": {
+ "titulo": "70+ × Família e cuidado",
+ "linha": "Saúde é a maior riqueza e a maior perda. E cuidar não pode virar tratar o idoso como incapaz.",
+ "por_que": {
+  "texto": ["A saúde é a maior riqueza dos idosos e sua perda o maior desafio: limitações físicas estão na raiz da perda de autonomia e da dependência de terceiros. O sistema público de saúde é valorizado e criticado ao mesmo tempo: agradece-se a existência do serviço e denuncia-se a fila para exames e cirurgias e a distribuição desigual de remédios.", "A segurança pública aparece entre as principais demandas, como condição de convivência e mobilidade diante do medo da violência. \"Se um de nós com mais de 70 anos for mexer com moleque de 16, eles vão bater em nós.\" E há o cuidado que sufoca: a superproteção familiar é vivida como limitação, e o abandono, como realidade de parte deste público."],
+  "dados": [
+   {"titulo": "Saúde é tudo", "texto": "\"A minha vida, graças a Deus, com saúde a gente acha que está boa.\" Fila para exame e cirurgia e remédio que não chega são vividos com desgaste imenso."},
+   {"titulo": "Medo que limita a rua", "texto": "Segurança é salvaguarda de convivência e mobilidade. Nenhuma resposta institucional convence; o que se pede é lei aplicada com rigor."},
+   {"titulo": "Cuidado sem tutela", "texto": "Ser tratado como incapaz de atividades simples, em nome do cuidado, é vivido como perda de espontaneidade. Parte do público vive isolamento e não tem com quem falar no dia a dia."}
+  ]},
+ "funciona": [
+  {"titulo": "Provar que alguma coisa mudou", "texto": "Em segurança e em saúde, anunciar mais uma lei ou um programa não convence. Convence mostrar o efeito no posto, na fila, na rua."},
+  {"titulo": "Cuidado como autonomia", "texto": "Centros públicos de lazer, cultura e reabilitação, transporte humanizado, acessibilidade urbana: cuidar é devolver espaço para circular e conviver, não trancar em casa."},
+  {"titulo": "Reconhecer o isolamento", "texto": "Falar com quem mora sozinho ou não tem interlocução diária. A rede de apoio não pode ser presumida."}
+ ],
+ "nao_funciona": [
+  {"titulo": "SUS como se funcionasse plenamente", "texto": "Fila, cirurgia adiada e remédio desigual são a experiência concreta. Negar isso afasta."},
+  {"titulo": "Governo que cuida, em tom paternalista", "texto": "O problema percebido não é falta de cuidado, é falta de lei aplicada e de serviço que funcione. Tutela soa como diminuição."},
+  {"titulo": "Pressupor amparo familiar", "texto": "Nem todo idoso tem filho que leve ao posto ou à urna. Falar como se a família estivesse sempre lá afasta quem vive sozinho."}
+ ],
+ "resumo": ["Saúde é a maior riqueza e a fila é a maior queixa.", "Segurança como condição para sair de casa e conviver.", "Cuidado que devolve autonomia, não tutela.", "Reconhecer quem vive só.", "Provar mudança concreta, não anunciar lei."]
+},
+"brasil e pertencimento": {
+ "titulo": "70+ × Brasil e pertencimento",
+ "linha": "O país que importa é o que fica para filhos, netos e bisnetos.",
+ "por_que": {
+  "texto": ["Para este público, o futuro que importa é o dos descendentes. Já viveram a maior parte da vida e canalizam expectativas para filhos, netos e bisnetos: não deixar \"uma porcaria de país\" é o que faz aceitar dor e cansaço no deslocamento até a urna.", "O vínculo mais seguro com o país nasce do cotidiano: família, comida, humor, cuidado, território, com o orgulho regional como camada extra de identidade. A associação do brasileiro a \"preguiçoso\" é rejeitada com força. É o cruzamento com menos material no acervo, e a página diz isso onde for o caso."],
+  "dados": [
+   {"titulo": "Herança, não conquista própria", "texto": "Imagens de crianças e jovens estudando e circulando em segurança ativam de imediato o desejo de deixar um país próspero e seguro."},
+   {"titulo": "País do cotidiano", "texto": "Família, comida, humor, cuidado e território. O orgulho regional (nordestino, baiano) é camada extra de identidade."},
+   {"titulo": "Rejeição ao estigma", "texto": "\"Preguiçoso\" e \"jeitinho\" como marca do brasileiro são rejeitados. \"O Pix é nosso, o SUS pode ser melhor, e o Brasil presta.\""}
+  ]},
+ "funciona": [
+  {"titulo": "Mostrar quem vem depois", "texto": "Crianças e jovens estudando e circulando em segurança. Ativa o desejo de herdar um país viável para filhos, netos e bisnetos."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Estigma do brasileiro", "texto": "Preguiçoso, malandro, jeitinho. Qualquer eco disso afasta."},
+  {"titulo": "Os 70+ como bloco único", "texto": "Há orgulhos regionais e trajetórias muito diferentes dentro do público. Generalizar afasta."},
+  {"titulo": "Velhice como passividade", "texto": "Quem se mantém ativo para não ser descartado não se reconhece na imagem do idoso parado."}
+ ],
+ "lacuna": "O acervo tem um único trecho sobre o que funciona neste cruzamento. A pesquisa disponível para 70+ trata de motivação de voto.",
+ "resumo": ["O país que importa é o dos netos.", "Vínculo com o Brasil nasce do cotidiano e do orgulho regional.", "Mostrar quem vem depois, estudando e em segurança.", "Sem estigma, sem bloco único, sem velhice passiva.", "Acervo menor neste cruzamento: onde faltar, a página declara."]
+},
+"participação e voz": {
+ "titulo": "70+ × Participação e voz",
+ "linha": "Votar aos 70 é prova de vitalidade e ato de amor pelos netos. O que afasta é promessa, cobrança e fila que humilha.",
+ "por_que": {
+  "texto": ["O eleitorado 70+ soma 36,2 milhões de pessoas e quase um em cada quatro votos, mas o voto é facultativo e a abstenção passa de metade. A frustração com \"promessa, promessa e nada\" faz do voto facultativo uma válvula de escape legítima. Quando descobrem o próprio peso numérico, a reação é espanto e orgulho: \"Nós somos a força ainda.\"", "A motivação mais recorrente para votar é o futuro de filhos, netos e bisnetos; educação, emprego e segurança para eles valem mais que vantagens próprias. O que impede é logística: falta de transporte, de companhia e de filho que leve, fila preferencial negada a quem tem menos de 80, seção sem acessibilidade. E há a família que desestimula: \"não é mais obrigado, para quê?\""],
+  "dados": [
+   {"n": "8,8 mi", "titulo": "não foram votar em 2022", "texto": "58,9% de abstenção entre 70+. A ausência de suporte logístico da família é apontada de forma unânime como uma das principais causas."},
+   {"titulo": "O voto pelos netos", "texto": "\"Para meus filhos, para meus netos tem que ser melhor. Melhor para eles do que para mim.\" A responsabilidade entre gerações é o principal vetor de ativação."},
+   {"titulo": "Dia de festa, não de obrigação", "texto": "Arrumar-se, votar com filhos e netos e reunir a família num almoço é o principal indutor afetivo de comparecimento. \"Vamos fazer uma feijoada para comemorar essas eleições.\""}
+  ]},
+ "funciona": [
+  {"titulo": "Informar o peso do voto 70+", "texto": "Quantos são e quantos deixaram de votar. Reverte invisibilidade em força e desperta a vontade de convencer vizinhos, amigos de igreja e parentes."},
+  {"titulo": "Voto como herança para os netos", "texto": "Educação, emprego e segurança para as gerações mais jovens. Avó conversando com o neto é o formato de maior identificação."},
+  {"titulo": "Resolver a logística e a fila", "texto": "Informar sobre a fila preferencial a que têm direito, salas térreas, transporte e companhia. Votar é direito e prova de vitalidade, e o dia pode ser festa em família."}
+ ],
+ "nao_funciona": [
+  {"titulo": "Tom de promessa", "texto": "\"Promessa, promessa e nada\" é a marca que este público atribui aos políticos. Promessas mirabolantes e discursos fáceis não passam: eles conferem no dia a dia."},
+  {"titulo": "Cobrar o voto como obrigação", "texto": "Parte do público sente alívio com o fim da obrigatoriedade. Mobiliza o voto como direito conquistado, não a cobrança."},
+  {"titulo": "Celebridade, influenciador e discurso ensaiado", "texto": "Soam pagos, distantes e sem verdade. Gente comum, com cabelo branco e cenário real, convence."}
+ ],
+ "resumo": ["36,2 milhões de eleitores; mais de metade não vota.", "Descobrir o próprio peso vira orgulho e vontade de multiplicar.", "O voto é pelos netos e pode ser dia de festa em família.", "Logística e fila preferencial decidem o comparecimento.", "Sem promessa, sem cobrança, sem celebridade."]
+}
+}
+}
