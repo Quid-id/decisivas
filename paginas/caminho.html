@@ -22,41 +22,15 @@
   <h1 class="titulo-caminho">{{TITULO_CAMINHO}}</h1>
   <p class="linha-caminho">{{LINHA}}</p>
 
-  <!-- 2. Por que falar: prosa mais três cards de dados -->
-  <section class="bloco">
-    <h2>{{ROTULO_POR_QUE}}</h2>
-    {{POR_QUE}}
-  </section>
-
-  <!-- 3. O que funciona -->
-  <section class="bloco">
-    <h2>{{ROTULO_FUNCIONA}}</h2>
-    {{FUNCIONA}}
-  </section>
-
-  <!-- 4. O que não funciona -->
-  <section class="bloco">
-    <h2>{{ROTULO_NAO_FUNCIONA}}</h2>
-    {{NAO_FUNCIONA}}
-  </section>
-
-  <!-- 6. Quem é este público -->
-  <section class="bloco">
-    <h2>{{ROTULO_QUEM_E}}</h2>
-    {{QUEM_E}}
-  </section>
-
-  <!-- 7. Como chegar nele -->
-  <section class="bloco">
-    <h2>{{ROTULO_COMO_CHEGAR}}</h2>
-    {{COMO_CHEGAR}}
-  </section>
-
-  <!-- 8. Resumo -->
-  <section class="bloco">
-    <h2>{{ROTULO_RESUMO}}</h2>
-    {{RESUMO}}
-  </section>
+  <!-- Os seis blocos de conteúdo. Cada um é montado inteiro pelo build, com o
+       rótulo de dados/configuracao.json: bloco sem nenhum item não é
+       renderizado, e a página segue nos que existem. -->
+{{BLOCO_POR_QUE}}
+{{BLOCO_FUNCIONA}}
+{{BLOCO_NAO_FUNCIONA}}
+{{BLOCO_QUEM_E}}
+{{BLOCO_COMO_CHEGAR}}
+{{BLOCO_RESUMO}}
 
   <!-- 9. Explorar o acervo: presente e desligado no beta -->
   <section class="bloco explorar" data-ligado="nao" aria-labelledby="titulo-explorar">

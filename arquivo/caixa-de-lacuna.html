@@ -1,0 +1,32 @@
+<!-- DECISIVAS — caixa de lacuna declarada, retirada da página de caminho em
+     02/09/2026 (etapa 8C).
+
+     O que era: quando o acervo não sustentava um bloco, a página mostrava os
+     cards que existiam e, logo abaixo do bloco, uma caixa bege e tracejada com
+     o texto do campo `lacuna` do JSON do público, dizendo o que faltava. A
+     ideia era declarar a lacuna em vez de escondê-la.
+
+     Por que saiu: o bloco com dois ou um card já mostra o que existe, e a
+     caixa chamava atenção para a falta em vez do conteúdo. A regra passou a
+     ser mais simples: o bloco mostra os cards que tem, sejam 3, 2 ou 1, e um
+     bloco sem nenhum card não é renderizado.
+
+     O campo `lacuna` continua nos cinco arquivos de conteudo/ que o traziam —
+     não foi apagado —, e o build simplesmente não o lê mais. Saiu também
+     `caminho.lacuna_padrao` de dados/configuracao.json.
+
+     Não é lido por nenhum script, build ou rota. -->
+
+<div class="lacuna">{{TEXTO_DA_LACUNA}}</div>
+
+<style>
+/* De paginas/estilos.css. Os três tokens --cor-aviso-* continuam em
+   brand/tokens.css: são o papel "Aviso" da identidade (brand/guia.md), hoje
+   sem nada na tela usando. */
+.lacuna {
+  background: var(--cor-aviso-fundo); border: var(--cor-aviso-borda);
+  border-radius: var(--raio-card);
+  padding: var(--espaco-3) var(--espaco-4); color: var(--cor-aviso-texto);
+  font-size: var(--texto-m); margin-top: var(--espaco-3);
+}
+</style>

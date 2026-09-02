@@ -120,8 +120,10 @@
   --cor-formato-carrossel: var(--rosa);
   --cor-formato-roteiro:  var(--azul-claro);
 
-  /* ---------- Aviso (lacuna declarada) ----------
-     Lacuna não é erro: caixa discreta, tracejada, sem cor de alarme. */
+  /* ---------- Aviso ----------
+     A caixa de lacuna declarada saiu da página de caminho (arquivo/), e hoje
+     nada na tela usa estes três: ficam como papel de cor da identidade, para
+     aviso de conteúdo — nunca para erro de sistema (brand/guia.md). */
   --cor-aviso-fundo:  var(--cor-superficie-alt);
   --cor-aviso-texto:  var(--cor-texto-suave);
   --cor-aviso-borda:  var(--borda-tracejada);
@@ -182,12 +184,13 @@
   --largura-texto:    70ch;
   --altura-banner:       220px;
   --altura-banner-movel: 140px;
-  --altura-barra:        60px;
+  --altura-barra:        72px;
   /* Barra de compartilhamento: tamanho do botão e a folga que ela respeita
      nas duas pontas, para não cobrir o menu nem o rodapé. */
-  /* Altura do logotipo: na barra preta e, um pouco maior, no rodapé. */
-  --altura-marca:        26px;
-  --altura-marca-rodape: 34px;
+  /* Altura do logotipo: na barra preta e, maior, no rodapé. A barra cresceu
+     para o logotipo de 40px respirar (--altura-barra). */
+  --altura-marca:        40px;
+  --altura-marca-rodape: 48px;
   --tamanho-share: 44px;
   /* Retrato do público no bloco "Quem é este público": círculo. */
   --tamanho-retrato: 160px;

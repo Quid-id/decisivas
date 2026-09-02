@@ -61,20 +61,18 @@ function cardsDeLista(cards, classe, icone) {
 }
 
 function grade(cards, classe, icone) {
+  if (!cards || !cards.length) return "";
   return `    <div class="grade">\n${cardsDeLista(cards, classe, icone)}\n    </div>`;
 }
 
-// A lacuna vai logo abaixo do bloco a que se refere, e o próprio texto diz
-// qual é: usa o rótulo do bloco, como ele está na configuração. Sem essa
-// marca, ela é da página inteira e entra depois do último dos dois blocos.
-function ondeVaiALacuna(texto, blocos) {
-  const alvo = texto.toLowerCase();
-  if (alvo.includes(blocos.funciona.toLowerCase())) return "funciona";
-  return "nao_funciona";
-}
-
-function caixaDeLacuna(texto) {
-  return `\n    <div class="lacuna">${escapa(texto)}</div>`;
+// Um bloco da página: o rótulo, com a régua, e o que vier dentro. **Bloco sem
+// nenhum item não é renderizado** — a página mostra os cards que existem,
+// sejam 3, 2 ou 1, e some com o bloco quando não há nenhum. Não há caixa de
+// aviso: o campo `lacuna` dos JSON deixou de ser lido no build (a caixa está
+// em arquivo/caixa-de-lacuna.html).
+function bloco(rotulo, dentro) {
+  if (!dentro || !String(dentro).trim()) return "";
+  return `  <section class="bloco">\n    <h2>${escapa(rotulo)}</h2>\n${dentro}\n  </section>\n`;
 }
 
 // "Quem é este público": o retrato do público em círculo, o card de número na
@@ -123,7 +121,6 @@ function textoDoExplorar(configuracao, resumoDoCruzamento) {
 function montaCaminho(modelo, comum, configuracao, { publico, tema, dados, pagina, resumoDoCruzamento }) {
   const cor = { cor: publico.cor, texto: publico.texto };
   const blocos = configuracao.caminho.blocos;
-  const lacunaEm = pagina.lacuna ? ondeVaiALacuna(pagina.lacuna, blocos) : null;
   const titulo = `${dados.nome} ${configuracao.caminho.separador_titulo} ${tema.nome}`;
 
   return troca(modelo, {
@@ -148,22 +145,21 @@ function montaCaminho(modelo, comum, configuracao, { publico, tema, dados, pagin
       : escapa(configuracao.caminho.texto_em_revisao),
     TITULO_CAMINHO: escapa(pagina.titulo || titulo),
     LINHA: escapa(pagina.linha),
-    ROTULO_POR_QUE: escapa(blocos.por_que),
-    POR_QUE: blocoPorQue(pagina, cor),
-    ROTULO_FUNCIONA: escapa(blocos.funciona),
-    FUNCIONA:
-      grade(pagina.funciona, "funciona", configuracao.caminho.icone_funciona) +
-      (lacunaEm === "funciona" ? caixaDeLacuna(pagina.lacuna) : ""),
-    ROTULO_NAO_FUNCIONA: escapa(blocos.nao_funciona),
-    NAO_FUNCIONA:
-      grade(pagina.nao_funciona, "evita", configuracao.caminho.icone_nao_funciona) +
-      (lacunaEm === "nao_funciona" ? caixaDeLacuna(pagina.lacuna) : ""),
-    ROTULO_QUEM_E: escapa(blocos.quem_e),
-    QUEM_E: blocoQuemE(dados.quem_e, cor, monta.retrato(configuracao, publico, dados.nome)),
-    ROTULO_COMO_CHEGAR: escapa(blocos.como_chegar),
-    COMO_CHEGAR: grade(dados.como_chegar, "publico", null),
-    ROTULO_RESUMO: escapa(blocos.resumo),
-    RESUMO: blocoResumo(pagina.resumo),
+    BLOCO_POR_QUE: bloco(blocos.por_que, blocoPorQue(pagina, cor)),
+    BLOCO_FUNCIONA: bloco(
+      blocos.funciona,
+      grade(pagina.funciona, "funciona", configuracao.caminho.icone_funciona)
+    ),
+    BLOCO_NAO_FUNCIONA: bloco(
+      blocos.nao_funciona,
+      grade(pagina.nao_funciona, "evita", configuracao.caminho.icone_nao_funciona)
+    ),
+    BLOCO_QUEM_E: bloco(
+      blocos.quem_e,
+      blocoQuemE(dados.quem_e, cor, monta.retrato(configuracao, publico, dados.nome))
+    ),
+    BLOCO_COMO_CHEGAR: bloco(blocos.como_chegar, grade(dados.como_chegar, "publico", null)),
+    BLOCO_RESUMO: bloco(blocos.resumo, blocoResumo(pagina.resumo)),
     TITULO_EXPLORAR: escapa(configuracao.explorar.titulo),
     TEXTO_EXPLORAR: textoDoExplorar(configuracao, resumoDoCruzamento),
     PAUTAS: botoesDePauta(resumoDoCruzamento ? resumoDoCruzamento.pautas : [], configuracao),

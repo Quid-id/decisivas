@@ -47,6 +47,7 @@ saiu depois traz a data na própria linha.
 | Item | O que era |
 |---|---|
 | `janela-de-video.html` | a janela do vídeo de abertura do Início, com a marcação e o estilo como estavam. Retirada em 02/09/2026: o vídeo de apresentação passou a viver só na página Sobre, pelo `video_embed` da configuração |
+| `caixa-de-lacuna.html` | a caixa bege que declarava a lacuna abaixo do bloco, com a marcação e o estilo como estavam. Retirada em 02/09/2026: o bloco passou a mostrar os cards que existem — 3, 2 ou 1 — e a não ser renderizado quando não há nenhum. O campo `lacuna` segue nos JSON, ignorado pelo build |
 
 ## Cargas e migrações já aplicadas
 

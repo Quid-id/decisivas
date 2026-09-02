@@ -91,7 +91,7 @@ As 273 linhas da amostra antiga saíram do banco com a migração 004.
 
 **Os assets da identidade chegaram em 02/09/2026** (logotipos, favicon, três faixas de banner e os quatro retratos duotone), ligados à configuração e ao vocabulário. Faltam só os logotipos da Quid e do BRIEF em off-white, que seguem como placeholder no rodapé.
 
-Onde o acervo não sustenta um bloco, a página declara a lacuna: hoje isso acontece em 70+ com dinheiro, trabalho e Brasil, e em trabalho digno para os dois públicos femininos. Lacuna é conteúdo, não erro. O tipo `exemplo` tem zero linhas no acervo e a coluna `link` está sempre vazia.
+Onde o acervo não sustenta um bloco, a página **mostra os cards que existem e nada mais**: 3, 2 ou 1, e bloco sem nenhum card não é renderizado. Não há caixa de aviso de lacuna — saiu em 02/09/2026 (`arquivo/caixa-de-lacuna.html`), e o campo `lacuna` continua nos JSON, ignorado pelo build. O acervo rende menos em 70+ com dinheiro, trabalho e Brasil, e em trabalho digno para os dois públicos femininos: são as páginas com dois ou um card. O tipo `exemplo` tem zero linhas no acervo e a coluna `link` está sempre vazia.
 
 **Endereços:** `/` (Início), `/caminhos/<slug do público>/<slug do tema>` (as 20 páginas), `/sobre`, `/privacidade`. `/resultado?publico=...&tema=...` redireciona para o caminho novo; `/metodologia` e `/transparencia` vão para `/sobre`.
 
