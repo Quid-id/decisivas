@@ -1,5 +1,7 @@
 # DECISIVAS — Contexto do projeto
 
+**Versão 2, 01/09/2026.** Atualizada com as decisões do dia: taxonomia final, pauta como tag, blocos da página, rótulo de IA, links adiados, acervo consolidado sem revisão linha a linha. As mudanças em relação à versão 1 estão marcadas ao longo do texto pelas próprias frases; a versão anterior fica no histórico do repositório.
+
 **Como usar este documento.** Cole o conteúdo inteiro no início de uma conversa nova com o Claude, antes de qualquer pedido. Ele carrega o contexto técnico e o vocabulário do projeto, para que qualquer pessoa da equipe trabalhe a partir das mesmas definições.
 
 Se você é novo no projeto, leia antes de colar. As seções 1 a 4 explicam o que estamos construindo; as seções 5 e 6 explicam por que algumas decisões foram tomadas do jeito que foram, e evitam reabrir discussões já fechadas.
@@ -34,15 +36,14 @@ Cada termo tem um significado, e apenas um.
 | **Trecho** | A unidade do acervo: uma informação, com origem, que se entende sozinha |
 | **Público** | Um dos quatro grupos abaixo |
 | **Macronarrativa** | Um dos cinco temas abaixo. Na tela aparece como "tema" |
-| **Pauta** | O assunto concreto dentro de uma macronarrativa. Não aparece na tela |
+| **Pauta** | O assunto concreto dentro de uma macronarrativa. São 59, lista fechada (ver `dados/DECISIVAS_pautas_de_para_v1.xlsx`). Na tela aparece como tag de ângulo, só quando tem 3 ou mais trechos no cruzamento |
 | **Cruzamento** | A combinação de um público com uma macronarrativa. São 20 possíveis, cada um é uma página |
-| **Tipo** | A função do trecho: achado, funciona, afasta, contexto, exemplo, verbatim, perfil |
+| **Tipo** | A função do trecho: achado, funciona, afasta, contexto, exemplo, verbatim, perfil. Nesta versão, exemplo não é usado |
 | **Força** | Se o achado é recorrente (`forte`) ou pontual (`indício`) |
 | **Bloco** | Cada seção da página de resultado |
 | **Gatilho** | O ângulo que mobiliza um público num tema. É um bloco da página, não um tipo de trecho |
 | **Lacuna** | O aviso de que o acervo não sustenta um bloco. É conteúdo, não erro |
-| **Veto** | Marcação de que o trecho não vai ao ar. Pode ser derrubada por quem revisa |
-| **CONFERIR** | Marcação de dúvida sobre a etiqueta. Exige decisão humana, não significa descarte |
+| **Veto** e **CONFERIR** | Marcações da fase de extração. Deixaram de existir no acervo carregado: tudo entrou, exceto trechos que citam ou aludem a figura política, partido, candidatura ou avaliação de governo específico, removidos pela regra 4 |
 
 ### Os quatro públicos
 
@@ -84,10 +85,11 @@ Isso é central e vale decorar:
 | Escrito pelo agente | Anexado por código |
 |---|---|
 | Gatilho da mensagem | Hábitos de mídia do público |
-| O que ancorar | Botão do especial BRIEF |
-| O que evitar | Materiais complementares |
+| O que ancorar | (links e materiais: adiados para depois do beta) |
+| O que evitar | |
 | Por que falar com este público sobre este tema | Caracterização do público |
 | O que a pesquisa mostra | Rótulo de IA e avisos de lacuna |
+| Versões do gatilho e da adaptação de formato por pauta (tag) | Tags de pauta e card semiótico do público |
 
 **Por quê:** modelo de linguagem inventa URL com naturalidade. Ao anexar links por código, a partir de tabelas curadas por pessoas, essa classe inteira de erro deixa de existir.
 
@@ -97,17 +99,19 @@ Isso é central e vale decorar:
 
 Na ordem em que aparecem:
 
-1. **Identificação** — público, tema e data da última atualização do acervo
-2. **Por que falar com este público sobre este tema** — vem dos trechos de tipo `contexto`
-3. **O que a pesquisa mostra** — vem dos trechos de tipo `achado`
-4. **O gatilho da mensagem** — composto a partir dos achados
-5. **O que ancorar** — três itens, dos trechos de tipo `funciona`
-6. **O que evitar** — três itens, dos trechos de tipo `afasta`
-7. **Quem é este público** — dos trechos de tipo `perfil`
-8. **Hábitos de mídia** — de planilha própria, filtrada só por público
-9. **Exemplos e materiais** — links curados
+1. **Identificação** — público, tema e data da última atualização do acervo. Sem contador nem chips de fonte
+2. **Tags de pauta** — "Ajustar o ângulo da mensagem". Trocam só o gatilho e a adaptação de formato
+3. **Por que falar com este público sobre este tema** — vem dos trechos de tipo `contexto`
+4. **O que a pesquisa mostra** — vem dos trechos de tipo `achado`, de qualquer força
+5. **O gatilho da mensagem** — composto a partir dos achados, pelas regras de gatilho
+6. **O que ancorar** — até três itens, dos trechos de tipo `funciona`, pelas regras de seleção
+7. **O que evitar** — até três itens, dos trechos de tipo `afasta`, pelas regras de seleção
+8. **Quem é este público** — dos trechos de tipo `perfil`
+9. **Hábitos de mídia** — card semiótico do público e planilha própria, filtrada só por público
 10. **Adaptar formato** — WhatsApp, carrossel, roteiro de vídeo
-11. **Rodapé** — aviso de uso de inteligência artificial
+11. **Rótulo de IA** — em itálico, pequeno, abaixo da saída gerada e anexado ao texto copiado
+
+O bloco de exemplos e materiais (links curados, especial BRIEF) está adiado para depois do beta. Quando um bloco tem menos de três itens, mostra os que existem e declara a lacuna.
 
 Quando o acervo não sustenta um bloco, a página **declara a lacuna** em vez de preencher por aproximação. Várias páginas terão dois ou três blocos assim. Isso é comportamento correto.
 
@@ -123,11 +127,15 @@ Estas estão fechadas. Reabrir só com motivo novo.
 
 **Sem painel de edição de conteúdo.** Os textos fixos vivem como arquivos no repositório, editáveis pela interface do GitHub. Construir um painel consumiria semanas e cada mudança já fica registrada no histórico, o que serve de salvaguarda.
 
-**Links nunca são gerados pelo modelo.** Vêm de planilha curada e verificada por pessoas, e são anexados por código.
+**Links nunca são gerados pelo modelo.** Vêm de planilha curada e verificada por pessoas, e são anexados por código. Nesta versão não há links na página; a planilha entra depois do beta.
 
 **Regras de formato são escritas por nós.** O que funciona no WhatsApp, no carrossel e no roteiro está num documento do repositório. O agente aplica essas regras ao acervo daquele cruzamento; ele não inventa técnica de comunicação.
 
 **O modelo é fixo e auditável.** Não usamos roteamento automático entre modelos, porque isso tornaria o custo imprevisível e a resposta irreprodutível.
+
+**Sem revisão humana linha a linha do acervo.** O acervo v5 foi consolidado por regras aprovadas em lote por Lucas em 01/09/2026. Tudo o que estava nas extrações entrou, exceto o que a regra 4 veda.
+
+**Regras vivem em planilha.** Regra_geral_formatos (RG), Regra_gatilho (RGT) e Regra_selecao (RS), em `dados/`, entram no prompt como texto no build. Em conflito com `docs/08-regras-de-formato.md`, a planilha prevalece; os limites numéricos por formato continuam no docs/08.
 
 ---
 
@@ -138,9 +146,9 @@ Valem para código, conteúdo e qualquer peça.
 1. **Nenhuma chave de API em código.** Segredos vivem no painel do provedor, nunca em arquivo versionado.
 2. **O modelo só responde a partir dos trechos recuperados.** Sem conhecimento geral, sem completar lacuna.
 3. **O modelo nunca escreve URL.**
-4. **Nunca mencionar candidatura, partido ou figura política.**
+4. **Nunca mencionar candidatura, partido ou figura política.** Vale também para alusão sem nome ("quem está no poder", "o pai", "proximidade com o governo") e para avaliação ou aprovação de governo ou gestão específica.
 5. **Não coletar dados pessoais.** Sem cadastro, sem rastreamento. O registro interno guarda o que foi entregue, nunca quem pediu.
-6. **Rótulo de IA visível** em toda saída gerada.
+6. **Rótulo de IA visível** em toda saída gerada, em itálico e tamanho pequeno, com a explicação completa na página Sobre. Texto: "Texto organizado por inteligência artificial a partir do banco de pesquisa próprio do DECISIVAS. Não usa fontes externas, não indica voto e não menciona candidaturas."
 7. **Lacuna declarada, nunca preenchimento por aproximação.**
 8. **Interface usa apenas os tokens da identidade.** Nenhuma cor, fonte ou espaçamento escrito à mão.
 9. **Todo texto em português do Brasil.**
@@ -165,11 +173,11 @@ Valem para código, conteúdo e qualquer peça.
 
 **Funcionando:** infraestrutura, banco, filtro, agente, telas, adaptação de formatos, cache, identidade provisória. A plataforma está no ar, protegida por login enquanto o acervo não é revisado.
 
-**Em migração:** a taxonomia nova (nomes de público e macronarrativa) ainda não foi aplicada ao banco nem às telas.
+**Em migração:** a taxonomia nova (4 públicos, 5 temas, 7 tipos, 59 pautas) e o acervo v5 (2.405 linhas), conforme `docs/DECISIVAS_especificacao_claude_code.md`. Sem páginas de Metodologia e Transparência: só Sobre, com o vídeo de apresentação.
 
 **Pendente de código:** proteção anti-abuso (verificação anti-robô e limite de requisições por pessoa), correção do cache do navegador, revisão final de segurança.
 
-**Pendente de conteúdo:** acervo revisado, textos das páginas institucionais, planilha de hábitos de mídia, planilha de links, identidade visual definitiva, política de privacidade.
+**Pendente de conteúdo:** textos da página Sobre (projeto, públicos, temas, quem faz, aviso de IA), planilha de hábitos de mídia, cards semióticos e demais assets da identidade, assinatura e contato do rodapé, política de privacidade. Planilha de links: depois do beta.
 
 ---
 
