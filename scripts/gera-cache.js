@@ -18,24 +18,10 @@
 // e invalida o cache inteiro; sem regenerar, a primeira pessoa de cada
 // cruzamento paga o tempo da geração.
 
-// Vocabulários fechados do CLAUDE.md (os mesmos de src/worker.js).
-const PUBLICOS = [
-  "idosos",
-  "jovens",
-  "mulheres beneficiárias",
-  "mulheres de 2 a 5 salários mínimos",
-  "trabalhadoras informais",
-  "pequenas empreendedoras",
-  "plataformizadas",
-];
-
-const MACRONARRATIVAS = [
-  "dinheiro no bolso",
-  "proteção do trabalhador",
-  "proteção da família",
-  "brasil soberano",
-  "engajamento cívico",
-];
+// Vocabulários fechados: fonte única em dados/vocabulario.json.
+const VOCABULARIO = require("../dados/vocabulario.json");
+const PUBLICOS = VOCABULARIO.publicos.map((p) => p.id);
+const MACRONARRATIVAS = VOCABULARIO.macronarrativas.map((m) => m.id);
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:8787";
 

@@ -173,6 +173,8 @@ linha só vira "aplicada" com o resultado da verificação em mãos.
 |---|---|---|---|
 | 001 | schema inicial | Tabelas `documentos`, `trechos`, `recursos`, `registros`; índices `idx_trechos_match`, `idx_trechos_midia`, `idx_recursos_match` | Aplicada em 08/2026, pelo console |
 | 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Aplicada em 02/09/2026, pelo console.** Verificação devolveu `1, 1, 1`. Foi a ausência desta migração que causou `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
+| 003 | etapa 2 | Tabela `pautas` com as 59 pautas; tabela `trechos` recriada com as nove colunas, a taxonomia final e as restrições (a antiga vira `trechos_ate_002`, preservada); `paginas` e `formatos` recriadas com `pauta` na chave; índices recriados | **Aguardando aplicação.** Os 15 blocos abaixo foram validados em réplica local: aplicam sem erro, a verificação final devolve `59, 9, 0, 1, 1, 2` com as 273 linhas antigas preservadas, as restrições recusam os nove casos inválidos testados, e as 2.405 linhas do acervo v5 passam |
+| 004 | depois da etapa 3 | Remover `trechos_ate_002`, quando a carga nova estiver no ar e conferida | Não escrita ainda |
 
 A migração 002 foi a **etapa 0** de `docs/DECISIVAS_especificacao_claude_code.md`:
 o código publicado já a esperava, e ela não mudou nenhuma linha de código.
@@ -213,6 +215,124 @@ Para conferir o schema remoto inteiro a qualquer momento, e comparar com
 ```sql
 SELECT type, name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' ORDER BY type, name;
 ```
+
+### Migração 003 (etapa 2): taxonomia, pautas e cache por pauta
+
+São **15 blocos**, um comando cada, na ordem. Todos foram executados contra uma
+réplica local do remoto (001 + 002, com as 273 linhas antigas dentro) antes de
+serem escritos aqui.
+
+Três avisos antes de começar:
+
+1. **Entre os blocos 11 e 12 a tabela `trechos` não existe.** Execute-os em
+   sequência, sem pausa: nesse intervalo a rota `/api/match` responde
+   indisponibilidade. Com o Access na frente e o beta fechado, a janela é de
+   segundos e afeta só quem estiver testando.
+2. **Nada é apagado.** As 273 linhas antigas continuam em `trechos_ate_002`,
+   que a migração 004 remove depois da carga da etapa 3 e do deploy. É o padrão
+   aditivo desta seção: tabela nova, dados preservados, remoção depois.
+3. **O bloco 3 é uma conferência.** Ele precisa devolver `0` e `0`. Se devolver
+   outra coisa, pare: o cache não está vazio e os blocos 4 e 6 apagariam
+   páginas geradas.
+
+**Bloco 1** — Cria a tabela de pautas
+
+```sql
+CREATE TABLE pautas (pauta_consolidada TEXT PRIMARY KEY, macronarrativa_padrao TEXT NOT NULL CHECK (macronarrativa_padrao IN ('dinheiro no bolso', 'trabalho digno', 'família e cuidado', 'brasil e pertencimento', 'participação e voz', 'vale para os 5 temas')));
+```
+
+**Bloco 2** — Carrega as 59 pautas
+
+```sql
+INSERT INTO pautas (pauta_consolidada, macronarrativa_padrao) VALUES ('acesso a benefícios e atendimento', 'dinheiro no bolso'), ('aposentadoria e previdência', 'dinheiro no bolso'), ('atribuição de políticas públicas', 'participação e voz'), ('autonomia e amparo', 'trabalho digno'), ('bolsa família e transferência de renda', 'dinheiro no bolso'), ('brasil cotidiano', 'brasil e pertencimento'), ('cansaço cívico', 'participação e voz'), ('clima', 'brasil e pertencimento'), ('competência e autoestima política', 'participação e voz'), ('comunicação de serviço', 'família e cuidado'), ('comunicação e linguagem', 'vale para os 5 temas'), ('condição juvenil', 'trabalho digno'), ('confiança nas instituições', 'participação e voz'), ('cuidado e sobrecarga', 'família e cuidado'), ('cultura e lazer', 'família e cuidado'), ('custo de vida', 'dinheiro no bolso'), ('decisão de voto', 'participação e voz'), ('desigualdade', 'brasil e pertencimento'), ('direitos trabalhistas', 'trabalho digno'), ('educação', 'família e cuidado'), ('endividamento e crédito', 'dinheiro no bolso'), ('envelhecimento e autonomia', 'família e cuidado'), ('estigma do benefício', 'dinheiro no bolso'), ('etarismo', 'trabalho digno'), ('família e maternidade', 'família e cuidado'), ('funcionamento do legislativo', 'participação e voz'), ('futuro possível', 'brasil e pertencimento'), ('fé e religiosidade', 'família e cuidado'), ('gênero e trabalho', 'trabalho digno'), ('impostos', 'dinheiro no bolso'), ('informação e desinformação', 'participação e voz'), ('informação sobre direitos', 'trabalho digno'), ('jornada de trabalho', 'trabalho digno'), ('juventude e trabalho', 'trabalho digno'), ('mei e trabalho autônomo', 'trabalho digno'), ('memória e legado', 'participação e voz'), ('moradia e cidade', 'família e cuidado'), ('orgulho e identidade nacional', 'brasil e pertencimento'), ('orçamento e planejamento', 'dinheiro no bolso'), ('participação política', 'participação e voz'), ('país em disputa', 'brasil e pertencimento'), ('pertencimento regional', 'brasil e pertencimento'), ('polarização', 'participação e voz'), ('potências do país', 'brasil e pertencimento'), ('promessa e entrega', 'participação e voz'), ('proteção da infância', 'família e cuidado'), ('reconhecimento do trabalho', 'trabalho digno'), ('rede de apoio', 'família e cuidado'), ('rede de proteção social', 'família e cuidado'), ('renda e sustento', 'dinheiro no bolso'), ('representação política', 'participação e voz'), ('respeito ao idoso', 'brasil e pertencimento'), ('salário mínimo', 'dinheiro no bolso'), ('saúde e sus', 'família e cuidado'), ('saúde mental', 'família e cuidado'), ('segurança pública', 'família e cuidado'), ('soberania e política externa', 'brasil e pertencimento'), ('violência contra a mulher', 'família e cuidado'), ('voto e acesso à urna', 'participação e voz');
+```
+
+**Bloco 3** — Confere que o cache está vazio antes de recriá-lo (precisa devolver 0 e 0)
+
+```sql
+SELECT (SELECT COUNT(*) FROM paginas) AS paginas, (SELECT COUNT(*) FROM formatos) AS formatos;
+```
+
+**Bloco 4** — Remove a tabela de páginas (vazia) para recriá-la com pauta na chave
+
+```sql
+DROP TABLE paginas;
+```
+
+**Bloco 5** — Recria a tabela de páginas com pauta na chave
+
+```sql
+CREATE TABLE paginas (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, pauta TEXT NOT NULL DEFAULT '', resposta TEXT NOT NULL, ids_trechos TEXT NOT NULL, ids_acervo TEXT NOT NULL, modelo TEXT, gerado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa, pauta));
+```
+
+**Bloco 6** — Remove a tabela de formatos (vazia) para recriá-la com pauta na chave
+
+```sql
+DROP TABLE formatos;
+```
+
+**Bloco 7** — Recria a tabela de formatos com pauta na chave
+
+```sql
+CREATE TABLE formatos (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, formato TEXT NOT NULL, pauta TEXT NOT NULL DEFAULT '', resposta TEXT NOT NULL, ids_trechos TEXT NOT NULL, ids_acervo TEXT NOT NULL, modelo TEXT, gerado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa, formato, pauta));
+```
+
+**Bloco 8** — Cria a tabela de trechos nova, com as nove colunas e as restrições
+
+```sql
+CREATE TABLE trechos_003 (id TEXT PRIMARY KEY, texto TEXT NOT NULL, publico TEXT NOT NULL CHECK (publico IN ('jovens', '60+', 'mulheres beneficiárias', 'mulheres de 2 a 5 salários mínimos')), macronarrativa TEXT CHECK ((tipo = 'perfil' AND (macronarrativa IS NULL OR macronarrativa IN ('dinheiro no bolso', 'trabalho digno', 'família e cuidado', 'brasil e pertencimento', 'participação e voz'))) OR (tipo <> 'perfil' AND macronarrativa IS NOT NULL AND macronarrativa IN ('dinheiro no bolso', 'trabalho digno', 'família e cuidado', 'brasil e pertencimento', 'participação e voz'))), pauta TEXT REFERENCES pautas(pauta_consolidada) CHECK (pauta IS NOT NULL OR tipo = 'perfil'), tipo TEXT NOT NULL CHECK (tipo IN ('achado', 'funciona', 'afasta', 'contexto', 'exemplo', 'verbatim', 'perfil')), forca TEXT CHECK ((tipo = 'achado' AND forca IS NOT NULL AND forca IN ('forte', 'indício')) OR (tipo <> 'achado' AND forca IS NULL)), link TEXT, pagina TEXT);
+```
+
+**Bloco 9** — Libera o nome do primeiro índice
+
+```sql
+DROP INDEX idx_trechos_match;
+```
+
+**Bloco 10** — Libera o nome do segundo índice
+
+```sql
+DROP INDEX idx_trechos_midia;
+```
+
+**Bloco 11** — Aposenta a tabela antiga, preservando as linhas
+
+```sql
+ALTER TABLE trechos RENAME TO trechos_ate_002;
+```
+
+**Bloco 12** — Coloca a tabela nova no lugar (execute logo em seguida ao bloco 11)
+
+```sql
+ALTER TABLE trechos_003 RENAME TO trechos;
+```
+
+**Bloco 13** — Recria o índice do cruzamento
+
+```sql
+CREATE INDEX idx_trechos_match ON trechos (publico, macronarrativa);
+```
+
+**Bloco 14** — Recria o índice de pauta
+
+```sql
+CREATE INDEX idx_trechos_midia ON trechos (publico, pauta);
+```
+
+**Bloco 15** — Verificação final (esperado: 59, 9, 0, 1, 1, 2, e preservados > 0)
+
+```sql
+SELECT (SELECT COUNT(*) FROM pautas) AS pautas, (SELECT COUNT(*) FROM pragma_table_info('trechos')) AS colunas_trechos, (SELECT COUNT(*) FROM trechos) AS trechos, (SELECT COUNT(*) FROM pragma_table_info('paginas') WHERE name='pauta') AS paginas_pauta, (SELECT COUNT(*) FROM pragma_table_info('formatos') WHERE name='pauta') AS formatos_pauta, (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_trechos_match','idx_trechos_midia')) AS indices, (SELECT COUNT(*) FROM trechos_ate_002) AS preservados;
+```
+
+**Depois da verificação**, confira que as restrições recusam valor fora da
+lista. Este comando **tem de falhar** com `CHECK constraint failed`:
+
+```sql
+INSERT INTO trechos (id, texto, publico, macronarrativa, pauta, tipo, forca, link, pagina) VALUES ('TESTE-003', 'teste', 'idosos', 'engajamento cívico', 'custo de vida', 'achado', 'forte', NULL, NULL);
+```
+
+Se ele for aceito, a tabela nova não entrou no lugar: refaça do bloco 8.
 
 ### O que o código faz quando o schema está atrasado
 

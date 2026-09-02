@@ -21,33 +21,19 @@ import REGRAS_DE_FORMATO from "../docs/08-regras-de-formato.md";
 import VERSAO_ACERVO_BRUTA from "../data/versao-acervo.txt";
 const VERSAO_ACERVO = VERSAO_ACERVO_BRUTA.trim();
 
-// Vocabulários fechados (CLAUDE.md). Qualquer valor fora deles → 400.
-const PUBLICOS = [
-  "idosos",
-  "jovens",
-  "mulheres beneficiárias",
-  "mulheres de 2 a 5 salários mínimos",
-  "trabalhadoras informais",
-  "pequenas empreendedoras",
-  "plataformizadas",
-];
+// Fonte única dos vocabulários fechados (migração 003).
+import VOCABULARIO from "../dados/vocabulario.json";
 
-const MACRONARRATIVAS = [
-  "dinheiro no bolso",
-  "proteção do trabalhador",
-  "proteção da família",
-  "brasil soberano",
-  "engajamento cívico",
-];
-
-const FORMATOS = ["whatsapp", "carrossel", "roteiro"];
+// Vocabulários fechados: fonte única em dados/vocabulario.json, lida também
+// pelos scripts e pelo build (que publica public/vocabulario.js para o front).
+// Nenhuma outra cópia destas listas existe no repositório.
+const PUBLICOS = VOCABULARIO.publicos.map((p) => p.id);
+const MACRONARRATIVAS = VOCABULARIO.macronarrativas.map((m) => m.id);
+const FORMATOS = VOCABULARIO.formatos;
 
 // Rótulo de IA obrigatório em toda saída gerada (docs/01, item 9 do cartão).
 const ROTULO_IA =
   "Conteúdo organizado com apoio de inteligência artificial a partir do acervo de pesquisa. Não indica voto nem menciona candidaturas.";
-
-const NOTA_BASE_RESTRITA =
-  "Achado referente aos participantes do estudo citado, não generalizável ao conjunto do público.";
 
 const AVISO_LACUNA = "Evidência insuficiente no acervo para este item.";
 
@@ -281,25 +267,19 @@ async function rotaMatch(corpo, env, request) {
   // 6. Anexação por código: lacunas, chips de fonte, nota de base,
   // mídia, exemplos (links do banco), recursos.
   const idsValidos = new Set(subconjunto.map((t) => t.id));
-  const documentos = await mapaDocumentos(env, [
-    ...subconjunto, ...blocos.midia, ...blocos.exemplos,
-  ]);
 
   const pagina = { match: { publico, macronarrativa } };
   for (const campo of camposDoModelo) {
-    pagina[campo] = montaCampo(gerado[campo], minimos[campo], campo, idsValidos, subconjunto, documentos);
+    pagina[campo] = montaCampo(gerado[campo], minimos[campo], campo, idsValidos, subconjunto);
   }
 
   pagina.habitos_de_midia = minimos.midia
-    ? {
-        itens: blocos.midia.map((t) => ({ id: t.id, texto: t.texto, chip: chipDe(t, documentos) })),
-        lacuna: false,
-      }
+    ? { itens: blocos.midia.map((t) => ({ id: t.id, texto: t.texto })), lacuna: false }
     : { lacuna: true, aviso: AVISO_LACUNA };
 
   pagina.exemplos = minimos.exemplos
     ? {
-        itens: blocos.exemplos.map((t) => ({ id: t.id, texto: t.texto, link: t.link, chip: chipDe(t, documentos) })),
+        itens: blocos.exemplos.map((t) => ({ id: t.id, texto: t.texto, link: t.link })),
         lacuna: false,
       }
     : { lacuna: true, aviso: AVISO_LACUNA };
@@ -308,12 +288,6 @@ async function rotaMatch(corpo, env, request) {
   pagina.materiais_complementares = recursos;
 
   const idsUsados = idsDaPagina(pagina);
-  const trechosVisiveis = [...subconjunto, ...blocos.midia, ...blocos.exemplos]
-    .filter((t) => idsUsados.has(t.id));
-  pagina.nota_base_restrita = trechosVisiveis.some((t) => t.base === "restrita")
-    ? NOTA_BASE_RESTRITA
-    : null;
-  pagina.fontes = new Set(trechosVisiveis.map((t) => t.id_documento)).size;
   // Data da última atualização do acervo: definida na carga, via variável
   // de ambiente (ex.: ACERVO_ATUALIZADO_EM="08/2026").
   pagina.atualizado_em = env.ACERVO_ATUALIZADO_EM ?? null;
@@ -327,7 +301,7 @@ async function rotaMatch(corpo, env, request) {
   // validade por ids_acervo invalida sozinha quando o acervo mudar).
   await guardaCache(
     env, cache,
-    "INSERT OR REPLACE INTO paginas (publico, macronarrativa, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, datetime('now'))",
+    "INSERT OR REPLACE INTO paginas (publico, macronarrativa, pauta, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, '', ?3, ?4, ?5, ?6, datetime('now'))",
     [publico, macronarrativa, JSON.stringify(pagina), [...idsUsados].join(","), cache.idsAcervo, modeloUsado]
   );
 
@@ -354,7 +328,7 @@ async function abreCachePagina(env, ligado, publico, macronarrativa) {
   try {
     const idsAcervo = await idsAcervoAtual(env, publico, macronarrativa);
     const guardada = await env.DB.prepare(
-      "SELECT resposta, ids_trechos, modelo FROM paginas WHERE publico = ?1 AND macronarrativa = ?2 AND ids_acervo = ?3 AND (modelo IS NULL OR modelo = ?4)"
+      "SELECT resposta, ids_trechos, modelo FROM paginas WHERE publico = ?1 AND macronarrativa = ?2 AND pauta = '' AND ids_acervo = ?3 AND (modelo IS NULL OR modelo = ?4)"
     ).bind(publico, macronarrativa, idsAcervo, modeloAtual(env)).first();
     return { disponivel: true, idsAcervo, guardada };
   } catch (e) {
@@ -369,7 +343,7 @@ async function abreCacheFormato(env, ligado, publico, macronarrativa, formato) {
   try {
     const idsAcervo = await idsAcervoAtual(env, publico, macronarrativa);
     const guardada = await env.DB.prepare(
-      "SELECT resposta, ids_trechos, modelo FROM formatos WHERE publico = ?1 AND macronarrativa = ?2 AND formato = ?3 AND ids_acervo = ?4 AND (modelo IS NULL OR modelo = ?5)"
+      "SELECT resposta, ids_trechos, modelo FROM formatos WHERE publico = ?1 AND macronarrativa = ?2 AND formato = ?3 AND pauta = '' AND ids_acervo = ?4 AND (modelo IS NULL OR modelo = ?5)"
     ).bind(publico, macronarrativa, formato, idsAcervo, modeloAtual(env)).first();
     return { disponivel: true, idsAcervo, guardada };
   } catch (e) {
@@ -520,7 +494,6 @@ function montaMensagemUsuario(publico, macronarrativa, subconjunto) {
   const linhas = subconjunto.map((t) => {
     const meta = [`id: ${t.id}`, `tipo: ${t.tipo}`];
     if (t.forca) meta.push(`força: ${t.forca}`);
-    meta.push(`base: ${t.base}`);
     return `[${meta.join(" | ")}]\n${t.texto}`;
   });
   return `Match: publico = "${publico}", macronarrativa = "${macronarrativa}".\n\nTrechos fornecidos:\n\n${linhas.join("\n\n")}`;
@@ -578,45 +551,16 @@ function normaliza(texto) {
 
 // Um campo da página: lacuna quando abaixo do mínimo OU quando o modelo
 // devolveu LACUNA ou "LACUNA" no texto. Ids fora do subconjunto são removidos.
-function montaCampo(valor, minimoOk, campo, idsValidos, subconjunto, documentos) {
+function montaCampo(valor, minimoOk, campo, idsValidos, subconjunto) {
   const ehLacuna =
     !minimoOk || valor === "LACUNA" || valor?.texto === "LACUNA" || valor == null;
   if (ehLacuna) return { lacuna: true, aviso: AVISO_LACUNA };
 
   const ids = (valor.ids ?? []).filter((id) => idsValidos.has(id));
-  const usados = subconjunto.filter((t) => ids.includes(t.id));
-  const resultado = { lacuna: false, ids, chips: chipsDe(usados, documentos) };
+  const resultado = { lacuna: false, ids };
   if ("itens" in valor) resultado.itens = valor.itens;
   else resultado.texto = valor.texto;
   return resultado;
-}
-
-// Chips de fonte: nome do estudo, método, período (docs/01).
-function chipsDe(trechos, documentos) {
-  const vistos = new Map();
-  for (const t of trechos) {
-    const d = documentos.get(t.id_documento);
-    if (d && !vistos.has(t.id_documento)) {
-      vistos.set(t.id_documento, { fonte: d.fonte, metodo: d.metodo, periodo: d.periodo });
-    }
-  }
-  return [...vistos.values()];
-}
-
-function chipDe(trecho, documentos) {
-  return chipsDe([trecho], documentos)[0] ?? null;
-}
-
-async function mapaDocumentos(env, trechos) {
-  const ids = [...new Set(trechos.map((t) => t.id_documento))];
-  if (ids.length === 0) return new Map();
-  const marcadores = ids.map((_, i) => `?${i + 1}`).join(", ");
-  const docs = await consulta(
-    env,
-    `SELECT id_documento, fonte, metodo, periodo FROM documentos WHERE id_documento IN (${marcadores})`,
-    ids
-  );
-  return new Map(docs.map((d) => [d.id_documento, d]));
 }
 
 function idsDaPagina(pagina) {
@@ -801,7 +745,7 @@ async function rotaFormato(corpo, env, request) {
 
   await guardaCache(
     env, cache,
-    "INSERT OR REPLACE INTO formatos (publico, macronarrativa, formato, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))",
+    "INSERT OR REPLACE INTO formatos (publico, macronarrativa, formato, pauta, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, '', ?4, ?5, ?6, ?7, datetime('now'))",
     [
       canonica.match.publico, canonica.match.macronarrativa, formato,
       JSON.stringify(resposta), canonica.ids.join(","), cache.idsAcervo, modeloUsado,

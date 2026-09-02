@@ -1,0 +1,19 @@
+{
+  "_leia_me": "Fonte única dos vocabulários fechados do DECISIVAS. Lido pelo Worker (import), pelos scripts (require) e pelo build, que gera public/vocabulario.js para o front. Nenhuma outra cópia destas listas pode existir no repositório.",
+  "publicos": [
+    { "id": "jovens", "nome": "Jovens", "cor": "#26cbff" },
+    { "id": "60+", "nome": "60+", "cor": "#16c172" },
+    { "id": "mulheres beneficiárias", "nome": "Mulheres beneficiárias", "cor": "#ffb23d" },
+    { "id": "mulheres de 2 a 5 salários mínimos", "nome": "Mulheres de 2 a 5 SM", "cor": "#7e2dff" }
+  ],
+  "macronarrativas": [
+    { "id": "dinheiro no bolso", "nome": "Dinheiro no bolso" },
+    { "id": "trabalho digno", "nome": "Trabalho digno" },
+    { "id": "família e cuidado", "nome": "Família e cuidado" },
+    { "id": "brasil e pertencimento", "nome": "Brasil e pertencimento" },
+    { "id": "participação e voz", "nome": "Participação e voz" }
+  ],
+  "tipos": ["achado", "funciona", "afasta", "contexto", "exemplo", "verbatim", "perfil"],
+  "forcas": ["forte", "indício"],
+  "formatos": ["whatsapp", "carrossel", "roteiro"]
+}

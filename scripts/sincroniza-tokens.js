@@ -51,3 +51,17 @@ fs.writeFileSync(
   "utf8"
 );
 console.log(`versão do acervo publicada: ${versao} | cache no navegador: ${cacheHabilitado ? "ligado" : "desligado"}`);
+
+// E publica os vocabulários fechados para o front, a partir da mesma fonte que
+// o Worker e os scripts leem (dados/vocabulario.json). É o que impede as listas
+// de divergirem entre servidor e tela.
+const vocabulario = JSON.parse(fs.readFileSync("dados/vocabulario.json", "utf8"));
+fs.writeFileSync(
+  "public/vocabulario.js",
+  "// ARQUIVO GERADO no build a partir de dados/vocabulario.json — NÃO EDITAR AQUI.\n" +
+    `window.VOCABULARIO = ${JSON.stringify(vocabulario)};\n`,
+  "utf8"
+);
+console.log(
+  `vocabulário publicado: ${vocabulario.publicos.length} públicos, ${vocabulario.macronarrativas.length} temas`
+);

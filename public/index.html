@@ -6,6 +6,7 @@
   <title>DECISIVAS — Com quem você quer falar, e sobre o quê?</title>
   <link rel="stylesheet" href="/tokens.css">
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/vocabulario.js"></script>
 </head>
 <body>
   <header class="barra-topo">
@@ -37,23 +38,10 @@
   </main>
 
   <script>
-    // Vocabulários fechados (CLAUDE.md). Não criar valores novos.
-    const PUBLICOS = [
-      "idosos",
-      "jovens",
-      "mulheres beneficiárias",
-      "mulheres de 2 a 5 salários mínimos",
-      "trabalhadoras informais",
-      "pequenas empreendedoras",
-      "plataformizadas",
-    ];
-    const TEMAS = [
-      "dinheiro no bolso",
-      "proteção do trabalhador",
-      "proteção da família",
-      "brasil soberano",
-      "engajamento cívico",
-    ];
+    // Vocabulários fechados: vêm de /vocabulario.js, gerado no build a partir
+    // de dados/vocabulario.json — a mesma fonte que o Worker valida.
+    const PUBLICOS = window.VOCABULARIO.publicos;
+    const TEMAS = window.VOCABULARIO.macronarrativas;
 
     const selecao = { publico: null, tema: null };
 
@@ -63,12 +51,14 @@
         const tag = document.createElement("button");
         tag.type = "button";
         tag.className = "tag";
-        tag.textContent = valor;
+        // O banco guarda o identificador; a tela mostra o nome.
+        tag.textContent = valor.nome;
+        tag.dataset.id = valor.id;
         tag.setAttribute("aria-pressed", "false");
         tag.addEventListener("click", () => {
-          selecao[chave] = selecao[chave] === valor ? null : valor;
+          selecao[chave] = selecao[chave] === valor.id ? null : valor.id;
           for (const irma of nuvem.children) {
-            irma.setAttribute("aria-pressed", String(irma.textContent === selecao[chave]));
+            irma.setAttribute("aria-pressed", String(irma.dataset.id === selecao[chave]));
           }
           atualizaBarra();
         });

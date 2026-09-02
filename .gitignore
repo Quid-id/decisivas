@@ -21,3 +21,6 @@ public/tokens.css
 
 # Gerado no build a partir de data/versao-acervo.txt (scripts/sincroniza-tokens.js)
 public/versao-acervo.js
+
+# Gerado no build a partir de dados/vocabulario.json (scripts/sincroniza-tokens.js)
+public/vocabulario.js
