@@ -226,7 +226,7 @@ linha só vira "aplicada" com o resultado da verificação em mãos.
 | 001 | schema inicial | Tabelas `documentos`, `trechos`, `recursos`, `registros`; índices `idx_trechos_match`, `idx_trechos_midia`, `idx_recursos_match` | Aplicada em 08/2026, pelo console |
 | 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Aplicada em 02/09/2026, pelo console.** Verificação devolveu `1, 1, 1`. Foi a ausência desta migração que causou `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
 | 003 | etapa 2 | Tabela `pautas` com as 59 pautas; tabela `trechos` recriada com as nove colunas, a taxonomia final e as restrições (a antiga vira `trechos_ate_002`, preservada); `paginas` e `formatos` recriadas com `pauta` na chave; índices recriados | **Aplicada em 02/09/2026, pelo console.** Bloco 15 devolveu `59, 9, 0, 1, 1, 2` e `preservados: 273`, igual ao esperado; o INSERT de teste falhou com `CHECK constraint failed` em `publico`. O bloco 3 não foi executado — o bloco 4 rodou antes —, sem consequência: com `CACHE_ENABLED="false"` o Worker nunca gravou nas tabelas que a 002 acabara de criar, então estavam vazias, e o bloco 15 confirmou as duas recriadas com `pauta` na chave |
-| 004 | etapa 8A | Remove `trechos_ate_002` (as 273 linhas da amostra anterior, já substituídas pela carga v5) e as tabelas de cache `paginas` e `formatos`, que saíram com a geração de página por modelo | **Não aplicada ainda.** Comandos em `migracao-004.sql`, na raiz; validados contra uma réplica local do schema pós-003 com as três tabelas presentes |
+| 004 | etapa 8A | Remove `trechos_ate_002` (as 273 linhas da amostra anterior, já substituídas pela carga v5) e as tabelas de cache `paginas` e `formatos`, que saíram com a geração de página por modelo | **Aplicada em 02/09/2026, pelo console.** Bloco 1 devolveu `trechos 2405, antigos 273, pautas 59, paginas 12, formatos 1`; bloco 5 devolveu `0, 2405, 59`, igual ao esperado. As 12 páginas e o formato descartados eram o que o cache tinha guardado entre o deploy da etapa 7 e a decisão de páginas fixas — conteúdo gerado por modelo, que não vai ao ar |
 
 A migração 002 foi a **etapa 0** da especificação em etapas versão 2 (hoje em `arquivo/DECISIVAS_especificacao_claude_code.md`):
 o código publicado já a esperava, e ela não mudou nenhuma linha de código.
@@ -424,6 +424,12 @@ Depois da verificação, `docs/02-schema.sql` descreve o banco resultante: cinco
 tabelas (`pautas`, `trechos`, `registros`, `documentos`, `recursos`) e três
 índices. O arquivo já está nesse estado, conferido aplicando-o num SQLite
 vazio.
+
+**Aplicada em 02/09/2026, pelo console.** O bloco 1 no remoto devolveu
+`trechos 2405, antigos 273, pautas 59, paginas 12, formatos 1` — a réplica
+local tinha 184 e 60 no lugar dos dois últimos, e a diferença é só o que cada
+uma tinha em cache: no remoto, as 12 páginas e o formato gerados entre o deploy
+da etapa 7 e a decisão de páginas fixas. O bloco 5 devolveu `0, 2405, 59`.
 
 ### O que o código faz quando o schema está atrasado
 
