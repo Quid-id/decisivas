@@ -1,0 +1,8 @@
+# Rotas antigas de Metodologia e Transparência, removidas na etapa 6.
+# O Worker só roda em /api/*, então o redirecionamento é do site estático.
+# O destino é a URL canônica (sem .html): o servidor de assets redireciona
+# /sobre.html para /sobre, e apontar para o .html custaria um salto a mais.
+/metodologia.html    /sobre  301
+/transparencia.html  /sobre  301
+/metodologia         /sobre  301
+/transparencia       /sobre  301

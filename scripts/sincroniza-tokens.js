@@ -65,6 +65,10 @@ console.log(
   `vocabulário publicado: ${vocabulario.publicos.length} públicos, ${vocabulario.macronarrativas.length} temas`
 );
 
+// Monta as telas: parciais de cabeçalho e rodapé, configuração e assets
+// (etapa 6). As fontes ficam em paginas/ e parciais/; public/ é só saída.
+require("./gera-paginas").main();
+
 // E monta os prompts do agente a partir das planilhas de regra e do documento
 // de formatos (etapa 5). O prompt de sistema vive num só lugar — prompts/ —, e
 // o build o compõe em prompts/gerado/, que é o que o Worker importa e o que

@@ -25,3 +25,14 @@ public/vocabulario.js
 # Gerado no build a partir de prompts/*.txt e das planilhas de regra de dados/
 # (scripts/gera-prompts.js) — é o prompt que vai ao modelo, não editar à mão
 prompts/gerado/
+
+# Telas geradas no build a partir de paginas/ e parciais/ (scripts/gera-paginas.js)
+public/index.html
+public/resultado.html
+public/sobre.html
+public/privacidade.html
+public/estilos.css
+public/rodape.js
+public/configuracao.js
+public/_redirects
+public/assets/

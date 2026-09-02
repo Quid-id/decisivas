@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+{{CABECA}}
+</head>
+<body>
+{{CABECALHO}}
+
+<main><div class="larg">
+  <div class="texto">
+    <h1>Sobre o projeto</h1>
+
+    <div class="video" id="video" tabindex="-1"></div>
+
+    <h2>O que é o DECISIVAS</h2>
+    <div id="texto-projeto"></div>
+
+    <h2>Os públicos</h2>
+    <div id="lista-publicos"></div>
+
+    <h2>Os temas</h2>
+    <div id="lista-temas"></div>
+
+    <h2>Quem faz</h2>
+    <div id="texto-quem-faz"></div>
+
+    <h2>Inteligência artificial e origem dos dados</h2>
+    <div id="texto-aviso-ia"></div>
+  </div>
+</div></main>
+
+{{RODAPE}}
+
+<script>
+  const CONFIG = window.CONFIGURACAO;
+  const VOCABULARIO = window.VOCABULARIO;
+
+  // Texto ainda não redigido aparece como caixa [preencher]. Nada é escrito
+  // por código: a página mostra o que existe e sinaliza o que falta.
+  function bloco(valor, oQue) {
+    if (!valor || valor === "[preencher]") {
+      const caixa = document.createElement("div");
+      caixa.className = "preencher";
+      caixa.textContent = `[preencher] ${oQue} — dados/configuracao.json`;
+      return caixa;
+    }
+    const p = document.createElement("p");
+    p.textContent = valor;
+    return p;
+  }
+
+  const idVideo = CONFIG.video_youtube_id;
+  const caixaVideo = document.getElementById("video");
+  if (idVideo && idVideo !== "[preencher]") {
+    const quadro = document.createElement("iframe");
+    quadro.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(idVideo)}?rel=0`;
+    quadro.title = "Vídeo de apresentação do DECISIVAS";
+    quadro.allow = "accelerometer; encrypted-media; gyroscope; picture-in-picture";
+    quadro.allowFullscreen = true;
+    caixaVideo.appendChild(quadro);
+  } else {
+    caixaVideo.textContent = "[preencher] vídeo de apresentação: identificador do YouTube em dados/configuracao.json";
+  }
+
+  document.getElementById("texto-projeto").appendChild(bloco(CONFIG.sobre?.projeto, "texto sobre o projeto"));
+  document.getElementById("texto-quem-faz").appendChild(bloco(CONFIG.sobre?.quem_faz, "quem faz"));
+  document.getElementById("texto-aviso-ia").appendChild(
+    bloco(CONFIG.sobre?.aviso_ia, "aviso sobre uso de inteligência artificial e origem dos dados")
+  );
+
+  function montaLista(idAlvo, valores, textos, oQue) {
+    const alvo = document.getElementById(idAlvo);
+    for (const valor of valores) {
+      const titulo = document.createElement("h3");
+      titulo.textContent = valor.nome;
+      alvo.appendChild(titulo);
+      alvo.appendChild(bloco((textos ?? {})[valor.id], `${oQue} ${valor.nome}`));
+    }
+  }
+
+  montaLista("lista-publicos", VOCABULARIO.publicos, CONFIG.sobre?.publicos, "texto do público");
+  montaLista("lista-temas", VOCABULARIO.macronarrativas, CONFIG.sobre?.temas, "texto do tema");
+</script>
+</body>
+</html>

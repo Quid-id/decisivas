@@ -508,6 +508,59 @@ CREATE TABLE formatos (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, form
 npx wrangler d1 execute decisivas --remote --command="DELETE FROM paginas; DELETE FROM formatos;"
 ```
 
+## O build, e o que ele gera
+
+Um comando só, declarado em `[build]` no `wrangler.toml`, roda antes de
+`wrangler dev` e de `wrangler deploy` — inclusive nos deploys por push:
+
+```sh
+node scripts/sincroniza-tokens.js
+```
+
+Ele encadeia três coisas, e **tudo que ele escreve fica fora do
+versionamento**. A regra é simples: se um arquivo está em `public/` ou em
+`prompts/gerado/`, ele é saída de build; edite a fonte, nunca a cópia.
+
+| Fonte | Saída | Quem gera |
+|---|---|---|
+| `brand/tokens.css` | `public/tokens.css` | `sincroniza-tokens.js` |
+| `dados/versao-acervo.txt` + `CACHE_ENABLED` | `public/versao-acervo.js` | `sincroniza-tokens.js` |
+| `dados/vocabulario.json` | `public/vocabulario.js` | `sincroniza-tokens.js` |
+| `paginas/*.html` + `parciais/*.html` | `public/*.html` | `gera-paginas.js` |
+| `paginas/estilos.css`, `rodape.js`, `_redirects` | `public/` | `gera-paginas.js` |
+| `dados/configuracao.json` | `public/configuracao.js` | `gera-paginas.js` |
+| `assets/*` | `public/assets/` | `gera-paginas.js` |
+| `prompts/*.txt` + planilhas de regra + `docs/08` | `prompts/gerado/*.txt` | `gera-prompts.js` |
+
+**Cabeçalho e rodapé são um parcial só** (`parciais/cabecalho.html` e
+`parciais/rodape.html`), incluídos em cada tela pelo marcador `{{CABECALHO}}` e
+`{{RODAPE}}`. Nenhuma tela repete a barra ou o rodapé: repetir é como duas
+telas divergem.
+
+O build é **idempotente**: só reescreve arquivo cujo conteúdo mudou
+(`scripts/escreve-se-mudou.js`). Sem isso, a saída dentro de um diretório
+observado pelo `wrangler dev` dispara o watcher e o Worker reinicia no meio das
+requisições.
+
+Falha de build é dura, de propósito: marcador não substituído, regra de
+planilha sem verificação ou cor de público fora da paleta de `brand/tokens.css`
+derrubam o build em vez de publicar tela ou prompt pela metade.
+
+### Assets
+
+`assets/` é a pasta única de imagens (banner, logotipos, cards semióticos,
+favicon), copiada para `public/assets/` no build. **Enquanto um arquivo não
+existir, a tela mostra um placeholder tracejado com o nome esperado** — nada
+quebra e nada é inventado. Os nomes estão em `assets/LEIA-ME.md`. Sem nenhum
+`banner-*`, o cabeçalho usa a faixa provisória de linhas coloridas do protótipo.
+
+### Endereços das telas
+
+O servidor de assets do Cloudflare serve a URL sem `.html`: `/sobre.html`
+responde 307 para `/sobre`. Os links internos apontam direto para a forma sem
+extensão. As rotas antigas saem em `paginas/_redirects`: `/metodologia` e
+`/transparencia`, com e sem `.html`, respondem 301 para `/sobre`.
+
 ## Seções a completar (tarefa 8 de docs/05)
 
 - Cadastrar `OPENROUTER_API_KEY` como segredo

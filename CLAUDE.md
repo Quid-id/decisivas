@@ -10,11 +10,11 @@ Não é ferramenta eleitoral. Não menciona candidaturas. É um acervo de pesqui
 
 ## Stack
 
-- Site estático servido pelo Cloudflare (telas em HTML, CSS e JS simples, sem framework pesado)
+- Site estático servido pelo Cloudflare (telas em HTML, CSS e JS simples, sem framework pesado). As fontes ficam em `paginas/` e `parciais/`; **`public/` é saída de build**, inteira
 - Worker do Cloudflare na rota `/api/*`: é o agente, com filtro, regras e registro
 - Banco Cloudflare D1 (SQL) com o acervo etiquetado — schema em `docs/02-schema.sql`
 - Modelo de linguagem via API do OpenRouter, chamado somente pelo Worker
-- Sem CMS. Conteúdo entra por carga versionada (planilha em `dados/` → script de carga → D1). Os textos fixos hoje vivem no HTML de `public/`; a pasta `content/` prevista no plano antigo nunca foi criada
+- Sem CMS. Conteúdo entra por carga versionada (planilha em `dados/` → script de carga → D1). Os textos fixos das telas vivem em `dados/configuracao.json`, com `[preencher]` no que ainda não foi redigido; a pasta `content/` prevista no plano antigo nunca foi criada
 - Deploy automático: push na branch principal publica; branches geram pré-visualização
 
 ## Regras que nunca se quebram
@@ -27,7 +27,8 @@ Não é ferramenta eleitoral. Não menciona candidaturas. É um acervo de pesqui
 6. **Interruptor de desligamento:** o Worker verifica a variável de ambiente `AGENT_ENABLED`; se for `false`, responde com mensagem estática de indisponibilidade. Toda rota do agente passa por essa checagem.
 7. **Rótulo de IA visível** em toda saída gerada, com o texto definido na especificação.
 8. **Interface exclusivamente com os tokens de `brand/tokens.css`.** Sem cores ou fontes fora deles.
-8.1. **O prompt de sistema vive num só lugar: `prompts/`.** Nenhuma cópia dele em `docs/`, em script ou no Worker. As regras do agente vêm das planilhas de `dados/` e entram no prompt no build (`scripts/gera-prompts.js`); mudar uma regra é mudar a planilha e fazer deploy. Em conflito entre planilha e `docs/08`, a planilha prevalece.
+8.1. **Cabeçalho e rodapé são um parcial só** (`parciais/`), incluído no build. Nenhuma tela repete barra ou rodapé, e nada em `public/` é editado à mão.
+8.2. **O prompt de sistema vive num só lugar: `prompts/`.** Nenhuma cópia dele em `docs/`, em script ou no Worker. As regras do agente vêm das planilhas de `dados/` e entram no prompt no build (`scripts/gera-prompts.js`); mudar uma regra é mudar a planilha e fazer deploy. Em conflito entre planilha e `docs/08`, a planilha prevalece.
 9. Todo texto de interface em português do Brasil.
 10. **Alterar o schema sem entregar os comandos de migração remota é entrega incompleta.** O D1 não migra sozinho: `docs/02-schema.sql` é só um arquivo, e um `CREATE TABLE` commitado não cria nada em produção. Toda mudança de schema entrega junto os comandos prontos para o console do painel (um por bloco, uma linha, sem comentários), um comando de verificação, e a linha nova no registro de migrações de `docs/06-operacao.md`. A aplicação no remoto vem ANTES do deploy do código que depende dela.
 
@@ -58,6 +59,10 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 - `dados/DECISIVAS_pautas_de_para_v1.xlsx` — as 59 pautas consolidadas
 - `dados/Regra_geral_formatos.xlsx`, `dados/Regra_gatilho.xlsx`, `dados/Regra_selecao.xlsx` — as regras RG, RGT e RS; entram no prompt pelo build, nunca à mão
 - `prompts/` — **fonte única** dos prompts do agente (`match.txt`, `pauta.txt`, `formato.txt`); `scripts/gera-prompts.js` injeta as regras e escreve `prompts/gerado/`, fora do versionamento
+- `paginas/` — fonte das telas (Início, resultado, Sobre, Política de privacidade), mais `estilos.css` e `_redirects`
+- `parciais/` — cabeça, cabeçalho e rodapé comuns a todas as telas, incluídos no build
+- `dados/configuracao.json` — textos e identificadores das telas; o que falta redigir está como `[preencher]`
+- `assets/` — pasta única de imagens (banner, logotipos, cards semióticos, favicon); enquanto um arquivo não existe, a tela mostra placeholder com o nome esperado
 - `referencia/decisivas_prototipo_v3.html` — referência visual das telas (etapa 6)
 - `brand/` — tokens de design, logotipo e guia (entregues pela equipe de identidade)
 - `dados/versao-acervo.txt` — marca de versão do acervo; muda a cada carga e invalida o cache do navegador
