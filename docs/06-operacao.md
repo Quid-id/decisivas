@@ -121,10 +121,14 @@ Nunca corte no meio de um comando.
 
 | Acervo | Blocos | Linhas | Remoto |
 |---|---|---|---|
-| v5 (`dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`) | `carga-003/01` a `09` | 2.405 trechos | **Não aplicada ainda.** Os blocos estão validados contra uma réplica local do schema pós-003 (os nove rodaram, o bloco 09 devolveu os números esperados, e a segunda passada não duplicou nada) |
+| v5 (`dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`) | `carga-003/01` a `09` | 2.405 trechos | **Aplicada em 02/09/2026, pelo console.** O bloco 09 devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59, paginas 0, formatos 0` — igual ao esperado e ao que os nove blocos já tinham devolvido na réplica local do schema pós-003 |
 
 A linha só vira "aplicada" com a saída do bloco `09` do remoto em mãos, como no
 registro de migrações — a regra de quem aplica é a mesma, mais abaixo.
+
+Com o acervo v5 no ar, a migração 004 (remover `trechos_ate_002`) fica liberada:
+as 273 linhas da amostra antiga não são mais a única cópia de nada, e nenhuma
+consulta do código as alcança.
 
 ### Conferir a carga
 

@@ -63,10 +63,10 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 
 ## Estado atual dos dados
 
-**A tabela `trechos` no remoto está vazia.** A migração 003 (etapa 2) criou a tabela nova, com a taxonomia final e as restrições. A etapa 3 gerou os blocos de carga em `carga-003/` — 2.405 linhas, validadas contra as restrições, nenhuma recusa —, mas **aplicá-los no remoto é trabalho de uma pessoa no console do painel**: o ambiente do Claude Code não tem credencial do Cloudflare (ver docs/06, "Quem aplica, e de onde"). Enquanto não forem aplicados, os 20 cruzamentos respondem com lacuna declarada em todos os blocos — comportamento correto, não erro.
+**O acervo v5 está no remoto:** 2.405 trechos, aplicados em 02/09/2026 pelo console, a partir dos blocos de `carga-003/` gerados na etapa 3. A verificação devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59, paginas 0, formatos 0`. Os 20 cruzamentos têm trechos, então lacuna declarada agora significa bloco sem evidência suficiente — não mais banco vazio.
 
 A fonte do acervo é `dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`, 2.405 linhas, já na taxonomia nova. Consolidado por regras aprovadas em lote, sem revisão linha a linha: tudo que estava nas extrações entrou, exceto o que a regra 4 veda. Conferido contra as restrições do banco: as 2.405 linhas passam, nenhuma violação.
 
-As 273 linhas da amostra antiga continuam preservadas no banco remoto, na tabela `trechos_ate_002`, que a migração 004 remove depois da carga e do deploy. **Elas não podem ser publicadas** e nenhuma consulta do código as alcança.
+As 273 linhas da amostra antiga continuam no banco remoto, na tabela `trechos_ate_002`. Com a carga aplicada, a migração 004 (que a remove) está liberada, e é a próxima coisa a escrever no `docs/06`. **Elas não podem ser publicadas** e nenhuma consulta do código as alcança.
 
 Ausências conhecidas, que o código deve tratar como lacuna e não como erro: a pauta `consumo de mídia` não existe entre as 59, então o bloco de hábitos de mídia sai vazio até a planilha própria chegar; o tipo `exemplo` tem zero linhas no acervo; e a coluna `link` está sempre vazia nesta versão.
