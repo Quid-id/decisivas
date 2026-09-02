@@ -149,6 +149,13 @@ Se um comando falhar dizendo que a tabela ou a coluna já existe, aquela parte
 da migração já estava aplicada: siga para o próximo comando. Nenhum comando
 desta seção apaga dados.
 
+**Bloco de conferência que protege um `DROP` vem antes dele, e não se pula.**
+O console não impõe ordem: quem cola decide. Quando um bloco existe só para
+confirmar que é seguro remover algo, rodá-lo depois não protege nada. Se um
+desses for pulado, registre o fato e o motivo na tabela abaixo, junto com o que
+sustenta que não houve perda — o registro serve para auditoria, não para
+parecer limpo.
+
 Com terminal, o equivalente é `npx wrangler d1 execute decisivas --remote
 --file=<arquivo com os comandos>`, mas o painel é o caminho oficial do projeto
 (ver "Sem terminal", acima).
@@ -173,7 +180,7 @@ linha só vira "aplicada" com o resultado da verificação em mãos.
 |---|---|---|---|
 | 001 | schema inicial | Tabelas `documentos`, `trechos`, `recursos`, `registros`; índices `idx_trechos_match`, `idx_trechos_midia`, `idx_recursos_match` | Aplicada em 08/2026, pelo console |
 | 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Aplicada em 02/09/2026, pelo console.** Verificação devolveu `1, 1, 1`. Foi a ausência desta migração que causou `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
-| 003 | etapa 2 | Tabela `pautas` com as 59 pautas; tabela `trechos` recriada com as nove colunas, a taxonomia final e as restrições (a antiga vira `trechos_ate_002`, preservada); `paginas` e `formatos` recriadas com `pauta` na chave; índices recriados | **Aguardando aplicação.** Os 15 blocos abaixo foram validados em réplica local: aplicam sem erro, a verificação final devolve `59, 9, 0, 1, 1, 2` com as 273 linhas antigas preservadas, as restrições recusam os nove casos inválidos testados, e as 2.405 linhas do acervo v5 passam |
+| 003 | etapa 2 | Tabela `pautas` com as 59 pautas; tabela `trechos` recriada com as nove colunas, a taxonomia final e as restrições (a antiga vira `trechos_ate_002`, preservada); `paginas` e `formatos` recriadas com `pauta` na chave; índices recriados | **Aplicada em 02/09/2026, pelo console.** Bloco 15 devolveu `59, 9, 0, 1, 1, 2` e `preservados: 273`, igual ao esperado; o INSERT de teste falhou com `CHECK constraint failed` em `publico`. O bloco 3 não foi executado — o bloco 4 rodou antes —, sem consequência: com `CACHE_ENABLED="false"` o Worker nunca gravou nas tabelas que a 002 acabara de criar, então estavam vazias, e o bloco 15 confirmou as duas recriadas com `pauta` na chave |
 | 004 | depois da etapa 3 | Remover `trechos_ate_002`, quando a carga nova estiver no ar e conferida | Não escrita ainda |
 
 A migração 002 foi a **etapa 0** de `docs/DECISIVAS_especificacao_claude_code.md`:
@@ -324,6 +331,14 @@ CREATE INDEX idx_trechos_midia ON trechos (publico, pauta);
 ```sql
 SELECT (SELECT COUNT(*) FROM pautas) AS pautas, (SELECT COUNT(*) FROM pragma_table_info('trechos')) AS colunas_trechos, (SELECT COUNT(*) FROM trechos) AS trechos, (SELECT COUNT(*) FROM pragma_table_info('paginas') WHERE name='pauta') AS paginas_pauta, (SELECT COUNT(*) FROM pragma_table_info('formatos') WHERE name='pauta') AS formatos_pauta, (SELECT COUNT(*) FROM sqlite_master WHERE type='index' AND name IN ('idx_trechos_match','idx_trechos_midia')) AS indices, (SELECT COUNT(*) FROM trechos_ate_002) AS preservados;
 ```
+
+**Os comandos desta seção são a fonte; copie daqui, não de uma conversa.**
+O bloco 2 foi conferido em 02/09/2026 com `openpyxl` contra
+`dados/DECISIVAS_pautas_de_para_v1.xlsx`: as 59 `pauta_consolidada` e os 59
+`macronarrativa_padrao` batem com o arquivo, sem sobra nem falta, e as 59
+pautas usadas em `dados/DECISIVAS_acervo_v5.xlsx` existem todas na tabela, o
+que fecha a chave estrangeira. Para reemitir os blocos em arquivo, sem
+transcrever nada: `node scripts/extrai-blocos-migracao.js 003`.
 
 **Depois da verificação**, confira que as restrições recusam valor fora da
 lista. Este comando **tem de falhar** com `CHECK constraint failed`:
