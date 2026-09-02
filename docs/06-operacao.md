@@ -616,10 +616,52 @@ carregar uma lista de nomes de figuras e partidos.
 BLOCKED_TERMS="Sobrenome|Outro Nome|SIGLA" node scripts/verifica-conteudo.js
 ```
 
-Sem a variável, a varredura **não roda** e o build avisa em voz alta —
-`termos bloqueados: VARREDURA NÃO EXECUTADA` — em vez de passar em silêncio. É
-o que permite rodar `wrangler dev` sem a lista à mão; a linha no log do build
-do Cloudflare é o sinal de que a variável falta no painel.
+**Sem a variável, o que acontece depende de onde o build roda:**
+
+| Onde | Sem `BLOCKED_TERMS` |
+|---|---|
+| Build de esteira **da main** — o que publica | **o build FALHA.** Publicar sem a varredura é publicar sem a rede que sustenta a regra 4 |
+| Build de pré-visualização (qualquer outra branch) | só avisa |
+| Máquina de quem desenvolve | só avisa (`termos bloqueados: VARREDURA NÃO EXECUTADA`), para `wrangler dev` rodar sem a lista à mão |
+
+**Por que a pré-visualização não reprova:** as variáveis de build ficam no
+ambiente de **produção** do painel, e o build de branch não as recebe.
+Reprovar ali seria reprovar por um detalhe da esteira, não por conteúdo — e a
+branch que vai ao ar é a main, que recebe as variáveis.
+
+A esteira é reconhecida pela presença de `CI`, `WORKERS_CI`, `CF_PAGES` ou
+`GITHUB_ACTIONS` no ambiente, e a branch pela primeira de `WORKERS_CI_BRANCH`,
+`CF_PAGES_BRANCH`, `GITHUB_REF_NAME` ou `BRANCH` que vier preenchida — o build
+do Cloudflare define `CI` e `WORKERS_CI_BRANCH`. Para reproduzir a falha na
+mão, sem a lista:
+
+```
+CI=1 WORKERS_CI_BRANCH=main node scripts/verifica-conteudo.js
+```
+
+**Como saber se a variável chegou.** A primeira linha do log do build diz, sem
+imprimir os termos:
+
+```
+ambiente do build: esteira (CI, WORKERS_CI) | ramo main | BLOCKED_TERMS: 58 termo(s)
+ambiente do build: máquina local (nenhuma marca de esteira) | ramo desconhecido | BLOCKED_TERMS: AUSENTE ou vazia …
+```
+
+Ela existe porque o **check do GitHub não traz log nenhum** — só o número do
+build e o link para o painel. Quando o check fica vermelho, é no log do build,
+por esse link, que está a resposta.
+
+No painel, `BLOCKED_TERMS` fica em **Settings → Builds → Variables and
+secrets**, no **ambiente de produção** — é onde ela está desde 02/09/2026. Duas
+consequências: o build de pré-visualização de branch **não** recebe essa
+variável (e por isso não reprova por ausência), e a linha `BLOCKED_TERMS:
+AUSENTE` num log de pré-visualização é o esperado, não um defeito.
+
+**A variável tem de estar no painel ANTES deste comportamento entrar**, no
+ambiente de produção (confirmado em 02/09/2026). Com o painel sem a lista, o
+build da main falha e o site não republica — o que já está no ar continua no
+ar, mas nada novo sobe. E vale de volta: **build da main verde é prova de que a
+lista chegou**, porque ali a ausência derruba.
 
 ### A lista de pendências no fim do build
 

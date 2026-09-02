@@ -172,9 +172,13 @@ async function main() {
         `${conferido.ocorrencias.length} ocorrência(s)`
     );
   } else {
+    // No build que publica a verificação já teria derrubado tudo; aqui é
+    // pré-visualização ou máquina de quem desenvolve, e o aviso basta.
     console.log(
       "termos bloqueados: VARREDURA NÃO EXECUTADA — BLOCKED_TERMS ausente ou vazia. " +
-        "Em produção ela é variável de build no painel do Cloudflare (docs/06-operacao.md)."
+        "Em pré-visualização e na máquina local isso é só aviso; no build da main " +
+        "derruba a publicação. A variável fica no ambiente de produção do painel " +
+        "(docs/06-operacao.md)."
     );
   }
 
