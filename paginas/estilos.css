@@ -20,6 +20,14 @@
   font-display: swap;
   src: url("/assets/fonts/inclusive-sans-latin-italico.woff2") format("woff2");
 }
+/* Unbounded: a fonte de destaque, também servida pelo próprio site. */
+@font-face {
+  font-family: "Unbounded";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("/assets/fonts/unbounded-latin.woff2") format("woff2");
+}
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -68,7 +76,11 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 html { scroll-behavior: smooth; }
 .barra { background: var(--preto); color: var(--off-white); position: sticky; top: 0; z-index: 20; }
 .barra .larg { display: flex; align-items: center; justify-content: space-between; height: var(--altura-barra); }
-.marca { display: inline-flex; align-items: center; gap: var(--espaco-2); font-weight: var(--peso-forte); font-size: var(--texto-gg); text-decoration: none; }
+.marca {
+  display: inline-flex; align-items: center; gap: var(--espaco-2);
+  font-family: var(--tipo-destaque); font-weight: var(--peso-forte);
+  font-size: var(--texto-gg); letter-spacing: .02em; text-decoration: none;
+}
 .marca svg { display: block; }
 .barra nav a {
   color: var(--off-white); text-decoration: none; font-size: var(--texto-m);
@@ -80,8 +92,9 @@ main { padding: var(--espaco-6) 0 var(--espaco-7); }
 
 /* ---------- Início ---------- */
 .chamada {
-  font-size: var(--texto-pergunta); line-height: 1.05;
-  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-3); max-width: 16ch; min-height: 2.2em;
+  font-family: var(--tipo-destaque);
+  font-size: var(--texto-pergunta); line-height: 1.08;
+  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-3); max-width: 18ch; min-height: 2.4em;
 }
 .apoio { color: var(--cor-texto-suave); margin: 0 0 var(--espaco-6); max-width: 52ch; }
 .etapa { margin-bottom: var(--espaco-4); }
@@ -127,53 +140,73 @@ main.caminho { padding: var(--espaco-5) 0 var(--espaco-7); }
 .pilula.tema { background: transparent; color: var(--cor-texto); border: var(--borda-cartao) solid var(--cor-borda-forte); }
 .meta { color: var(--cor-texto-suave); }
 
-h1.titulo-caminho { font-size: var(--texto-h1); line-height: 1.1; margin: 0 0 var(--espaco-2); }
+h1.titulo-caminho {
+  font-family: var(--tipo-destaque); font-size: var(--texto-h1); line-height: 1.12;
+  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-3);
+}
 .linha-caminho { font-size: var(--texto-linha); color: var(--cor-texto-suave); margin: 0 0 var(--espaco-6); max-width: 60ch; }
 
 /* Cada bloco tem o título em caixa alta pequena, com uma régua que corre até
    a borda — é o que separa os blocos sem precisar de cor. */
 section.bloco { margin: 0 0 var(--espaco-6); }
 .bloco h2 {
-  font-size: var(--texto-m); letter-spacing: .1em; text-transform: uppercase;
-  margin: 0 0 var(--espaco-3); display: flex; align-items: center; gap: var(--espaco-3);
+  font-family: var(--tipo-destaque); font-weight: var(--peso-forte);
+  font-size: var(--texto-m); letter-spacing: .08em; text-transform: uppercase;
+  margin: 0 0 var(--espaco-4); display: flex; align-items: center; gap: var(--espaco-3);
 }
 .bloco h2::after { content: ""; flex: 1; height: 2px; background: var(--preto); }
 
-.grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--espaco-3); }
+.grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--espaco-4); }
 @media (max-width: 760px) { .grade { grid-template-columns: 1fr; } }
 
 .card {
   background: var(--cor-superficie); border: var(--borda-cartao) solid var(--cor-borda-forte);
-  border-radius: var(--raio-card); padding: var(--espaco-4);
+  border-radius: var(--raio-card); padding: var(--espaco-4) var(--espaco-4) var(--espaco-5);
   box-shadow: var(--sombra-dura);
 }
-.card h3 { margin: 0 0 var(--espaco-2); font-size: var(--texto-card-titulo); line-height: 1.25; }
-.card p { margin: 0; font-size: var(--texto-card); }
-.card p + p { margin-top: var(--espaco-2); }
+.card h3 { margin: 0 0 var(--espaco-3); font-size: var(--texto-card-titulo); line-height: 1.3; }
+.card p { margin: 0; font-size: var(--texto-card); line-height: 1.5; }
+.card p + p { margin-top: var(--espaco-3); }
 /* Card numérico: pintado na cor do público, com o texto que a regra de
    contraste manda (--cor-texto-pilula, de dados/vocabulario.json). */
 .card.numero { background: var(--cor, var(--cor-superficie)); color: var(--cor-texto-pilula, var(--cor-texto)); }
 .card.numero .n { font-size: var(--texto-numero); font-weight: var(--peso-forte); line-height: 1; margin-bottom: var(--espaco-2); }
-.card.funciona { background: var(--verde-claro); color: var(--sobre-verde-claro); }
-.card.funciona h3::before { content: "✓ "; }
-.card.evita { background: var(--vermelho); color: var(--sobre-vermelho); }
-.card.evita h3::before { content: "✕ "; }
+/* "O que funciona" e "o que não funciona": fundo off-white como os demais
+   cards, borda e texto pretos. A cor da leitura vai para a sombra dura e para
+   o ícone à esquerda do texto — e os cantos são um pouco mais arredondados. */
+.card.funciona, .card.evita {
+  background: var(--cor-fundo); color: var(--cor-texto);
+  border-radius: var(--raio-card-icone);
+  display: grid; grid-template-columns: auto 1fr; gap: var(--espaco-3) var(--espaco-4);
+  align-items: start;
+}
+.card.funciona { box-shadow: var(--sombra-funciona); }
+.card.evita { box-shadow: var(--sombra-evita); }
+.card.funciona .icone, .card.evita .icone {
+  font-size: var(--tamanho-icone); line-height: 1; font-weight: var(--peso-forte);
+  grid-row: 1 / span 2; align-self: start;
+}
+.card.funciona .icone { color: var(--verde); }
+.card.evita .icone { color: var(--vermelho); }
+/* O título e o texto ficam na segunda coluna, ao lado do ícone. */
+.card.funciona h3, .card.evita h3 { margin: 0; grid-column: 2; }
+.card.funciona p, .card.evita p { grid-column: 2; margin: 0; }
 .card.largo { grid-column: span 2; }
 @media (max-width: 760px) { .card.largo { grid-column: auto; } }
-.card .fonte { font-size: var(--texto-p); color: var(--cor-texto-suave); margin-top: var(--espaco-2); }
-.card.numero .fonte, .card.funciona .fonte, .card.evita .fonte { color: inherit; opacity: .8; }
+.card .fonte { font-size: var(--texto-p); color: var(--cor-texto-suave); margin-top: var(--espaco-3); }
+.card.numero .fonte { color: inherit; opacity: .8; }
 
 .prosa {
   background: var(--cor-superficie); border: var(--borda-cartao) solid var(--cor-borda-forte);
-  border-radius: var(--raio-card); padding: var(--espaco-4) var(--espaco-4);
-  box-shadow: var(--sombra-dura); margin-bottom: var(--espaco-3);
+  border-radius: var(--raio-card); padding: var(--espaco-5);
+  box-shadow: var(--sombra-dura); margin-bottom: var(--espaco-4);
 }
-.prosa p { margin: 0 0 var(--espaco-2); font-size: var(--texto-corpo); max-width: var(--largura-texto); }
+.prosa p { margin: 0 0 var(--espaco-3); font-size: var(--texto-prosa); line-height: 1.55; max-width: var(--largura-texto); }
 .prosa p:last-child { margin-bottom: 0; }
 
 .resumo { background: var(--preto); color: var(--off-white); border-radius: var(--raio-card); padding: var(--espaco-4) var(--espaco-5); }
 .resumo ul { margin: 0; padding-left: var(--espaco-4); }
-.resumo li { margin: var(--espaco-1) 0; }
+.resumo li { margin: var(--espaco-2) 0; font-size: var(--texto-prosa); }
 
 /* Lacuna: bege, tracejada, logo abaixo do bloco a que se refere. É conteúdo,
    não erro — nunca cor de alarme. */
@@ -284,7 +317,10 @@ footer ul { list-style: none; margin: 0; padding: 0; }
 footer li { margin-bottom: var(--espaco-3); }
 footer a { color: var(--off-white); text-decoration: none; border-bottom: 1px solid var(--off-white); padding-bottom: var(--espaco-1); }
 footer a:hover { border-bottom-color: var(--rosa); }
-.assinatura { font-size: var(--texto-gg); font-weight: var(--peso-forte); margin: 0 0 var(--espaco-2); }
+.assinatura {
+  font-family: var(--tipo-destaque); font-size: var(--texto-gg);
+  font-weight: var(--peso-forte); letter-spacing: .02em; margin: 0 0 var(--espaco-2);
+}
 .tagline { color: var(--cor-texto-fraco); margin: 0; max-width: 34ch; }
 .fixa-ia { color: var(--cor-texto-fraco); font-size: var(--texto-p); max-width: 60ch; margin-top: var(--espaco-3); font-style: italic; }
 .base {

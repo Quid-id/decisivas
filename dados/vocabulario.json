@@ -1,5 +1,5 @@
 {
-  "_leia_me": "Fonte única dos vocabulários fechados do DECISIVAS. Lido pelo Worker (import), pelos scripts (require) e pelo build, que gera public/vocabulario.js para o front. Nenhuma outra cópia destas listas pode existir no repositório. Em cada público, `cor` é a cor da pílula e `texto` é a cor do texto por cima, pela regra de contraste da identidade; as duas têm de ser valores da paleta de brand/tokens.css, e o build confere. `slug` é o nome curto usado nos arquivos de asset (card semiótico), sem acento nem espaço. O identificador `60+` é o do banco e muda para `70+` na migração 005, depois do beta; na tela o público é 70+, e `slug` é o que aparece na URL de cada caminho e no nome dos assets.",
+  "_leia_me": "Fonte única dos vocabulários fechados do DECISIVAS. Lido pelo Worker (import), pelos scripts (require) e pelo build, que gera public/vocabulario.js para o front. Nenhuma outra cópia destas listas pode existir no repositório. Em cada público, `cor` é a cor da pílula e `texto` é a cor do texto por cima, pela regra de contraste da identidade (o verde do 70+ passou a levar texto preto na revisão de identidade que acompanha a etapa 8B: com off-white a razão era 2,19:1); as duas têm de ser valores da paleta de brand/tokens.css, e o build confere. `slug` é o nome curto usado nos arquivos de asset (card semiótico), sem acento nem espaço. O identificador `60+` é o do banco e muda para `70+` na migração 005, depois do beta; na tela o público é 70+, e `slug` é o que aparece na URL de cada caminho e no nome dos assets.",
   "publicos": [
     {
       "id": "jovens",
@@ -12,7 +12,7 @@
       "id": "60+",
       "nome": "70+",
       "cor": "#16c172",
-      "texto": "#f7f7ed",
+      "texto": "#000000",
       "slug": "70-mais"
     },
     {

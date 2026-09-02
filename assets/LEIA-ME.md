@@ -13,8 +13,9 @@ faltando.
 | `logo-decisivas.svg` | logotipo DECISIVAS | vetor · **ainda não usado**: a barra desenha o logotipo em texto, como no protótipo v5 |
 | `logo-quid.svg` | logo da Quid, monocromático off-white | vetor, 24 px de altura na tela |
 | `logo-brief.svg` | logo do BRIEF, monocromático off-white | vetor, 24 px de altura na tela |
-| `fonts/inclusive-sans-latin.woff2` | Inclusive Sans, romana, pesos 300 a 700 (variável) | woff2 |
-| `fonts/inclusive-sans-latin-italico.woff2` | Inclusive Sans, itálica | woff2 |
+| `fonts/inclusive-sans-latin.woff2` | Inclusive Sans, romana, pesos 300 a 700 (variável) — **no repositório** | 30 KB |
+| `fonts/inclusive-sans-latin-italico.woff2` | Inclusive Sans, itálica — **no repositório** | 31 KB |
+| `fonts/unbounded-latin.woff2` | Unbounded, a fonte de destaque, pesos 200 a 900 (variável) — **no repositório** | 50 KB |
 | `favicon.svg` | favicon vetorial | vetor |
 | `favicon-512.png` | favicon rasterizado | 512 × 512 |
 
@@ -28,10 +29,18 @@ O nome curto de cada público (`jovens`, `70-mais`, `mulheres-beneficiarias`,
 fonte única do vocabulário — se um slug mudar lá, o nome do arquivo muda junto.
 É o mesmo slug que aparece na URL de cada caminho.
 
-A fonte Inclusive Sans é servida pelo próprio site (etapa 8B): **nenhuma
-chamada ao Google Fonts**. Os arquivos vão em `assets/fonts/`, declarados em
-`@font-face` no `paginas/estilos.css`; enquanto não chegarem, as telas caem na
-pilha de fontes do sistema, sem erro visível.
+As duas fontes são servidas pelo próprio site: **nenhuma chamada ao Google
+Fonts**. Os arquivos estão em `assets/fonts/`, declarados em `@font-face` no
+`paginas/estilos.css`, com as licenças ao lado (`LICENCA-*.txt`) — as duas são
+SIL Open Font License 1.1, que permite uso e redistribuição.
+
+- **Inclusive Sans** é a fonte de corpo: leitura, cards, prosa.
+- **Unbounded** é a de destaque, no token `--tipo-destaque`: a marca DECISIVAS
+  na barra e no rodapé, a pergunta da home, o título de cada caminho e os
+  títulos de bloco em caixa alta. Não é fonte de leitura, e não entra no corpo.
+
+Se um arquivo faltar, a tela cai na pilha de fontes do sistema, sem erro
+visível.
 
 Enquanto não houver nenhum `banner-*`, o build escreve no cabeçalho a faixa
 provisória com o padrão de linhas coloridas do protótipo.

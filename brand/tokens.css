@@ -42,16 +42,16 @@
      MEDIDO (WCAG 2.1, texto normal exige 4,5:1):
        roxo + off-white ....... 5,26  passa
        azul + off-white ....... alto  passa
-       vermelho + off-white ... 3,40  REPROVA (passa só em texto grande)
-       verde + off-white ...... 2,19  REPROVA
+       vermelho + PRETO ....... 5,74  passa  (com off-white dava 3,40, reprovava)
+       verde + PRETO .......... 8,91  passa  (com off-white dava 2,19, reprovava)
        amarelo, verde claro, laranja, azul claro, rosa + preto .. 7 a 14  passam
-     Trocar o texto do vermelho e do verde para preto dá 5,74 e 8,91, e os
-     dois valores continuam na paleta. É decisão de identidade, não de código:
-     por isso os tokens seguem como a regra manda, e a medição fica aqui. */
+     Vermelho e verde levam texto PRETO por decisão de identidade tomada depois
+     da medição: a pílula e o card numérico do 70+ (verde) e qualquer superfície
+     vermelha ficavam abaixo do mínimo com off-white. Os fundos não mudaram. */
   --sobre-roxo:        var(--off-white);
-  --sobre-vermelho:    var(--off-white);
+  --sobre-vermelho:    var(--preto);
   --sobre-azul:        var(--off-white);
-  --sobre-verde:       var(--off-white);
+  --sobre-verde:       var(--preto);
   --sobre-amarelo:     var(--preto);
   --sobre-verde-claro: var(--preto);
   --sobre-laranja:     var(--preto);
@@ -83,9 +83,15 @@
   --sombra-dura:   4px 4px 0 var(--preto);
   --sombra-dura-p: 3px 3px 0 var(--preto);
   --sombra-dura-g: 6px 6px 0 var(--preto);
+  /* Cards de "o que funciona" e "o que não funciona": o fundo é off-white como
+     os demais, e a cor vai para a sombra e para o ícone. */
+  --sombra-funciona: 4px 4px 0 var(--verde);
+  --sombra-evita:    4px 4px 0 var(--vermelho);
   --raio-card:   10px;
   --raio-card-g: 12px;
+  --raio-card-icone: 16px;  /* cantos um pouco mais arredondados */
   --raio-campo:  8px;
+  --tamanho-icone: 2.25rem; /* 36px — o ✓ e o ✕ à esquerda do texto */
   --borda-grossa: 3px;   /* pílulas da home e caixa do Explorar */
 
   /* ---------- Linhas ---------- */
@@ -124,10 +130,16 @@
 
   /* ---------- Tipografia ----------
      Inclusive Sans (Google Fonts), pesos 300 a 700. Títulos em 700. */
-  --fonte-texto:  "Inclusive Sans", "Inclusive Sans FB", -apple-system,
-                  BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-                  sans-serif;
+  --fonte-texto:  "Inclusive Sans", -apple-system, BlinkMacSystemFont,
+                  "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --fonte-titulo: var(--fonte-texto);
+  /* Fonte de destaque: Unbounded, servida pelo próprio site. Vale para a marca
+     DECISIVAS, a pergunta da home, o título do caminho e os títulos de bloco.
+     O corpo de texto continua em Inclusive Sans — a Unbounded é para
+     tipografia curta e grande, não para leitura. */
+  --tipo-destaque: "Unbounded", "Inclusive Sans", -apple-system,
+                   BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+                   sans-serif;
 
   --texto-pp:     0.6875rem; /* 11px — rótulo de IA, créditos */
   --texto-p:      0.8125rem; /* 13px — rótulos, metadados */
@@ -139,8 +151,9 @@
   --texto-pergunta: clamp(1.875rem, 5vw, 3.25rem);  /* pergunta da home */
   --texto-h1:      clamp(1.75rem, 4vw, 2.5rem);     /* título do caminho */
   --texto-linha:   1.25rem;   /* 20px — linha de resumo do caminho */
-  --texto-card:    0.9375rem; /* 15px — corpo de card */
-  --texto-card-titulo: 1.125rem; /* 18px — título de card */
+  --texto-prosa:   1.125rem;  /* 18px — prosa dos blocos */
+  --texto-card:    1.0625rem; /* 17px — corpo de card */
+  --texto-card-titulo: 1.1875rem; /* 19px — título de card */
   --texto-numero:  2.5rem;    /* 40px — número em destaque */
 
   --peso-normal: 400;

@@ -49,11 +49,17 @@ function blocoPorQue(pagina, corDoPublico) {
   return `    <div class="prosa">${prosa}</div>\n    <div class="grade">\n${cards}\n    </div>`;
 }
 
+// Ícone dos cards de leitura: o ✓ e o ✕ ficam FORA do título, numa coluna
+// própria à esquerda, e são decoração — o leitor de tela não os anuncia, o
+// título do bloco já diz se é o que funciona ou o que não funciona.
+const ICONE = { funciona: "✓", evita: "✕" };
+
 function cardsDeLista(cards, classe) {
+  const icone = ICONE[classe] ? `<span class="icone" aria-hidden="true">${ICONE[classe]}</span>` : "";
   return cards
     .map((card) => {
       const fonte = card.fonte ? `<p class="fonte">${escapa(card.fonte)}</p>` : "";
-      return `      <div class="card ${classe}"><h3>${escapa(card.titulo)}</h3><p>${escapa(card.texto)}</p>${fonte}</div>`;
+      return `      <div class="card ${classe}">${icone}<h3>${escapa(card.titulo)}</h3><p>${escapa(card.texto)}</p>${fonte}</div>`;
     })
     .join("\n");
 }
