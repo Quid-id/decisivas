@@ -1,0 +1,64 @@
+// DECISIVAS — utilidades de montagem de HTML no build.
+//
+// Um lugar só para escapar texto e para aplicar os parciais, usado por
+// scripts/gera-paginas.js e scripts/gera-caminhos.js. Todo texto de conteúdo
+// passa por `escapa` antes de entrar no HTML: o conteúdo é editado por pessoas,
+// em JSON, e um `<` perdido não pode virar marcação.
+
+const fs = require("node:fs");
+
+function escapa(valor) {
+  return String(valor)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function troca(html, marcadores) {
+  let resultado = html;
+  for (const [chave, valor] of Object.entries(marcadores)) {
+    resultado = resultado.split(`{{${chave}}}`).join(valor);
+  }
+  return resultado;
+}
+
+// Marcador esquecido é erro de build, não detalhe: a tela iria ao ar com um
+// buraco. Nenhum marcador sobrevive à geração.
+function confereMarcadores(html, origem) {
+  const restantes = [...html.matchAll(/\{\{([A-Z_]+)\}\}/g)].map((m) => m[1]);
+  if (restantes.length) {
+    throw new Error(`${origem}: marcador não substituído: ${[...new Set(restantes)].join(", ")}`);
+  }
+}
+
+function leParciais() {
+  return {
+    cabeca: fs.readFileSync("parciais/cabeca.html", "utf8").trim(),
+    cabecalho: fs.readFileSync("parciais/cabecalho.html", "utf8").trim(),
+    rodape: fs.readFileSync("parciais/rodape.html", "utf8").trim(),
+    compartilhar: fs.readFileSync("parciais/compartilhar.html", "utf8").trim(),
+  };
+}
+
+// O que falta redigir aparece na tela como caixa [preencher], nunca como texto
+// inventado (regra 2 do CLAUDE.md). Devolve também a lista do que faltou, para
+// o build imprimir no fim.
+const PENDENTES = [];
+
+function ehPendente(valor) {
+  return !valor || String(valor).trim() === "" || String(valor).startsWith("[preencher");
+}
+
+function textoOuPendente(valor, oQue, onde) {
+  if (!ehPendente(valor)) return { html: `<p>${escapa(valor)}</p>`, pendente: false };
+  PENDENTES.push(`${oQue} (${onde})`);
+  return { html: `<div class="preencher">[preencher] ${escapa(oQue)} — ${escapa(onde)}</div>`, pendente: true };
+}
+
+function pendentes() {
+  return [...new Set(PENDENTES)];
+}
+
+module.exports = { escapa, troca, confereMarcadores, leParciais, ehPendente, textoOuPendente, pendentes };

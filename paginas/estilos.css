@@ -3,6 +3,32 @@
    Todo valor de cor, fonte, espaço e raio vem de tokens.css: nenhum
    literal aqui (regra 8 do CLAUDE.md). */
 
+/* Inclusive Sans servida pelo próprio site: nenhuma chamada ao Google Fonts
+   (CONTEXTO v3, seção 5). Enquanto os arquivos não chegarem em assets/fonts/,
+   o navegador cai na pilha de fontes do sistema declarada nos tokens. */
+@font-face {
+  font-family: "Inclusive Sans";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/assets/fonts/inclusive-sans-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inclusive Sans";
+  font-style: italic;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/assets/fonts/inclusive-sans-latin-italico.woff2") format("woff2");
+}
+/* Unbounded: a fonte de destaque, também servida pelo próprio site. */
+@font-face {
+  font-family: "Unbounded";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("/assets/fonts/unbounded-latin.woff2") format("woff2");
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
@@ -47,9 +73,14 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
 @media (max-width: 700px) { .banner { height: var(--altura-banner-movel); } }
 
 /* ---------- Barra preta ---------- */
+html { scroll-behavior: smooth; }
 .barra { background: var(--preto); color: var(--off-white); position: sticky; top: 0; z-index: 20; }
-.barra .larg { display: flex; align-items: center; justify-content: space-between; padding: var(--espaco-3) var(--espaco-4); }
-.marca { display: inline-flex; align-items: center; gap: var(--espaco-2); font-weight: var(--peso-forte); font-size: var(--texto-gg); text-decoration: none; }
+.barra .larg { display: flex; align-items: center; justify-content: space-between; height: var(--altura-barra); }
+.marca {
+  display: inline-flex; align-items: center; gap: var(--espaco-2);
+  font-family: var(--tipo-destaque); font-weight: var(--peso-forte);
+  font-size: var(--texto-gg); letter-spacing: .02em; text-decoration: none;
+}
 .marca svg { display: block; }
 .barra nav a {
   color: var(--off-white); text-decoration: none; font-size: var(--texto-m);
@@ -61,127 +92,194 @@ main { padding: var(--espaco-6) 0 var(--espaco-7); }
 
 /* ---------- Início ---------- */
 .chamada {
-  font-size: var(--texto-titulo); line-height: var(--entrelinha-apertada);
-  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-2); max-width: 20ch; min-height: 2.3em;
+  font-family: var(--tipo-destaque);
+  font-size: var(--texto-pergunta); line-height: 1.08;
+  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-3); max-width: 18ch; min-height: 2.4em;
 }
-.apoio { color: var(--cor-texto-suave); margin: 0 0 var(--espaco-6); max-width: 60ch; }
-.etapa { margin-bottom: var(--espaco-5); }
+.apoio { color: var(--cor-texto-suave); margin: 0 0 var(--espaco-6); max-width: 52ch; }
+.etapa { margin-bottom: var(--espaco-4); }
 .etapa h2 {
-  font-size: var(--texto-p); letter-spacing: .12em; color: var(--cor-texto-suave);
-  font-weight: var(--peso-normal); margin: 0 0 var(--espaco-3); text-transform: uppercase;
+  font-size: var(--texto-p); letter-spacing: .1em; color: var(--cor-texto-suave);
+  font-weight: var(--peso-normal); margin: var(--espaco-5) 0 var(--espaco-3); text-transform: uppercase;
 }
 .opcoes { display: flex; flex-wrap: wrap; gap: var(--espaco-2); }
+/* Pílula de público: pintada na cor dele desde o repouso, como no protótipo v5.
+   A cor vem de dados/vocabulario.json, aplicada em --cor pelo script. */
 .opcoes button {
-  font: inherit; font-size: var(--texto-m); background: transparent;
-  border: var(--borda-cartao) solid var(--cor-borda-forte); border-radius: var(--raio-pilula);
-  padding: var(--espaco-2) var(--espaco-4); cursor: pointer;
+  font: inherit; font-weight: var(--peso-forte);
+  background: var(--cor, var(--branco)); color: var(--cor-texto-pilula, var(--cor-texto));
+  border: var(--borda-grossa) solid var(--cor-borda-forte); border-radius: var(--raio-pilula);
+  padding: var(--espaco-3) var(--espaco-4); cursor: pointer; transition: transform .08s;
 }
-/* A cor de público vem de dados/vocabulario.json, aplicada em --cor pelo script. */
-.opcoes button[aria-pressed="true"] {
-  background: var(--cor, var(--preto)); color: var(--cor-texto-pilula, var(--off-white));
-  font-weight: var(--peso-forte);
-}
-.acao { display: flex; flex-wrap: wrap; gap: var(--espaco-3); align-items: center; margin-top: var(--espaco-2); }
+.opcoes button:hover { transform: translateY(-2px); }
+.opcoes button[aria-pressed="true"] { outline: var(--borda-grossa) solid var(--cor-borda-forte); outline-offset: 3px; }
+/* Pílula de tema: sem cor, e o preto marca a escolha. */
+.opcoes button.tema { background: transparent; }
+.opcoes button.tema[aria-pressed="true"] { background: var(--preto); color: var(--off-white); }
+.acao { display: flex; flex-wrap: wrap; gap: var(--espaco-4); align-items: center; margin-top: var(--espaco-5); }
 .caminhos {
-  font: inherit; font-weight: var(--peso-forte); letter-spacing: .08em;
-  background: var(--cor-acao); color: var(--cor-acao-texto);
-  border: var(--borda-cartao) solid var(--cor-borda-forte); border-radius: var(--raio-pilula);
-  padding: var(--espaco-3) var(--espaco-5); cursor: pointer;
+  font: inherit; font-weight: var(--peso-forte); font-size: var(--texto-m); letter-spacing: .06em;
+  background: var(--rosa); color: var(--sobre-rosa);
+  border: var(--borda-grossa) solid var(--cor-borda-forte); border-radius: var(--raio-pilula);
+  padding: var(--espaco-3) var(--espaco-4); cursor: pointer;
+  box-shadow: var(--sombra-dura); transition: transform .08s, box-shadow .08s;
 }
-.caminhos[disabled] { background: transparent; color: var(--cor-texto-suave); border-color: var(--cor-borda); cursor: not-allowed; }
+.caminhos:hover { transform: translate(-1px, -1px); box-shadow: var(--sombra-dura-g); }
+.caminhos[disabled] { opacity: .45; box-shadow: none; cursor: not-allowed; transform: none; }
 .escolha { color: var(--cor-texto-suave); font-size: var(--texto-m); }
 
-/* ---------- Cartão de resultado ---------- */
-.cartao {
-  background: var(--cor-superficie);
-  border: var(--borda-cartao) solid var(--cor-borda-forte);
-  border-radius: var(--raio-nenhum);
-  padding: var(--espaco-5);
-}
-.voltar {
-  font: inherit; background: transparent; border: 0; color: var(--cor-texto-suave);
-  cursor: pointer; padding: 0; margin-bottom: var(--espaco-4);
-  border-bottom: 1px solid var(--cor-texto-suave);
-}
-.cartao h2 { font-size: var(--texto-g); margin: var(--espaco-5) 0 var(--espaco-3); font-weight: var(--peso-forte); }
-.cartao h2:first-of-type { margin-top: var(--espaco-4); }
-.cartao p { margin: 0 0 var(--espaco-3); max-width: var(--largura-texto); }
+/* ---------- Página de caminho ---------- */
+main.caminho { padding: var(--espaco-5) 0 var(--espaco-7); }
 
-.idmarca { display: flex; flex-wrap: wrap; gap: var(--espaco-2); align-items: center; font-size: var(--texto-m); }
+.cabecalho-caminho { display: flex; flex-wrap: wrap; gap: var(--espaco-2); align-items: center; font-size: var(--texto-m); margin-bottom: var(--espaco-4); }
 .pilula {
-  border-radius: var(--raio-pilula); padding: var(--espaco-1) var(--espaco-4);
+  border-radius: var(--raio-pilula); padding: var(--espaco-1) var(--espaco-3);
   font-weight: var(--peso-forte);
   background: var(--cor, var(--preto)); color: var(--cor-texto-pilula, var(--off-white));
 }
 .pilula.tema { background: transparent; color: var(--cor-texto); border: var(--borda-cartao) solid var(--cor-borda-forte); }
 .meta { color: var(--cor-texto-suave); }
 
-/* Tags de pauta */
-.pautas { margin-top: var(--espaco-4); padding-top: var(--espaco-3); border-top: 1px solid var(--cor-borda); }
-.pautas .rot { font-size: var(--texto-m); color: var(--cor-texto-suave); margin-bottom: var(--espaco-2); }
-.pautas button {
-  font: inherit; font-size: var(--texto-m); background: transparent;
-  border: var(--borda-cartao) solid var(--cor-borda-forte); border-radius: var(--raio-pilula);
-  padding: var(--espaco-1) var(--espaco-4); margin: 0 var(--espaco-2) var(--espaco-2) 0; cursor: pointer;
+h1.titulo-caminho {
+  font-family: var(--tipo-destaque); font-size: var(--texto-h1); line-height: 1.12;
+  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-3);
 }
-.pautas button[aria-pressed="true"] { background: var(--cor-tag-ativa); color: var(--cor-tag-ativa-texto); font-weight: var(--peso-forte); }
-/* Tag cujo gatilho ainda não está no cache: existe no acervo, mas não há o que
-   mostrar ainda. Desabilitada, não escondida. */
-.pautas button[disabled] { opacity: 0.45; cursor: not-allowed; border-style: dashed; }
-.selo {
-  display: inline-block; font-size: var(--texto-m); background: var(--cor-tag-ativa);
-  color: var(--cor-tag-ativa-texto); border-radius: var(--raio-pilula);
-  padding: var(--espaco-1) var(--espaco-3); margin-left: var(--espaco-3);
-  vertical-align: middle; font-weight: var(--peso-normal);
+.linha-caminho { font-size: var(--texto-linha); color: var(--cor-texto-suave); margin: 0 0 var(--espaco-6); max-width: 60ch; }
+
+/* Cada bloco tem o título em caixa alta pequena, com uma régua que corre até
+   a borda — é o que separa os blocos sem precisar de cor. */
+section.bloco { margin: 0 0 var(--espaco-6); }
+.bloco h2 {
+  font-family: var(--tipo-destaque); font-weight: var(--peso-forte);
+  font-size: var(--texto-m); letter-spacing: .08em; text-transform: uppercase;
+  margin: 0 0 var(--espaco-4); display: flex; align-items: center; gap: var(--espaco-3);
 }
-/* Bloco cuja versão mudou com a tag selecionada. */
-.versionado { border-left: 5px solid var(--cor-tag-ativa); padding-left: var(--espaco-3); margin-left: calc(-1 * var(--espaco-3) - 5px); }
+.bloco h2::after { content: ""; flex: 1; height: 2px; background: var(--preto); }
 
-.duas { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espaco-5); }
-@media (max-width: 700px) { .duas { grid-template-columns: 1fr; } }
-.itens { display: grid; gap: var(--espaco-2); list-style: none; margin: 0; padding: 0; }
-.itens li { border-left: 5px solid var(--cor-ancorar); background: var(--cor-superficie-alt); padding: var(--espaco-3); }
-#bloco-evitar .itens li { border-left-color: var(--cor-evitar); }
+.grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--espaco-4); }
+@media (max-width: 760px) { .grade { grid-template-columns: 1fr; } }
 
-/* Quem é este público: os trechos de perfil são muitos (até 30 por público),
-   então vão em lista simples e em duas colunas — não é bloco de decisão como
-   ancorar e evitar, é leitura de fundo. */
-.lista-perfil { margin: 0; padding-left: var(--espaco-4); font-size: var(--texto-m); columns: 2; column-gap: var(--espaco-5); }
-.lista-perfil li { margin-bottom: var(--espaco-2); break-inside: avoid; }
-@media (max-width: 700px) { .lista-perfil { columns: 1; } }
+.card {
+  background: var(--cor-superficie); border: var(--borda-cartao) solid var(--cor-borda-forte);
+  border-radius: var(--raio-card); padding: var(--espaco-4) var(--espaco-4) var(--espaco-5);
+  box-shadow: var(--sombra-dura);
+}
+.card h3 { margin: 0 0 var(--espaco-3); font-size: var(--texto-card-titulo); line-height: 1.3; }
+.card p { margin: 0; font-size: var(--texto-card); line-height: 1.5; }
+.card p + p { margin-top: var(--espaco-3); }
+/* Card numérico: pintado na cor do público, com o texto que a regra de
+   contraste manda (--cor-texto-pilula, de dados/vocabulario.json). */
+.card.numero { background: var(--cor, var(--cor-superficie)); color: var(--cor-texto-pilula, var(--cor-texto)); }
+.card.numero .n { font-size: var(--texto-numero); font-weight: var(--peso-forte); line-height: 1; margin-bottom: var(--espaco-2); }
+/* "O que funciona" e "o que não funciona": fundo off-white como os demais
+   cards, borda e texto pretos. A cor da leitura vai para a sombra dura e para
+   o ícone à esquerda do texto — e os cantos são um pouco mais arredondados. */
+.card.funciona, .card.evita {
+  background: var(--cor-fundo); color: var(--cor-texto);
+  border-radius: var(--raio-card-icone);
+  display: grid; grid-template-columns: auto 1fr; gap: var(--espaco-3) var(--espaco-4);
+  align-items: start;
+}
+.card.funciona { box-shadow: var(--sombra-funciona); }
+.card.evita { box-shadow: var(--sombra-evita); }
+.card.funciona .icone, .card.evita .icone {
+  font-size: var(--tamanho-icone); line-height: 1; font-weight: var(--peso-forte);
+  grid-row: 1 / span 2; align-self: start;
+}
+.card.funciona .icone { color: var(--verde); }
+.card.evita .icone { color: var(--vermelho); }
+/* O título e o texto ficam na segunda coluna, ao lado do ícone. */
+.card.funciona h3, .card.evita h3 { margin: 0; grid-column: 2; }
+.card.funciona p, .card.evita p { grid-column: 2; margin: 0; }
+.card.largo { grid-column: span 2; }
+@media (max-width: 760px) { .card.largo { grid-column: auto; } }
+.card .fonte { font-size: var(--texto-p); color: var(--cor-texto-suave); margin-top: var(--espaco-3); }
+.card.numero .fonte { color: inherit; opacity: .8; }
 
+.prosa {
+  background: var(--cor-superficie); border: var(--borda-cartao) solid var(--cor-borda-forte);
+  border-radius: var(--raio-card); padding: var(--espaco-5);
+  box-shadow: var(--sombra-dura); margin-bottom: var(--espaco-4);
+}
+.prosa p { margin: 0 0 var(--espaco-3); font-size: var(--texto-prosa); line-height: 1.55; max-width: var(--largura-texto); }
+.prosa p:last-child { margin-bottom: 0; }
+
+.resumo { background: var(--preto); color: var(--off-white); border-radius: var(--raio-card); padding: var(--espaco-4) var(--espaco-5); }
+.resumo ul { margin: 0; padding-left: var(--espaco-4); }
+.resumo li { margin: var(--espaco-2) 0; font-size: var(--texto-prosa); }
+
+/* Lacuna: bege, tracejada, logo abaixo do bloco a que se refere. É conteúdo,
+   não erro — nunca cor de alarme. */
 .lacuna {
   background: var(--cor-aviso-fundo); border: var(--cor-aviso-borda);
-  padding: var(--espaco-3); color: var(--cor-aviso-texto); font-size: var(--texto-m);
+  border-radius: var(--raio-card);
+  padding: var(--espaco-3) var(--espaco-4); color: var(--cor-aviso-texto);
+  font-size: var(--texto-m); margin-top: var(--espaco-3);
 }
-.erro { background: var(--cor-erro-fundo); border: var(--borda-cartao) solid var(--cor-erro); padding: var(--espaco-3); }
 
-/* Hábitos de mídia: card semiótico + conteúdo */
-.midia { display: grid; grid-template-columns: 240px 1fr; gap: var(--espaco-4); align-items: start; }
-@media (max-width: 700px) { .midia { grid-template-columns: 1fr; } }
-.card-semio {
-  aspect-ratio: 4 / 5; border: var(--borda-tracejada); display: flex; align-items: center;
-  justify-content: center; text-align: center; padding: var(--espaco-3);
-  color: var(--cor-texto-suave); font-size: var(--texto-p);
+/* ---------- Explorar o acervo (desligado no beta) ---------- */
+.explorar {
+  background: var(--cor-superficie); border: var(--borda-grossa) solid var(--cor-borda-forte);
+  border-radius: var(--raio-card-g); padding: var(--espaco-4); box-shadow: var(--sombra-dura-g);
 }
-.card-semio img { width: 100%; height: 100%; object-fit: cover; }
+.explorar h2 { font-size: var(--texto-g); margin: 0 0 var(--espaco-1); text-transform: none; letter-spacing: 0; }
+.explorar h2::after { display: none; }
+.explorar .apoio-explorar { margin: 0 0 var(--espaco-3); color: var(--cor-texto-suave); font-size: var(--texto-m); }
+.atalhos { display: flex; flex-wrap: wrap; gap: var(--espaco-2); margin-bottom: var(--espaco-3); }
+.atalhos button {
+  font: inherit; font-size: var(--texto-m); border: var(--borda-cartao) solid var(--cor-borda-forte);
+  background: transparent; border-radius: var(--raio-pilula); padding: var(--espaco-1) var(--espaco-3);
+}
+.campo { display: flex; gap: var(--espaco-2); flex-wrap: wrap; }
+.campo input {
+  flex: 1; min-width: 12rem; font: inherit; padding: var(--espaco-3);
+  border: var(--borda-cartao) solid var(--cor-borda-forte); border-radius: var(--raio-campo);
+  background: var(--cor-fundo);
+}
+.campo button {
+  font: inherit; font-weight: var(--peso-forte); border: var(--borda-cartao) solid var(--cor-borda-forte);
+  background: var(--cor-acao-campo); color: var(--sobre-amarelo);
+  border-radius: var(--raio-campo); padding: 0 var(--espaco-4);
+}
+/* Desligado no beta: os controles aparecem, e não fazem nada. */
+.explorar[data-ligado="nao"] button, .explorar[data-ligado="nao"] input { opacity: .5; cursor: not-allowed; }
+.explorar .em-breve { font-size: var(--texto-m); color: var(--cor-texto-suave); margin: var(--espaco-3) 0 0; font-style: italic; }
 
-/* Adaptar formato */
-.formatos { display: flex; flex-wrap: wrap; gap: var(--espaco-2); align-items: center; margin: var(--espaco-2) 0 var(--espaco-3); }
-.formatos button {
-  font: inherit; background: transparent; border: var(--borda-cartao) solid var(--cor-borda-forte);
-  border-radius: var(--raio-pilula); padding: var(--espaco-2) var(--espaco-4); cursor: pointer;
+/* ---------- Barra de compartilhamento ---------- */
+.compartilhar {
+  position: fixed; right: var(--espaco-4); top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: var(--espaco-2); z-index: 10;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
 }
-.formatos button[aria-pressed="true"] { background: var(--cor); color: var(--preto); font-weight: var(--peso-forte); }
-#copiar { margin-left: auto; background: var(--cor-acao); color: var(--cor-acao-texto); }
-.saida {
-  background: var(--cor-superficie-alt); border: 1px solid var(--cor-borda);
-  padding: var(--espaco-4); white-space: pre-wrap; font-size: var(--texto-m);
-  min-height: var(--espaco-6);
+.compartilhar.visivel { opacity: 1; pointer-events: auto; }
+.compartilhar a, .compartilhar button {
+  width: var(--tamanho-share); height: var(--tamanho-share); border-radius: 50%;
+  border: var(--borda-cartao) solid var(--cor-borda-forte); background: var(--cor-superficie);
+  display: grid; place-items: center; cursor: pointer; color: var(--cor-texto);
+  text-decoration: none; box-shadow: var(--sombra-dura-p);
+  font: inherit; font-weight: var(--peso-forte); font-size: var(--texto-p);
 }
-.aviso-ia {
-  font-size: var(--texto-pp); line-height: 1.45; color: var(--cor-texto-suave);
-  margin-top: var(--espaco-3); max-width: var(--largura-texto); font-style: italic;
+.compartilhar a:hover, .compartilhar button:hover { background: var(--rosa); color: var(--sobre-rosa); }
+@media (max-width: 900px) {
+  .compartilhar { top: auto; bottom: var(--espaco-3); right: var(--espaco-3); left: var(--espaco-3); flex-direction: row; justify-content: center; transform: none; }
+}
+
+/* ---------- Aviso de privacidade ---------- */
+.aviso-privacidade {
+  position: fixed; left: var(--espaco-3); bottom: var(--espaco-3); max-width: 520px;
+  background: var(--cor-superficie); border: var(--borda-cartao) solid var(--cor-borda-forte);
+  border-radius: var(--raio-card); padding: var(--espaco-3);
+  display: flex; gap: var(--espaco-3); align-items: center; font-size: var(--texto-m);
+  box-shadow: var(--sombra-dura); z-index: 40;
+}
+.aviso-privacidade button {
+  font: inherit; font-weight: var(--peso-forte); border: var(--borda-cartao) solid var(--cor-borda-forte);
+  background: var(--cor-acao-campo); color: var(--sobre-amarelo);
+  border-radius: var(--raio-pilula); padding: var(--espaco-1) var(--espaco-3);
+  cursor: pointer; white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .aviso-privacidade { left: var(--espaco-2); right: var(--espaco-2); bottom: calc(var(--tamanho-share) + var(--espaco-5)); max-width: none; }
 }
 
 /* ---------- Páginas de texto (Sobre, Privacidade) ---------- */
@@ -219,7 +317,10 @@ footer ul { list-style: none; margin: 0; padding: 0; }
 footer li { margin-bottom: var(--espaco-3); }
 footer a { color: var(--off-white); text-decoration: none; border-bottom: 1px solid var(--off-white); padding-bottom: var(--espaco-1); }
 footer a:hover { border-bottom-color: var(--rosa); }
-.assinatura { font-size: var(--texto-gg); font-weight: var(--peso-forte); margin: 0 0 var(--espaco-2); }
+.assinatura {
+  font-family: var(--tipo-destaque); font-size: var(--texto-gg);
+  font-weight: var(--peso-forte); letter-spacing: .02em; margin: 0 0 var(--espaco-2);
+}
 .tagline { color: var(--cor-texto-fraco); margin: 0; max-width: 34ch; }
 .fixa-ia { color: var(--cor-texto-fraco); font-size: var(--texto-p); max-width: 60ch; margin-top: var(--espaco-3); font-style: italic; }
 .base {

@@ -2,6 +2,8 @@
 <html lang="pt-BR">
 <head>
 {{CABECA}}
+<script src="/vocabulario.js"></script>
+<script src="/configuracao.js"></script>
 </head>
 <body>
 {{CABECALHO}}
@@ -11,12 +13,12 @@
   <p class="apoio" id="apoio"></p>
 
   <div class="etapa">
-    <h2 id="titulo-publicos">Com quem você quer falar</h2>
+    <h2 id="titulo-publicos">Público</h2>
     <div class="opcoes" id="publicos" role="group" aria-labelledby="titulo-publicos"></div>
   </div>
 
   <div class="etapa">
-    <h2 id="titulo-temas">Sobre o quê</h2>
+    <h2 id="titulo-temas">Tema</h2>
     <div class="opcoes" id="temas" role="group" aria-labelledby="titulo-temas"></div>
   </div>
 
@@ -53,6 +55,9 @@
     for (const valor of valores) {
       const botao = document.createElement("button");
       botao.type = "button";
+      // Pílula de tema não tem cor: a classe é o que o estilo usa para
+      // distinguir as duas (protótipo v5).
+      if (!valor.cor) botao.className = "tema";
       // O banco guarda o identificador; a tela mostra o nome.
       botao.textContent = valor.nome;
       botao.dataset.id = valor.id;
@@ -83,9 +88,15 @@
         : "Escolha um público e um tema.";
   }
 
+  // O caminho é uma página estática, gerada no build a partir de conteudo/:
+  // /caminhos/<slug do público>/<slug do tema>. Os slugs vêm do vocabulário,
+  // fonte única, e as 20 páginas entram na sub-etapa 8B.
   document.getElementById("btn-caminhos").addEventListener("click", () => {
-    const parametros = new URLSearchParams({ publico: selecao.publico, tema: selecao.tema });
-    window.location.href = `/resultado?${parametros}`;
+    const slugDe = (lista, id) => (lista.find((v) => v.id === id) ?? {}).slug;
+    const publico = slugDe(PUBLICOS, selecao.publico);
+    const tema = slugDe(TEMAS, selecao.tema);
+    if (!publico || !tema) return;
+    window.location.href = `/caminhos/${publico}/${tema}`;
   });
 
   // Pergunta em destaque: a primeira da configuração é a padrão; as demais

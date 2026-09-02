@@ -1,0 +1,69 @@
+<!-- Barra de compartilhamento: URL de compartilhamento simples, sem script de
+     terceiro, sem contador e sem pixel. O endereço a compartilhar é o da
+     própria página, lido no navegador — assim não existe domínio escrito no
+     build, e o link vale em produção, em pré-visualização e em desenvolvimento.
+     A barra aparece quando o banner e a barra de menu saíram da tela, e some
+     quando o rodapé começa a entrar. -->
+<aside class="compartilhar" id="compartilhar" aria-label="Compartilhar esta página">
+  <a data-rede="whatsapp" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no WhatsApp" aria-label="Compartilhar no WhatsApp">W</a>
+  <a data-rede="x" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no X" aria-label="Compartilhar no X">X</a>
+  <a data-rede="facebook" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no Facebook" aria-label="Compartilhar no Facebook">f</a>
+  <a data-rede="linkedin" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no LinkedIn" aria-label="Compartilhar no LinkedIn">in</a>
+  <a data-rede="bluesky" href="#" target="_blank" rel="noopener noreferrer" title="Compartilhar no Bluesky" aria-label="Compartilhar no Bluesky">B</a>
+  <button type="button" id="copiar-link" title="Copiar link" aria-label="Copiar link desta página">⧉</button>
+</aside>
+<script>
+  (function () {
+    var barra = document.getElementById("compartilhar");
+    var endereco = window.location.href.split("#")[0];
+    var titulo = document.title.split(" · ")[0];
+    var u = encodeURIComponent(endereco);
+    var t = encodeURIComponent(titulo + " — DECISIVAS");
+    var enderecos = {
+      whatsapp: "https://api.whatsapp.com/send?text=" + t + "%20" + u,
+      x: "https://twitter.com/intent/tweet?text=" + t + "&url=" + u,
+      facebook: "https://www.facebook.com/sharer/sharer.php?u=" + u,
+      linkedin: "https://www.linkedin.com/sharing/share-offsite/?url=" + u,
+      bluesky: "https://bsky.app/intent/compose?text=" + t + "%20" + u,
+    };
+    barra.querySelectorAll("[data-rede]").forEach(function (a) {
+      a.href = enderecos[a.dataset.rede];
+    });
+
+    // A mesma folga nas duas pontas: a barra só aparece depois que o banner
+    // saiu por cima, e sai de cena assim que o rodapé entra por baixo.
+    var folga = 60;
+    var alturaBarraDeMenu = 60;
+    // O rodapé é procurado a cada medição, e não uma vez só: este script vem
+    // ANTES do rodapé no HTML, então guardar a referência aqui daria null e a
+    // barra ficaria visível por cima do rodapé.
+    function posiciona() {
+      var banner = document.getElementById("banner");
+      var rodape = document.querySelector("footer");
+      var altura = barra.offsetHeight;
+      var vh = window.innerHeight;
+      var fimDoBanner = banner ? banner.getBoundingClientRect().bottom : 0;
+      var inicioDoRodape = rodape ? rodape.getBoundingClientRect().top : vh * 2;
+      barra.classList.toggle("visivel", fimDoBanner + folga < 0 && inicioDoRodape - folga > vh);
+      barra.style.top =
+        window.innerWidth > 900 ? Math.max(vh / 2, alturaBarraDeMenu + 24 + altura / 2) + "px" : "";
+    }
+    window.addEventListener("scroll", posiciona, { passive: true });
+    window.addEventListener("resize", posiciona);
+    document.addEventListener("DOMContentLoaded", posiciona);
+    posiciona();
+
+    document.getElementById("copiar-link").addEventListener("click", function () {
+      var botao = this;
+      function pronto() {
+        botao.textContent = "✓";
+        setTimeout(function () { botao.textContent = "⧉"; }, 1200);
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(endereco).then(pronto, function () {});
+      } else {
+        pronto();
+      }
+    });
+  })();
+</script>

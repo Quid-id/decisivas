@@ -1,7 +1,7 @@
 // DECISIVAS — carga do acervo no D1 (etapa 3).
 //
 // Lê dados/DECISIVAS_acervo_v5.xlsx, valida cada linha contra as restrições da
-// migração 003, e grava os comandos em blocos .sql numerados em carga-003/,
+// migração 003, e grava os comandos em blocos .sql numerados em carga-acervo/,
 // prontos para colar no console do painel do Cloudflare.
 //
 // Substitui o antigo scripts/csv-para-seed.js, que lia CSV e escrevia para o
@@ -9,11 +9,11 @@
 //
 // Uso:
 //   npm install                       # uma vez, traz o exceljs
-//   node scripts/carga-acervo.js      # valida, relata e grava carga-003/
+//   node scripts/carga-acervo.js      # valida, relata e grava carga-acervo/
 //
 // Opções por variável de ambiente:
 //   ACERVO=caminho.xlsx     outra planilha (padrão: dados/DECISIVAS_acervo_v5.xlsx)
-//   SAIDA=pasta             outra pasta de saída (padrão: carga-003)
+//   SAIDA=pasta             outra pasta de saída (padrão: carga-acervo)
 //   KB_POR_BLOCO=90         alvo de tamanho por comando INSERT
 //
 // Por que blocos de 90 KB: o D1 recusa comando acima de 96 KiB com
@@ -23,8 +23,8 @@
 // juntar mais depende de um limite do console que não conseguimos medir.
 //
 // A carga é idempotente: o bloco 1 limpa a tabela antes dos INSERTs, então
-// rodar tudo de novo substitui, não duplica. Ele também limpa o cache, porque
-// o acervo novo invalida as páginas já geradas.
+// rodar tudo de novo substitui, não duplica. Não há mais cache de páginas a
+// invalidar: as tabelas saíram na migração 004, e as páginas são estáticas.
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -34,7 +34,9 @@ const VOCABULARIO = require("../dados/vocabulario.json");
 
 const ACERVO = process.env.ACERVO ?? "dados/DECISIVAS_acervo_v5.xlsx";
 const PAUTAS = "dados/DECISIVAS_pautas_de_para_v1.xlsx";
-const SAIDA = process.env.SAIDA ?? "carga-003";
+// A pasta da carga aplicada em 02/09/2026 foi para arquivo/carga-003/; uma
+// carga nova escreve aqui, com o nome do script.
+const SAIDA = process.env.SAIDA ?? "carga-acervo";
 const KB_POR_BLOCO = Number(process.env.KB_POR_BLOCO ?? 90);
 
 // As nove colunas da migração 003, na ordem do schema.
@@ -207,17 +209,16 @@ function blocos(linhas) {
   if (atual) inserts.push({ sql: atual.sql + ";", n: atual.n });
 
   const limpeza =
-    "DELETE FROM trechos;\nDELETE FROM paginas;\nDELETE FROM formatos;";
+    "DELETE FROM trechos;";
   const verificacao =
     "SELECT (SELECT COUNT(*) FROM trechos) AS trechos, " +
     "(SELECT COUNT(DISTINCT publico || '|' || macronarrativa) FROM trechos WHERE tipo <> 'perfil') AS cruzamentos, " +
     "(SELECT COUNT(*) FROM trechos WHERE tipo = 'perfil') AS perfil, " +
     "(SELECT COUNT(*) FROM trechos WHERE tipo = 'achado' AND forca = 'forte') AS achados_forte, " +
-    "(SELECT COUNT(DISTINCT pauta) FROM trechos WHERE pauta IS NOT NULL) AS pautas_usadas, " +
-    "(SELECT COUNT(*) FROM paginas) AS paginas, (SELECT COUNT(*) FROM formatos) AS formatos;";
+    "(SELECT COUNT(DISTINCT pauta) FROM trechos WHERE pauta IS NOT NULL) AS pautas_usadas;";
 
   return [
-    { nome: "limpeza", descricao: "apaga o acervo anterior e invalida o cache", sql: limpeza },
+    { nome: "limpeza", descricao: "apaga o acervo anterior", sql: limpeza },
     ...inserts.map((i, k) => ({
       nome: `insert-${String(k + 1).padStart(2, "0")}`,
       descricao: `${i.n} trechos`,
@@ -290,8 +291,8 @@ novo a partir dele — nunca colar um bloco do meio isolado.
 Com wrangler autenticado, o equivalente é:
   for f in ${SAIDA}/*.sql; do npx wrangler d1 execute decisivas --remote --file="$f"; done
 
-Depois da carga: atualize dados/versao-acervo.txt e ACERVO_ATUALIZADO_EM no
-wrangler.toml, faça o deploy, e regenere o cache (docs/06-operacao.md).`);
+Depois da carga: atualize dados/versao-acervo.txt no mesmo commit e faça o
+deploy (docs/06-operacao.md).`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

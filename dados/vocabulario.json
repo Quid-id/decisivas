@@ -1,5 +1,5 @@
 {
-  "_leia_me": "Fonte única dos vocabulários fechados do DECISIVAS. Lido pelo Worker (import), pelos scripts (require) e pelo build, que gera public/vocabulario.js para o front. Nenhuma outra cópia destas listas pode existir no repositório. Em cada público, `cor` é a cor da pílula e `texto` é a cor do texto por cima, pela regra de contraste da identidade; as duas têm de ser valores da paleta de brand/tokens.css, e o build confere. `slug` é o nome curto usado nos arquivos de asset (card semiótico), sem acento nem espaço.",
+  "_leia_me": "Fonte única dos vocabulários fechados do DECISIVAS. Lido pelo Worker (import), pelos scripts (require) e pelo build, que gera public/vocabulario.js para o front. Nenhuma outra cópia destas listas pode existir no repositório. Em cada público, `cor` é a cor da pílula e `texto` é a cor do texto por cima, pela regra de contraste da identidade (o verde do 70+ passou a levar texto preto na revisão de identidade que acompanha a etapa 8B: com off-white a razão era 2,19:1); as duas têm de ser valores da paleta de brand/tokens.css, e o build confere. `slug` é o nome curto usado nos arquivos de asset (card semiótico), sem acento nem espaço. O identificador `60+` é o do banco e muda para `70+` na migração 005, depois do beta; na tela o público é 70+, e `slug` é o que aparece na URL de cada caminho e no nome dos assets.",
   "publicos": [
     {
       "id": "jovens",
@@ -10,46 +10,51 @@
     },
     {
       "id": "60+",
-      "nome": "60+",
+      "nome": "70+",
       "cor": "#16c172",
-      "texto": "#f7f7ed",
-      "slug": "60-mais"
+      "texto": "#000000",
+      "slug": "70-mais"
     },
     {
       "id": "mulheres beneficiárias",
       "nome": "Mulheres beneficiárias",
       "cor": "#ffb23d",
       "texto": "#000000",
-      "slug": "beneficiarias"
+      "slug": "mulheres-beneficiarias"
     },
     {
       "id": "mulheres de 2 a 5 salários mínimos",
       "nome": "Mulheres de 2 a 5 SM",
       "cor": "#7e2dff",
       "texto": "#f7f7ed",
-      "slug": "2-a-5-sm"
+      "slug": "mulheres-2-a-5-sm"
     }
   ],
   "macronarrativas": [
     {
       "id": "dinheiro no bolso",
-      "nome": "Dinheiro no bolso"
+      "nome": "Dinheiro no bolso",
+      "slug": "dinheiro-no-bolso"
     },
     {
       "id": "trabalho digno",
-      "nome": "Trabalho digno"
+      "nome": "Trabalho digno",
+      "slug": "trabalho-digno"
     },
     {
       "id": "família e cuidado",
-      "nome": "Família e cuidado"
+      "nome": "Família e cuidado",
+      "slug": "familia-e-cuidado"
     },
     {
       "id": "brasil e pertencimento",
-      "nome": "Brasil e pertencimento"
+      "nome": "Brasil e pertencimento",
+      "slug": "brasil-e-pertencimento"
     },
     {
       "id": "participação e voz",
-      "nome": "Participação e voz"
+      "nome": "Participação e voz",
+      "slug": "participacao-e-voz"
     }
   ],
   "tipos": [

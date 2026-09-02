@@ -1,9 +1,13 @@
 -- DECISIVAS — schema do banco D1
 -- D1 é SQLite gerenciado pelo Cloudflare. Este arquivo descreve o estado do
--- banco DEPOIS da migração 003 (etapa 2). Aplicar em banco vazio produz
--- exatamente o mesmo schema que as migrações 001 + 002 + 003 produzem num
--- banco existente. As listas fechadas abaixo espelham dados/vocabulario.json,
--- que é a fonte única lida pelo Worker, pelos scripts e pelo build.
+-- banco DEPOIS da migração 004 (etapa 8A). Aplicar em banco vazio produz
+-- exatamente o mesmo schema que as migrações 001 a 004 produzem num banco
+-- existente. As listas fechadas abaixo espelham dados/vocabulario.json, que é
+-- a fonte única lida pelos scripts e pelo build.
+--
+-- Saíram na migração 004, com a geração de página por modelo: as tabelas de
+-- cache `paginas` e `formatos`, e a `trechos_ate_002`, que preservava as 273
+-- linhas da amostra anterior à carga do acervo v5.
 --
 -- Histórico das migrações e comandos para o remoto: docs/06-operacao.md.
 
@@ -97,7 +101,10 @@ CREATE TABLE trechos (
 CREATE INDEX idx_trechos_match ON trechos (publico, macronarrativa);
 CREATE INDEX idx_trechos_midia ON trechos (publico, pauta);
 
--- Registro de tudo que o agente entregou. Sem IP, sem identidade.
+-- Registro do que a plataforma entregou. Sem IP, sem identidade.
+-- Depois da etapa 8A nada escreve aqui: as páginas são estáticas. A tabela
+-- fica para o "Explorar o acervo" (etapa 10), que volta a registrar pergunta
+-- e resposta, sem identificar quem perguntou.
 CREATE TABLE registros (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   criado_em     TEXT NOT NULL DEFAULT (datetime('now')),
@@ -111,41 +118,10 @@ CREATE TABLE registros (
   resposta      TEXT NOT NULL               -- o texto integral entregue
 );
 
--- Cache nível 1: páginas geradas por /api/match, uma por recorte.
--- A chave inclui a pauta: '' é a visão geral do cruzamento, e um nome de pauta
--- é o recorte daquela tag (etapa 4). ids_acervo guarda o conjunto ORDENADO de
--- ids do recorte no momento da geração; conjunto diferente invalida a entrada,
--- e a leitura também compara o modelo que gerou.
-CREATE TABLE paginas (
-  publico        TEXT NOT NULL,
-  macronarrativa TEXT NOT NULL,
-  pauta          TEXT NOT NULL DEFAULT '',
-  resposta       TEXT NOT NULL,             -- a página completa, em JSON
-  ids_trechos    TEXT NOT NULL,             -- ids usados na página, separados por vírgula
-  ids_acervo     TEXT NOT NULL,             -- conjunto ordenado de ids do recorte (validade)
-  modelo         TEXT,                      -- modelo que gerou (nulo em página só de lacunas)
-  gerado_em      TEXT NOT NULL DEFAULT (datetime('now')),
-  PRIMARY KEY (publico, macronarrativa, pauta)
-);
-
--- Cache nível 1 das saídas de /api/formato. Mesma regra de validade.
-CREATE TABLE formatos (
-  publico        TEXT NOT NULL,
-  macronarrativa TEXT NOT NULL,
-  formato        TEXT NOT NULL,             -- whatsapp, carrossel ou roteiro
-  pauta          TEXT NOT NULL DEFAULT '',
-  resposta       TEXT NOT NULL,             -- a orientação completa, em JSON
-  ids_trechos    TEXT NOT NULL,
-  ids_acervo     TEXT NOT NULL,
-  modelo         TEXT,
-  gerado_em      TEXT NOT NULL DEFAULT (datetime('now')),
-  PRIMARY KEY (publico, macronarrativa, formato, pauta)
-);
-
 -- ---------------------------------------------------------------------------
--- SEM USO nesta versão, mantidas para não perder o que já existe.
--- Os links da página foram adiados para depois do beta (CONTEXTO v2, seção 5),
--- então nada no código lê estas duas tabelas. Não remover sem migração própria.
+-- SEM USO, mantidas para não perder o que já existe. Nada no código lê estas
+-- duas tabelas: não há link na página (CONTEXTO v3). Não remover sem migração
+-- própria.
 -- ---------------------------------------------------------------------------
 
 -- Um registro por estudo. Espelhava a aba Cabeçalhos da planilha.

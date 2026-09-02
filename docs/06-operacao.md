@@ -1,8 +1,7 @@
 # Operação
 
-Passo a passo das tarefas de operação do DECISIVAS. Este arquivo começa
-pelo banco (tarefa 3 de docs/05); as demais seções serão completadas na
-tarefa 8.
+Passo a passo das tarefas de operação do DECISIVAS: o banco, as migrações e o
+build. Atualizado na etapa 8A, quando a geração de página por modelo saiu.
 
 Todos os comandos rodam na raiz do repositório. O `wrangler` (a ferramenta
 de linha de comando do Cloudflare) já está instalado como dependência do
@@ -51,7 +50,7 @@ node scripts/carga-acervo.js
 O script lê `dados/DECISIVAS_acervo_v5.xlsx` (aba `acervo`) e
 `dados/DECISIVAS_pautas_de_para_v1.xlsx` (aba `pautas_de_para`, só para
 conferir a chave estrangeira), valida cada linha contra as **restrições da
-migração 003** e grava os blocos em `carga-003/`. O que é verificado, com o
+migração 003** e grava os blocos em `carga-acervo/`. O que é verificado, com o
 número da linha da planilha em cada recusa:
 
 - `id` presente e único no arquivo;
@@ -67,14 +66,16 @@ existe carga parcial. Sem problema nenhum, o script imprime o relatório de
 contagens (por público, tema, tipo e força; perfil por público; cruzamentos
 cobertos; pautas usadas) e escreve os arquivos.
 
-O primeiro bloco (`01-limpeza.sql`) apaga `trechos`, `paginas` e `formatos`:
-a carga **substitui** o acervo por inteiro, e página em cache da carga
-anterior não sobrevive a ela. O último (`09-verificacao.sql`) é o `SELECT` de
+O primeiro bloco (`01-limpeza.sql`) apaga `trechos`: a carga **substitui** o
+acervo por inteiro. O último (`09-verificacao.sql`) é o `SELECT` de
 conferência; para o acervo v5 ele devolve:
 
 ```
-trechos 2405 | cruzamentos 20 | perfil 91 | achados_forte 94 | pautas_usadas 59 | paginas 0 | formatos 0
+trechos 2405 | cruzamentos 20 | perfil 91 | achados_forte 94 | pautas_usadas 59
 ```
+
+(Até a etapa 8A o bloco 1 apagava também `paginas` e `formatos`, e a
+verificação contava as duas. As tabelas saíram na migração 004.)
 
 ### Tamanho dos blocos, e por que são nove
 
@@ -93,10 +94,10 @@ Com terminal:
 
 ```sh
 # local
-for f in carga-003/*.sql; do npx wrangler d1 execute decisivas --local --file="$f"; done
+for f in carga-acervo/*.sql; do npx wrangler d1 execute decisivas --local --file="$f"; done
 
 # remoto (carga oficial — confira o relatório do script antes)
-for f in carga-003/*.sql; do npx wrangler d1 execute decisivas --remote --file="$f"; done
+for f in carga-acervo/*.sql; do npx wrangler d1 execute decisivas --remote --file="$f"; done
 ```
 
 Sem terminal, pelo console do painel:
@@ -121,14 +122,15 @@ Nunca corte no meio de um comando.
 
 | Acervo | Blocos | Linhas | Remoto |
 |---|---|---|---|
-| v5 (`dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`) | `carga-003/01` a `09` | 2.405 trechos | **Aplicada em 02/09/2026, pelo console.** O bloco 09 devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59, paginas 0, formatos 0` — igual ao esperado e ao que os nove blocos já tinham devolvido na réplica local do schema pós-003 |
+| v5 (`dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`) | `arquivo/carga-003/01` a `09` | 2.405 trechos | **Aplicada em 02/09/2026, pelo console.** O bloco 09 devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59, paginas 0, formatos 0` — igual ao esperado e ao que os nove blocos já tinham devolvido na réplica local do schema pós-003 |
 
 A linha só vira "aplicada" com a saída do bloco `09` do remoto em mãos, como no
 registro de migrações — a regra de quem aplica é a mesma, mais abaixo.
 
-Com o acervo v5 no ar, a migração 004 (remover `trechos_ate_002`) fica liberada:
-as 273 linhas da amostra antiga não são mais a única cópia de nada, e nenhuma
-consulta do código as alcança.
+Com o acervo v5 no ar, a migração 004 ficou liberada: as 273 linhas da amostra
+antiga não são mais a única cópia de nada, e nenhuma consulta do código as
+alcança. Ela está escrita em `migracao-004.sql` e ainda não foi aplicada — ver
+"Migração 004", abaixo.
 
 ### Conferir a carga
 
@@ -138,27 +140,16 @@ npx wrangler d1 execute decisivas --local --command="SELECT COUNT(*) AS trechos 
 
 (Troque `--local` por `--remote` para conferir a produção.)
 
-### Depois de CADA carga: versão do acervo e regeneração do cache
+### Depois de CADA carga: versão do acervo
 
-A carga muda o acervo, e três coisas dependem dele:
+**Atualize `dados/versao-acervo.txt`** com uma marca nova (ex.:
+`2026-09-15-carga-oficial-1`) **no mesmo commit dos blocos de carga**. É o que
+diz, no repositório, qual acervo está no banco.
 
-1. **Atualize `dados/versao-acervo.txt`** com uma marca nova (ex.:
-   `2026-09-15-carga-oficial-1`) **no mesmo commit dos blocos de carga**. Essa
-   marca vai para o site no deploy e é o que faz o navegador das pessoas
-   descartar páginas guardadas da carga anterior.
-2. **Atualize `ACERVO_ATUALIZADO_EM`** em `[vars]` do `wrangler.toml`, no
-   mesmo commit, com a data em `dd/mm/aaaa`. É o que a página mostra na
-   identificação — a marca do item 1 é técnica, esta é a que a pessoa lê. As
-   duas mudam juntas, sempre; separadas, a tela diz uma data e o cache
-   raciocina com outra.
-3. **Regenere o cache de páginas** (obrigatório — ver seção Cache abaixo):
-
-```sh
-BASE_URL=https://SEU-DOMINIO node scripts/gera-cache.js
-```
-
-Sem esse passo nada quebra — o cache invalida sozinho —, mas a primeira
-pessoa de cada cruzamento paga o tempo de geração.
+Nada mais depende da carga desde a etapa 8A: as páginas são texto fixo de
+`conteudo/`, não saem do acervo em tempo de acesso, e não há cache a regenerar.
+O acervo sustenta a escrita e a revisão das páginas, e volta a ser lido em tempo
+real quando o "Explorar o acervo" for ligado (etapa 10).
 
 ## Migrações de banco
 
@@ -235,9 +226,9 @@ linha só vira "aplicada" com o resultado da verificação em mãos.
 | 001 | schema inicial | Tabelas `documentos`, `trechos`, `recursos`, `registros`; índices `idx_trechos_match`, `idx_trechos_midia`, `idx_recursos_match` | Aplicada em 08/2026, pelo console |
 | 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Aplicada em 02/09/2026, pelo console.** Verificação devolveu `1, 1, 1`. Foi a ausência desta migração que causou `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
 | 003 | etapa 2 | Tabela `pautas` com as 59 pautas; tabela `trechos` recriada com as nove colunas, a taxonomia final e as restrições (a antiga vira `trechos_ate_002`, preservada); `paginas` e `formatos` recriadas com `pauta` na chave; índices recriados | **Aplicada em 02/09/2026, pelo console.** Bloco 15 devolveu `59, 9, 0, 1, 1, 2` e `preservados: 273`, igual ao esperado; o INSERT de teste falhou com `CHECK constraint failed` em `publico`. O bloco 3 não foi executado — o bloco 4 rodou antes —, sem consequência: com `CACHE_ENABLED="false"` o Worker nunca gravou nas tabelas que a 002 acabara de criar, então estavam vazias, e o bloco 15 confirmou as duas recriadas com `pauta` na chave |
-| 004 | depois da etapa 3 | Remover `trechos_ate_002`, quando a carga nova estiver no ar e conferida | Não escrita ainda |
+| 004 | etapa 8A | Remove `trechos_ate_002` (as 273 linhas da amostra anterior, já substituídas pela carga v5) e as tabelas de cache `paginas` e `formatos`, que saíram com a geração de página por modelo | **Aplicada em 02/09/2026, pelo console.** Bloco 1 devolveu `trechos 2405, antigos 273, pautas 59, paginas 12, formatos 1`; bloco 5 devolveu `0, 2405, 59`, igual ao esperado. As 12 páginas e o formato descartados eram o que o cache tinha guardado entre o deploy da etapa 7 e a decisão de páginas fixas — conteúdo gerado por modelo, que não vai ao ar |
 
-A migração 002 foi a **etapa 0** de `docs/DECISIVAS_especificacao_claude_code.md`:
+A migração 002 foi a **etapa 0** da especificação em etapas versão 2 (hoje em `arquivo/DECISIVAS_especificacao_claude_code.md`):
 o código publicado já a esperava, e ela não mudou nenhuma linha de código.
 
 O que muda em produção com ela aplicada: a gravação em `registros` volta a
@@ -403,210 +394,71 @@ INSERT INTO trechos (id, texto, publico, macronarrativa, pauta, tipo, forca, lin
 
 Se ele for aceito, a tabela nova não entrou no lugar: refaça do bloco 8.
 
+### Migração 004 (etapa 8A): sai o cache, sai a amostra antiga
+
+**Os comandos estão em `migracao-004.sql`, na raiz do repositório.** Copie de
+lá, um por bloco, na ordem — não desta página e nunca de uma conversa. São
+cinco blocos: uma conferência, três `DROP` e a verificação.
+
+**Bloco 1** — Conferência que protege os três `DROP`, e não se pula. Precisa
+devolver `2405`, `273`, `59` e as duas contagens de cache (quaisquer valores):
+com `trechos` em 2.405 e as 59 pautas no lugar, a amostra antiga já foi
+substituída e pode sair; se `trechos` vier diferente, **pare**, porque
+`trechos_ate_002` seria a última cópia de algo.
+
+**Blocos 2, 3 e 4** — `DROP TABLE trechos_ate_002;`, `DROP TABLE paginas;` e
+`DROP TABLE formatos;`, um por bloco. Nada além dessas três tabelas é tocado:
+`trechos`, `pautas`, `registros`, `documentos` e `recursos` ficam como estão.
+
+**Bloco 5** — Verificação. Precisa devolver exatamente:
+
+```
+tabelas_que_deviam_ter_saido 0 | trechos 2405 | pautas 59
+```
+
+Repetir um `DROP` já aplicado falha com `no such table: X: SQLITE_ERROR` —
+sinal de que aquela parte já estava feita, não de erro novo. Siga para o bloco
+seguinte.
+
+Depois da verificação, `docs/02-schema.sql` descreve o banco resultante: cinco
+tabelas (`pautas`, `trechos`, `registros`, `documentos`, `recursos`) e três
+índices. O arquivo já está nesse estado, conferido aplicando-o num SQLite
+vazio.
+
+**Aplicada em 02/09/2026, pelo console.** O bloco 1 no remoto devolveu
+`trechos 2405, antigos 273, pautas 59, paginas 12, formatos 1` — a réplica
+local tinha 184 e 60 no lugar dos dois últimos, e a diferença é só o que cada
+uma tinha em cache: no remoto, as 12 páginas e o formato gerados entre o deploy
+da etapa 7 e a decisão de páginas fixas. O bloco 5 devolveu `0, 2405, 59`.
+
 ### O que o código faz quando o schema está atrasado
 
 Desde a correção que acompanha esta seção, schema atrasado **degrada em vez de
 derrubar** — mas continua sendo defeito a corrigir, não estado aceitável:
 
-- Falha ao ler ou gravar o cache: a rota gera a página normalmente e o log traz
-  `cache de páginas indisponível, gerando normalmente: ...`.
-- Falha ao gravar em `registros`: a pessoa é atendida e o log traz
-  `FALHA AO GRAVAR REGISTRO — ... | registro: {...}`, com o conteúdo íntegro,
-  para o registro não se perder até a migração ser aplicada.
+Depois da etapa 8A nenhuma rota lê ou escreve no banco: as páginas são
+estáticas, e schema atrasado não alcança quem usa o site. A degradação
+descrita aqui valia para as rotas de geração, e volta a valer quando o
+"Explorar o acervo" (etapa 10) trouxer consulta e registro de novo.
 
-Qualquer uma dessas duas linhas no log significa migração pendente. Elas são a
-condição de alerta a procurar depois de todo deploy.
+## Cache de páginas geradas — removido na etapa 8A
 
-## Cache de páginas geradas
+As páginas deixaram de ser geradas por modelo no acesso: as 20 são texto fixo,
+escrito pela equipe e montado no build (`docs/CONTEXTO_DECISIVAS.md` v3). Com
+isso saiu tudo o que sustentava o cache:
 
-Dois níveis, ambos desligáveis pela variável `CACHE_ENABLED=false` (em
-`[vars]` no `wrangler.toml`; localmente em `.dev.vars` — reinicie o
-`wrangler dev` ao mudar, a troca a quente nem sempre é aplicada).
+- as tabelas `paginas` e `formatos`, na **migração 004**;
+- a variável `CACHE_ENABLED`, do `wrangler.toml`;
+- o cache do navegador, que vivia na tela de resultado;
+- `scripts/gera-cache.js` e `scripts/varre-termos.js`, em `arquivo/`.
 
-**Nível 1 — servidor (tabelas `paginas` e `formatos` no D1).** As duas rotas
-consultam o cache antes de qualquer chamada ao modelo; havendo entrada
-válida, devolvem-na e gravam em `registros` com `origem = 'cache'`. O
-mecanismo de validade é a **comparação literal do conjunto ordenado de ids
-de trechos do recorte**: o conjunto é guardado na coluna `ids_acervo` no
-momento da geração e comparado com o conjunto atual do banco a cada consulta.
+O lote de geração da etapa 7 foi **cancelado** pela mesma decisão, e nunca
+rodou em produção. A descrição de como o cache funcionava está no histórico do
+Git (este arquivo, antes da etapa 8A) e no `arquivo/LEIA-ME.md`.
 
-A unidade do cache é o **recorte**, não o cruzamento (etapa 4). Cada
-cruzamento tem uma linha do recorte geral, com `pauta` vazia, e uma linha por
-tag de pauta, com o nome da pauta — a chave primária das duas tabelas é
-`(publico, macronarrativa, pauta)`. Cada linha guarda a validade do seu
-próprio recorte: o geral é o cruzamento inteiro mais os trechos de `perfil` do
-público; o de uma pauta é a pauta mais a `comunicação e linguagem`. Mexer numa
-pauta invalida aquela tag e o recorte geral, e deixa as outras tags de pé —
-dá para conferir isso no `registros`, que registra `origem` por recorte, com a
-pauta dentro do JSON da resposta. Escolhemos comparação do conjunto inteiro,
-não hash nem data: não existe colisão possível, e a string guardada é
-auditável direto no banco (`SELECT ids_acervo FROM paginas WHERE ...`).
-Qualquer linha incluída, removida ou com id trocado invalida a entrada na
-hora, sem passo manual.
+Página estática não tem cache a invalidar: mudou o texto em `conteudo/`, o
+build refaz o HTML e o deploy publica.
 
-Atenção: a tabela `recursos` não entra na validade (a regra cobre trechos).
-Se só os recursos mudarem, rode a regeneração do cache — por isso o passo é
-obrigatório após qualquer carga.
-
-A validade tem **dois critérios**, ambos verificados na leitura:
-
-1. o conjunto de ids de trechos do recorte, como descrito acima;
-2. o **modelo** que gerou a entrada, comparado com o `MODEL_ID` atual — página
-   feita por outro modelo não é reutilizada. Páginas só de lacuna têm `modelo`
-   nulo (nenhum modelo foi chamado) e seguem válidas em qualquer modelo.
-
-Limitação conhecida: mudanças de **prompt** não entram na validade. Editar
-`prompts/*.txt`, uma planilha de regra ou `docs/08-regras-de-formato.md` não
-invalida nada — nesses deploys, esvazie o cache à mão (ver "Regenerar e
-publicar o cache", acima).
-
-**A resposta não espera as tags.** A rota devolve a página do recorte geral e
-só inclui os gatilhos de pauta que já estão no cache; tag sem gatilho vem com
-`disponivel: false` e a tela mostra o botão desabilitado. O que falta é gerado
-depois de responder, em `waitUntil`, e aparece na requisição seguinte. Com o
-cache desligado nada é guardado, então nem se gera: as tags ficam todas
-indisponíveis e quem preenche é o lote.
-
-**Nível 2 — navegador (localStorage).** A página de resultado guarda as
-páginas já vistas com a marca de versão de `dados/versao-acervo.txt`
-(publicada no site no build como `/versao-acervo.js`). Versão igual: exibe
-imediatamente, sem chamar o servidor. Versão diferente: descarta e busca.
-Guarda somente conteúdo de página (nunca dado da pessoa), com teto de 12
-páginas — estourou, a mais antiga sai.
-
-O interruptor alcança este nível **sem custo de requisição**: o build publica
-`window.CACHE_HABILITADO` em `/versao-acervo.js`, lido de `CACHE_ENABLED`
-(`.dev.vars` em desenvolvimento, `[vars]` do `wrangler.toml` em produção).
-Como a variável vive no `wrangler.toml`, mudá-la exige commit e deploy — o
-mesmo ciclo que regenera o arquivo, então os dois lados nunca discordam. Com
-o cache desligado, o front não lê nada guardado e **apaga todas** as páginas
-que tinha, não só a do match atual.
-
-**Gerar o cache em lote** (`scripts/gera-cache.js`): ver "Regenerar e publicar
-o cache (etapa 7)", acima — percorre os 20 cruzamentos, os 164 recortes por
-pauta e os 60 formatos; cruzamento sem acervo suficiente vira página de
-lacunas, sem custo de modelo. Reporta quantas páginas gerou,
-quantas já estavam em cache, quantas ficaram em lacuna e o custo total do
-lote (medido pela diferença de uso na conta OpenRouter, se
-`OPENROUTER_API_KEY` estiver no ambiente).
-
-```sh
-# local (wrangler dev rodando em outro terminal)
-node scripts/gera-cache.js
-
-# produção
-BASE_URL=https://SEU-DOMINIO OPENROUTER_API_KEY=... node scripts/gera-cache.js
-```
-
-**Banco criado antes do cache existir?** O schema atual já traz as tabelas.
-Para um banco que rodou o schema antigo, aplique uma vez (local e remoto):
-
-```sh
-npx wrangler d1 execute decisivas --remote --command="
-ALTER TABLE registros ADD COLUMN origem TEXT;
-CREATE TABLE paginas (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, resposta TEXT NOT NULL, ids_trechos TEXT NOT NULL, ids_acervo TEXT NOT NULL, modelo TEXT, gerado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa));
-CREATE TABLE formatos (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, formato TEXT NOT NULL, resposta TEXT NOT NULL, ids_trechos TEXT NOT NULL, ids_acervo TEXT NOT NULL, modelo TEXT, gerado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa, formato));
-"
-```
-
-**Limpar o cache na mão** (raramente necessário; regenerar já substitui):
-
-```sh
-npx wrangler d1 execute decisivas --remote --command="DELETE FROM paginas; DELETE FROM formatos;"
-```
-
-## Regenerar e publicar o cache (etapa 7)
-
-A ordem importa, e cada passo protege o seguinte.
-
-### 1. Ligar o cache e publicar
-
-`CACHE_ENABLED = "true"` em `[vars]`, commitado e no ar **antes** do lote. Com
-`"false"` a geração é paga e não grava nada, e a rota nem prepara os gatilhos
-das tags — o script recusa rodar e diz isso.
-
-**Sem `[env.*]` no `wrangler.toml`, a pré-visualização de branch usa o MESMO D1
-e o mesmo cache da produção.** Rode o lote só a partir da main, depois do
-deploy: rodar de uma branch grava no cache de produção com o código da branch.
-
-### 2. Esvaziar o cache
-
-Prompt e regra mudaram nas etapas 5 e 6, e **isso não invalida o cache
-sozinho**: a validade cobre o conjunto de trechos e o modelo, não o texto do
-prompt. Antes de gerar, esvazie as duas tabelas.
-
-No console do painel, um comando por bloco, na ordem:
-
-```
-DELETE FROM paginas;
-```
-
-```
-DELETE FROM formatos;
-```
-
-Conferência, que deve devolver `0` e `0`:
-
-```
-SELECT (SELECT COUNT(*) FROM paginas) AS paginas, (SELECT COUNT(*) FROM formatos) AS formatos;
-```
-
-Com terminal autenticado, o equivalente é
-`npx wrangler d1 execute decisivas --remote --command="DELETE FROM paginas; DELETE FROM formatos;"`.
-
-### 3. Rodar o lote
-
-```sh
-BASE_URL=https://SEU-DOMINIO node scripts/gera-cache.js
-```
-
-O script percorre, na ordem em que uma pessoa encontraria: os 20 cruzamentos,
-os recortes por pauta de cada um (o gatilho de cada tag) e os três formatos de
-cada cruzamento — 20 + 164 + 60 = **244 recortes** com o acervo v5.
-
-Como a rota devolve a página sem esperar as tags e as gera em segundo plano, o
-script **volta a pedir a página** até todas as tags ficarem disponíveis
-(`TENTATIVAS_TAGS` e `ESPERA_TAGS_MS` ajustam a espera). Ele reporta páginas,
-tags e formatos gerados, os tempos médios, o custo real do lote (com
-`OPENROUTER_API_KEY` no ambiente) e sai com código 1 se sobrar qualquer tag sem
-gatilho.
-
-**Atrás do Cloudflare Access**, use um token de serviço (Access → Service Auth)
-em vez de tentar autenticar no navegador:
-
-```sh
-BASE_URL=https://SEU-DOMINIO ACESSO_CLIENT_ID=... ACESSO_CLIENT_SECRET=... node scripts/gera-cache.js
-```
-
-Sem isso, a rota responde a tela de login e o script diz exatamente isso, em
-vez de contar erro de JSON.
-
-### 4. Varrer os termos bloqueados
-
-```sh
-BLOCKED_TERMS="..." BASE_URL=https://SEU-DOMINIO node scripts/varre-termos.js
-```
-
-Lê o que o cache entrega — as 20 páginas, os gatilhos de pauta dentro delas e
-os 60 formatos — e procura qualquer item de `BLOCKED_TERMS`, com a mesma
-comparação do Worker (ignora maiúsculas e acentos, casa palavra inteira). O
-resultado esperado é **zero ocorrências**; qualquer achado sai com o termo, o
-lugar e o trecho ao redor, e o script sai com código 1.
-
-A lista vive em variável de ambiente, fora do repositório, e traz somente nomes
-próprios. Exporte a mesma que está no painel; sem ela o script recusa rodar.
-
-Com wrangler autenticado, `node scripts/varre-termos.js --d1=remote` varre as
-tabelas direto, inclusive linhas que ninguém pediu ainda.
-
-### 5. Registro dos lotes
-
-| Quando | Onde | Resultado |
-|---|---|---|
-| — | — | Nenhum lote em produção registrado ainda |
-
-Uma linha por lote: data, destino, o que o relatório devolveu (páginas, tags,
-formatos, custo) e o resultado da varredura de termos.
 
 ## O build, e o que ele gera
 
@@ -617,20 +469,50 @@ Um comando só, declarado em `[build]` no `wrangler.toml`, roda antes de
 node scripts/sincroniza-tokens.js
 ```
 
-Ele encadeia três coisas, e **tudo que ele escreve fica fora do
-versionamento**. A regra é simples: se um arquivo está em `public/` ou em
-`prompts/gerado/`, ele é saída de build; edite a fonte, nunca a cópia.
+**Tudo que ele escreve fica fora do versionamento.** A regra é simples: se um
+arquivo está em `public/`, ele é saída de build; edite a fonte, nunca a cópia.
 
 | Fonte | Saída | Quem gera |
 |---|---|---|
 | `brand/tokens.css` | `public/tokens.css` | `sincroniza-tokens.js` |
-| `dados/versao-acervo.txt` + `CACHE_ENABLED` | `public/versao-acervo.js` | `sincroniza-tokens.js` |
 | `dados/vocabulario.json` | `public/vocabulario.js` | `sincroniza-tokens.js` |
-| `paginas/*.html` + `parciais/*.html` | `public/*.html` | `gera-paginas.js` |
-| `paginas/estilos.css`, `rodape.js`, `_redirects` | `public/` | `gera-paginas.js` |
+| `paginas/index.html`, `paginas/resultado.html` + `parciais/*.html` | `public/*.html` | `gera-paginas.js` |
+| **`conteudo/<publico>.json` + `paginas/caminho.html`** | **`public/caminhos/<publico>/<tema>.html`** (20) | `gera-caminhos.js` |
+| `conteudo/sobre.json` + `paginas/sobre.html` | `public/sobre.html` | `gera-caminhos.js` |
+| `conteudo/sobre.json` + `paginas/privacidade.html` | `public/privacidade.html` | `gera-caminhos.js` |
+| `paginas/estilos.css`, `_redirects` | `public/` | `gera-paginas.js` |
 | `dados/configuracao.json` | `public/configuracao.js` | `gera-paginas.js` |
-| `assets/*` | `public/assets/` | `gera-paginas.js` |
-| `prompts/*.txt` + planilhas de regra + `docs/08` | `prompts/gerado/*.txt` | `gera-prompts.js` |
+| `assets/*`, inclusive `assets/fonts/` | `public/assets/` | `gera-paginas.js` |
+
+Saíram na etapa 8A: `public/versao-acervo.js`, que servia ao cache do
+navegador, e `prompts/gerado/*.txt`, os prompts do agente. Na 8B saiu
+`public/rodape.js`: o rodapé passou a ser montado no build, com a assinatura e
+o contato já dentro.
+
+### O conteúdo, e o que o build recusa
+
+`scripts/conteudo.js` é a única porta de entrada do texto das páginas. Ele
+carrega os quatro arquivos de público pelo **mapa explícito** — `jovens.json`,
+`70mais.json`, `mulheres-beneficiarias.json`, `mulheres-2-a-5-sm.json` — porque
+identificador do banco, nome na tela, slug da URL e nome do arquivo são quatro
+coisas diferentes, e o 70+ é a prova (id `60+`, slug `70-mais`, arquivo
+`70mais.json`).
+
+Antes de gerar, ele confere: os 4 públicos, os 5 temas de cada um, os campos
+obrigatórios, 1 a 3 cards em "o que funciona" e em "o que não funciona", 3
+cards de dados, 2 parágrafos em "por que falar", 3 cards em "como chegar" e 5
+linhas de resumo. **Qualquer falha derruba o build com o caminho do campo**, do
+tipo `conteudo/70mais.json.paginas["trabalho digno"].resumo: deveria ter de 5 a
+5 itens, tem 4`.
+
+`revisado_em` é opcional em cada arquivo. Sem ele, o cabeçalho da página diz
+"texto em revisão" em vez de uma data.
+
+A seção "Explorar o acervo" precisa dizer quantos trechos existem no
+cruzamento e quais pautas há ali: isso vem de `dados/DECISIVAS_acervo_v5.xlsx`
+no build (`scripts/acervo.js`), a mesma planilha da carga — nunca de número
+escrito à mão. No beta a seção está desligada: os controles aparecem
+desabilitados e um aviso diz que o recurso chega em breve.
 
 **Cabeçalho e rodapé são um parcial só** (`parciais/cabecalho.html` e
 `parciais/rodape.html`), incluídos em cada tela pelo marcador `{{CABECALHO}}` e
@@ -642,14 +524,15 @@ O build é **idempotente**: só reescreve arquivo cujo conteúdo mudou
 observado pelo `wrangler dev` dispara o watcher e o Worker reinicia no meio das
 requisições.
 
-Falha de build é dura, de propósito: marcador não substituído, regra de
-planilha sem verificação ou cor de público fora da paleta de `brand/tokens.css`
-derrubam o build em vez de publicar tela ou prompt pela metade.
+Falha de build é dura, de propósito: marcador não substituído, cor de público
+fora da paleta de `brand/tokens.css` ou conteúdo com estrutura errada derrubam
+o build em vez de publicar tela pela metade.
 
 ### Assets
 
-`assets/` é a pasta única de imagens (banner, logotipos, cards semióticos,
-favicon), copiada para `public/assets/` no build. **Enquanto um arquivo não
+`assets/` é a pasta única de imagens e fontes (banner, logotipos, favicon e os
+arquivos da Inclusive Sans em `assets/fonts/`), copiada para `public/assets/`
+no build. **Enquanto um arquivo não
 existir, a tela mostra um placeholder tracejado com o nome esperado** — nada
 quebra e nada é inventado. Os nomes estão em `assets/LEIA-ME.md`. Sem nenhum
 `banner-*`, o cabeçalho usa a faixa provisória de linhas coloridas do protótipo.
@@ -661,7 +544,15 @@ responde 307 para `/sobre`. Os links internos apontam direto para a forma sem
 extensão. As rotas antigas saem em `paginas/_redirects`: `/metodologia` e
 `/transparencia`, com e sem `.html`, respondem 301 para `/sobre`.
 
-## Seções a completar (tarefa 8 de docs/05)
+Os caminhos ficam em `/caminhos/<slug do público>/<slug do tema>`, com os
+slugs de `dados/vocabulario.json`: 20 páginas de HTML estático, geradas no
+build. `VER CAMINHOS`, na home, monta esse endereço.
+
+A rota antiga `/resultado?publico=...&tema=...` continua de pé: virou uma
+página que lê os dois parâmetros, traduz para os slugs e redireciona para o
+caminho novo. Link já compartilhado não morre.
+
+## Seções a completar
 
 - Cadastrar `OPENROUTER_API_KEY` como segredo
 - Trocar o modelo via `MODEL_ID`

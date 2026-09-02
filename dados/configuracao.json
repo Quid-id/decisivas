@@ -1,36 +1,15 @@
 {
-  "_leia_me": "Textos e identificadores de configuração das telas (etapa 6). O build publica este arquivo como public/configuracao.js (window.CONFIGURACAO). Tudo que ainda não foi redigido está como [preencher] e aparece na tela dentro de uma caixa tracejada — nada é inventado por código.",
+  "_leia_me": "Textos e identificadores das telas. O build publica este arquivo como public/configuracao.js (window.CONFIGURACAO), lido pela tela de Início. O texto das 20 páginas, do Sobre e da privacidade NÃO vive aqui: vive em conteudo/*.json. O que ainda não foi redigido está como [preencher] e aparece na tela em caixa tracejada — nada é inventado por código.",
   "perguntas": [
     "Com quem você quer falar hoje?",
     "Qual conversa DECISIVA você quer ter hoje?",
     "Quem você pode mobilizar agora?"
   ],
-  "apoio_inicio": "Escolha um público e um tema. A plataforma entrega o material de pesquisa para você construir a mensagem.",
+  "apoio_inicio": "Escolha um público e um tema. Você recebe o que a pesquisa mostra, o que funciona, o que afasta e como chegar nessas pessoas. A mensagem, quem escreve é você.",
   "video_youtube_id": "[preencher]",
   "assinatura": "[preencher]",
   "contato": {
     "email": "[preencher]",
     "instagram": "[preencher]"
-  },
-  "sobre": {
-    "projeto": "[preencher]",
-    "publicos": {
-      "jovens": "[preencher]",
-      "60+": "[preencher]",
-      "mulheres beneficiárias": "[preencher]",
-      "mulheres de 2 a 5 salários mínimos": "[preencher]"
-    },
-    "temas": {
-      "dinheiro no bolso": "[preencher]",
-      "trabalho digno": "[preencher]",
-      "família e cuidado": "[preencher]",
-      "brasil e pertencimento": "[preencher]",
-      "participação e voz": "[preencher]"
-    },
-    "quem_faz": "[preencher]",
-    "aviso_ia": "[preencher]"
-  },
-  "privacidade": {
-    "texto": "[preencher]"
   }
 }

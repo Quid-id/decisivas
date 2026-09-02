@@ -1,8 +1,16 @@
+<!-- Aviso de privacidade: informativo, não pedido de consentimento — o site
+     não usa cookie nem coleta dado pessoal, então não há o que consentir.
+     Sem persistência: reaparece a cada visita (regra 5 do CLAUDE.md). -->
+<div class="aviso-privacidade" id="aviso-privacidade">
+  <span>Este site não usa cookies de rastreamento nem coleta dados pessoais. <a href="/privacidade">Política de privacidade</a></span>
+  <button type="button" id="fechar-privacidade">Entendi</button>
+</div>
+
 <footer><div class="larg">
   <div class="grade-rodape">
     <div>
       <p class="assinatura">DECISIVAS</p>
-      <p class="tagline" id="rodape-assinatura"></p>
+      <p class="tagline">{{ASSINATURA}}</p>
       <p class="fixa-ia">O funcionamento da plataforma, a origem dos dados e o uso de inteligência artificial estão descritos em Sobre o projeto.</p>
     </div>
     <div>
@@ -17,18 +25,22 @@
     <div>
       <h2>CONTATO</h2>
       <ul>
-        <li id="rodape-email"></li>
-        <li id="rodape-instagram"></li>
+        <li>{{CONTATO_EMAIL}}</li>
+        <li>{{CONTATO_INSTAGRAM}}</li>
         <li class="tagline">São Paulo · Brasil</li>
       </ul>
     </div>
   </div>
   <div class="base">
     <div class="creditos">
-      <span class="credito"><span>ORGANIZAÇÃO</span><span class="logo" id="logo-quid">[assets/logo-quid.svg]</span></span>
-      <span class="credito"><span>REALIZAÇÃO</span><span class="logo" id="logo-brief">[assets/logo-brief.svg]</span></span>
+      <span class="credito"><span>ORGANIZAÇÃO</span>{{LOGO_QUID}}</span>
+      <span class="credito"><span>REALIZAÇÃO</span>{{LOGO_BRIEF}}</span>
     </div>
     <span>© 2026 · TODOS OS DIREITOS RESERVADOS</span>
   </div>
 </div></footer>
-<script src="/rodape.js"></script>
+<script>
+  document.getElementById("fechar-privacidade").addEventListener("click", function () {
+    document.getElementById("aviso-privacidade").hidden = true;
+  });
+</script>

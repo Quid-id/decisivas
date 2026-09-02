@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+{{CABECA}}
+</head>
+<body>
+{{CABECALHO}}
+
+<main class="caminho"><div class="larg">
+
+  <!-- 1. Cabeçalho: público, tema, data da revisão, título e linha -->
+  <div class="cabecalho-caminho">
+    {{PILULA_PUBLICO}}
+    <span class="pilula tema">{{NOME_TEMA}}</span>
+    <span class="meta">{{REVISADO_EM}}</span>
+  </div>
+  <h1 class="titulo-caminho">{{TITULO_CAMINHO}}</h1>
+  <p class="linha-caminho">{{LINHA}}</p>
+
+  <!-- 2. Por que falar: prosa mais três cards de dados -->
+  <section class="bloco">
+    <h2>Por que falar com este público sobre este tema</h2>
+    {{POR_QUE}}
+  </section>
+
+  <!-- 3. O que funciona -->
+  <section class="bloco">
+    <h2>O que funciona</h2>
+    {{FUNCIONA}}
+  </section>
+
+  <!-- 4. O que não funciona -->
+  <section class="bloco">
+    <h2>O que não funciona</h2>
+    {{NAO_FUNCIONA}}
+  </section>
+
+  <!-- 6. Quem é este público -->
+  <section class="bloco">
+    <h2>Quem é este público</h2>
+    {{QUEM_E}}
+  </section>
+
+  <!-- 7. Como chegar nele -->
+  <section class="bloco">
+    <h2>Como chegar nele</h2>
+    {{COMO_CHEGAR}}
+  </section>
+
+  <!-- 8. Resumo -->
+  <section class="bloco">
+    <h2>Resumo</h2>
+    {{RESUMO}}
+  </section>
+
+  <!-- 9. Explorar o acervo: presente e desligado no beta -->
+  <section class="bloco explorar" data-ligado="nao" aria-labelledby="titulo-explorar">
+    <h2 id="titulo-explorar">Explorar o acervo</h2>
+    <p class="apoio-explorar">Esta página é um recorte. O acervo tem {{TRECHOS_DO_CRUZAMENTO}} de pesquisa sobre este cruzamento. Escolha um assunto ou escreva o que procura: a resposta traz só trechos da pesquisa, com a origem de cada um.</p>
+    <div class="atalhos">
+      {{PAUTAS}}
+    </div>
+    <div class="campo">
+      <input id="pergunta-acervo" placeholder="{{EXEMPLO_PERGUNTA}}" disabled aria-describedby="explorar-em-breve">
+      <button type="button" disabled>Quero explorar mais</button>
+    </div>
+    <p class="em-breve" id="explorar-em-breve">Este recurso chega em breve. No beta, a página traz o recorte já revisado; explorar o acervo inteiro vem depois.</p>
+  </section>
+
+</div></main>
+
+{{COMPARTILHAR}}
+{{RODAPE}}
+</body>
+</html>

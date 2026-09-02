@@ -19,38 +19,10 @@ const conteudo = fs.readFileSync(ORIGEM, "utf8");
 escreveSeMudou(DESTINO, cabecalho + conteudo);
 console.log(`tokens sincronizados: ${ORIGEM} → ${DESTINO}`);
 
-// Também gera public/versao-acervo.js, com os dois valores de que o cache do
-// navegador (nível 2) precisa:
-//
-// 1. VERSAO_ACERVO, de dados/versao-acervo.txt: a carga oficial do banco
-//    atualiza o .txt no mesmo commit, e o deploy leva a nova marca ao site.
-// 2. CACHE_HABILITADO, de CACHE_ENABLED no wrangler.toml: é o que faz o
-//    interruptor alcançar o navegador sem custo de requisição. A variável
-//    vive em [vars], então mudá-la exige commit + deploy — o mesmo ciclo que
-//    regenera este arquivo, o que mantém os dois lados sempre coerentes.
-const versao = fs.readFileSync("dados/versao-acervo.txt", "utf8").trim();
-// Em produção o valor vem de [vars] no wrangler.toml. Em desenvolvimento o
-// .dev.vars sobrescreve o ambiente do Worker, então é lido primeiro para que
-// o front local não discorde do servidor local.
-function leCacheEnabled() {
-  for (const [arquivo, padrao] of [
-    [".dev.vars", /^\s*CACHE_ENABLED\s*=\s*"?([^"\s]*)"?/m],
-    ["wrangler.toml", /^\s*CACHE_ENABLED\s*=\s*"([^"]*)"/m],
-  ]) {
-    if (!fs.existsSync(arquivo)) continue;
-    const achado = fs.readFileSync(arquivo, "utf8").match(padrao);
-    if (achado) return achado[1];
-  }
-  return "true";
-}
-const cacheHabilitado = leCacheEnabled() !== "false";
-escreveSeMudou(
-  "public/versao-acervo.js",
-  "// ARQUIVO GERADO no build (scripts/sincroniza-tokens.js) — NÃO EDITAR AQUI.\n" +
-    `window.VERSAO_ACERVO = ${JSON.stringify(versao)};\n` +
-    `window.CACHE_HABILITADO = ${cacheHabilitado};\n`
-);
-console.log(`versão do acervo publicada: ${versao} | cache no navegador: ${cacheHabilitado ? "ligado" : "desligado"}`);
+// A marca de versão do acervo NÃO é mais publicada para o front: ela existia
+// para o cache do navegador da tela de resultado, que saiu na etapa 8A junto
+// com a geração de página por modelo. `dados/versao-acervo.txt` continua sendo
+// a marca da carga no repositório, lida na hora de carregar o banco.
 
 // E publica os vocabulários fechados para o front, a partir da mesma fonte que
 // o Worker e os scripts leem (dados/vocabulario.json). É o que impede as listas
@@ -65,17 +37,12 @@ console.log(
   `vocabulário publicado: ${vocabulario.publicos.length} públicos, ${vocabulario.macronarrativas.length} temas`
 );
 
-// Monta as telas: parciais de cabeçalho e rodapé, configuração e assets
-// (etapa 6). As fontes ficam em paginas/ e parciais/; public/ é só saída.
-require("./gera-paginas").main();
-
-// E monta os prompts do agente a partir das planilhas de regra e do documento
-// de formatos (etapa 5). O prompt de sistema vive num só lugar — prompts/ —, e
-// o build o compõe em prompts/gerado/, que é o que o Worker importa e o que
-// scripts/testa-modelos.js lê. Ver scripts/gera-prompts.js.
-require("./gera-prompts")
+// Monta as telas: as fixas, as 20 páginas de caminho de conteudo/*.json, o
+// Sobre e a privacidade. As fontes ficam em paginas/, parciais/ e conteudo/;
+// public/ é só saída.
+require("./gera-paginas")
   .main()
   .catch((e) => {
-    console.error("FALHA ao gerar os prompts:", e.message);
+    console.error("FALHA ao gerar as telas:", e.message);
     process.exit(1);
   });

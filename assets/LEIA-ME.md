@@ -10,19 +10,37 @@ faltando.
 | Arquivo | O que é | Tamanho |
 |---|---|---|
 | `banner-1.svg` … `banner-N.svg` (ou `.png`) | imagens do banner do cabeçalho, em rotação a cada 5 s | 2560 × 360 |
-| `logo-decisivas.svg` | logotipo DECISIVAS | vetor · **ainda não usado**: a barra desenha o logotipo em texto, como no protótipo v3 |
+| `logo-decisivas.svg` | logotipo DECISIVAS | vetor · **ainda não usado**: a barra desenha o logotipo em texto, como no protótipo v5 |
 | `logo-quid.svg` | logo da Quid, monocromático off-white | vetor, 24 px de altura na tela |
 | `logo-brief.svg` | logo do BRIEF, monocromático off-white | vetor, 24 px de altura na tela |
-| `card-jovens.png` | card semiótico do público jovens | 1000 × 1250 |
-| `card-60-mais.png` | card semiótico do público 60+ | 1000 × 1250 |
-| `card-beneficiarias.png` | card semiótico das mulheres beneficiárias | 1000 × 1250 |
-| `card-2-a-5-sm.png` | card semiótico das mulheres de 2 a 5 salários mínimos | 1000 × 1250 |
+| `fonts/inclusive-sans-latin.woff2` | Inclusive Sans, romana, pesos 300 a 700 (variável) — **no repositório** | 30 KB |
+| `fonts/inclusive-sans-latin-italico.woff2` | Inclusive Sans, itálica — **no repositório** | 31 KB |
+| `fonts/unbounded-latin.woff2` | Unbounded, a fonte de destaque, pesos 200 a 900 (variável) — **no repositório** | 50 KB |
 | `favicon.svg` | favicon vetorial | vetor |
 | `favicon-512.png` | favicon rasterizado | 512 × 512 |
 
-O nome curto de cada público (`jovens`, `60-mais`, `beneficiarias`, `2-a-5-sm`)
-vem do campo `slug` de `dados/vocabulario.json`, que é a fonte única do
-vocabulário — se um slug mudar lá, o nome do arquivo muda junto.
+Os quatro cards semióticos (`card-<slug>.png`, 1000 × 1250) saíram da lista na
+etapa 8B: a página de caminho do protótipo v5 não tem card de imagem — "Quem é
+este público" é um card numérico mais um card de texto. Se voltarem a ser
+usados, a linha volta aqui.
+
+O nome curto de cada público (`jovens`, `70-mais`, `mulheres-beneficiarias`,
+`mulheres-2-a-5-sm`) vem do campo `slug` de `dados/vocabulario.json`, que é a
+fonte única do vocabulário — se um slug mudar lá, o nome do arquivo muda junto.
+É o mesmo slug que aparece na URL de cada caminho.
+
+As duas fontes são servidas pelo próprio site: **nenhuma chamada ao Google
+Fonts**. Os arquivos estão em `assets/fonts/`, declarados em `@font-face` no
+`paginas/estilos.css`, com as licenças ao lado (`LICENCA-*.txt`) — as duas são
+SIL Open Font License 1.1, que permite uso e redistribuição.
+
+- **Inclusive Sans** é a fonte de corpo: leitura, cards, prosa.
+- **Unbounded** é a de destaque, no token `--tipo-destaque`: a marca DECISIVAS
+  na barra e no rodapé, a pergunta da home, o título de cada caminho e os
+  títulos de bloco em caixa alta. Não é fonte de leitura, e não entra no corpo.
+
+Se um arquivo faltar, a tela cai na pilha de fontes do sistema, sem erro
+visível.
 
 Enquanto não houver nenhum `banner-*`, o build escreve no cabeçalho a faixa
-provisória com o padrão de linhas coloridas do protótipo v3.
+provisória com o padrão de linhas coloridas do protótipo.
