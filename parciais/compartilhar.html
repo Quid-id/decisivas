@@ -33,7 +33,10 @@
     // A mesma folga nas duas pontas. O rodapé é procurado a cada medição, e
     // não uma vez só: este script vem ANTES do rodapé no HTML.
     var folga = 60;
-    var alturaBarraDeMenu = 60;
+    // A altura da barra preta vem do token, e não repetida aqui: ela mudou
+    // quando o logotipo cresceu, e este cálculo tem de acompanhar.
+    var alturaBarraDeMenu =
+      parseInt(getComputedStyle(document.documentElement).getPropertyValue("--altura-barra"), 10) || 60;
     function posiciona() {
       var banner = document.getElementById("banner");
       var rodape = document.querySelector("footer");

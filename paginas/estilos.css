@@ -264,15 +264,6 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .resumo ul { margin: 0; padding-left: var(--espaco-4); }
 .resumo li { margin: var(--espaco-2) 0; font-size: var(--texto-prosa); }
 
-/* Lacuna: bege, tracejada, logo abaixo do bloco a que se refere. É conteúdo,
-   não erro — nunca cor de alarme. */
-.lacuna {
-  background: var(--cor-aviso-fundo); border: var(--cor-aviso-borda);
-  border-radius: var(--raio-card);
-  padding: var(--espaco-3) var(--espaco-4); color: var(--cor-aviso-texto);
-  font-size: var(--texto-m); margin-top: var(--espaco-3);
-}
-
 /* ---------- Explorar o acervo (desligado no beta) ---------- */
 .explorar {
   background: var(--cor-superficie); border: var(--borda-grossa) solid var(--cor-borda-forte);
@@ -334,15 +325,17 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .botao-redondo.voltar-fixo {
   position: fixed; z-index: 15;
   top: calc(var(--altura-banner) + var(--altura-barra) + var(--espaco-5) - var(--espaco-1));
+  /* Centrado na calha entre a borda da janela e a coluna de conteúdo: a calha
+     mede (100vw - largura da coluna) / 2, e o centro dela é a metade disso. */
   left: max(
     var(--espaco-2),
-    calc(50vw - var(--largura-conteudo) / 2 - var(--tamanho-share) - var(--espaco-3))
+    calc((100vw - var(--largura-conteudo)) / 4 - var(--tamanho-share) / 2)
   );
 }
 .barra-lateral .voltar.na-faixa { display: none; }
 /* Entre 901 e 1140 px não há margem sobrando ao lado da coluna de conteúdo:
    o botão encosta na borda e o conteúdo abre espaço para ele. */
-@media (min-width: 901px) and (max-width: 1140px) {
+@media (min-width: 901px) and (max-width: 1160px) {
   main.caminho > .larg { padding-left: calc(var(--tamanho-share) + var(--espaco-4)); }
 }
 @media (max-width: 900px) {

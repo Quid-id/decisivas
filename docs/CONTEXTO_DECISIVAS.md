@@ -34,7 +34,7 @@ Ficam fora também: avaliação ou aprovação de governo ou gestão específica
 | **Caminho** | A página fixa de um público com um tema. São 20 |
 | **Tipo** | A função do trecho: achado, funciona, afasta, contexto, verbatim, perfil |
 | **Bloco** | Cada seção de um caminho |
-| **Lacuna** | O aviso de que o acervo não sustenta um bloco. É conteúdo, não erro |
+| **Lacuna** | Onde o acervo não sustenta um bloco. Não é erro, e não vira aviso na tela: o bloco mostra os cards que existem, e um bloco sem nenhum não é renderizado |
 | **Explorar o acervo** | Recurso, ainda desligado, que devolve trechos do acervo para uma pauta ou pergunta. Não redige |
 
 ### Os quatro públicos
@@ -77,7 +77,7 @@ O identificador `60+` no banco muda para `70+` na migração 005, depois do beta
 7. **Resumo**: cinco linhas.
 8. **Explorar o acervo**: presente, desligado no beta.
 
-Quando o acervo não sustenta um bloco, a página mostra o que existe e declara a lacuna. Hoje isso acontece em 70+ com dinheiro, trabalho e Brasil, e em trabalho digno para os dois públicos femininos.
+Quando o acervo não sustenta um bloco, a página **mostra o que existe e cala sobre o que não existe**: os cards que houver, sejam 3, 2 ou 1, e nenhum bloco quando não há nenhum card. Não há caixa de aviso — ela saiu em 02/09/2026, porque chamava atenção para a falta em vez do conteúdo (`arquivo/caixa-de-lacuna.html`). Hoje o acervo rende menos em 70+ com dinheiro, trabalho e Brasil, e em trabalho digno para os dois públicos femininos: essas páginas trazem dois ou um card onde as outras trazem três.
 
 ---
 
@@ -106,7 +106,7 @@ Quando o acervo não sustenta um bloco, a página mostra o que existe e declara 
 3. Não pedir voto. Não nomear candidato, partido ou figura política, nem aludir sem nome. Não avaliar governo ou gestão específica.
 4. Não coletar dados pessoais. Sem cadastro, sem cookie de rastreamento, sem script de terceiro. A única marca guardada no navegador é a de que o aviso de privacidade já foi visto, declarada na política.
 5. Rótulo de IA visível onde a inteligência artificial participou (Sobre e, quando ligado, Explorar o acervo).
-6. Lacuna declarada, nunca preenchida por aproximação.
+6. Lacuna nunca preenchida por aproximação: onde não há evidência, não há card.
 7. Interface só com os tokens da identidade.
 8. Todo texto em português do Brasil.
 9. Dados citados têm fonte nomeada.

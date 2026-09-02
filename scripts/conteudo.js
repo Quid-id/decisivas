@@ -22,7 +22,9 @@ const ARQUIVO_POR_PUBLICO = {
 };
 
 // Campos obrigatórios de cada página, e os limites que a especificação fixa.
-const MINIMO_CARDS = 1;
+// Zero é válido: bloco sem card não é renderizado (a caixa de lacuna saiu da
+// página na etapa 8C). Três é o teto do layout.
+const MINIMO_CARDS = 0;
 const MAXIMO_CARDS = 3;
 const LINHAS_DE_RESUMO = 5;
 const PARAGRAFOS_POR_QUE = 2;
@@ -77,7 +79,8 @@ function validaPagina(pagina, caminho) {
   exigeLista(pagina.resumo, `${caminho}.resumo`, LINHAS_DE_RESUMO, LINHAS_DE_RESUMO);
   pagina.resumo.forEach((linha, i) => exigeTexto(linha, `${caminho}.resumo[${i}]`));
 
-  if (pagina.lacuna !== undefined) exigeTexto(pagina.lacuna, `${caminho}.lacuna`);
+  // `lacuna` não é mais lido pelo build: a caixa de aviso saiu da página. O
+  // campo segue nos arquivos, e é ignorado — não se valida o que não se usa.
 }
 
 function validaPublico(dados, publico, temas, arquivo) {

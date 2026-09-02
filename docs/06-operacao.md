@@ -503,7 +503,7 @@ coisas diferentes, e o 70+ é a prova (id `60+`, slug `70-mais`, arquivo
 `70mais.json`).
 
 Antes de gerar, ele confere: os 4 públicos, os 5 temas de cada um, os campos
-obrigatórios, 1 a 3 cards em "o que funciona" e em "o que não funciona", 3
+obrigatórios, **0 a 3** cards em "o que funciona" e em "o que não funciona", 3
 cards de dados, 2 parágrafos em "por que falar", 3 cards em "como chegar" e 5
 linhas de resumo. **Qualquer falha derruba o build com o caminho do campo**, do
 tipo `conteudo/70mais.json.paginas["trabalho digno"].resumo: deveria ter de 5 a
@@ -511,6 +511,15 @@ tipo `conteudo/70mais.json.paginas["trabalho digno"].resumo: deveria ter de 5 a
 
 `revisado_em` é opcional em cada arquivo. Sem ele, o cabeçalho da página diz
 "texto em revisão" em vez de uma data.
+
+**Bloco vazio não é renderizado.** "O que funciona" e "o que não funciona"
+aceitam de 0 a 3 cards: a página mostra os que existem e, sem nenhum, o bloco
+inteiro sai da tela — nem o título, nem a régua. Não há caixa de aviso de
+lacuna; ela saiu em 02/09/2026 e está em `arquivo/caixa-de-lacuna.html`. O
+campo `lacuna` continua nos cinco arquivos que o traziam e **não é lido pelo
+build**: não se valida o que não se usa. Cada bloco é montado inteiro pelo
+gerador e entra no molde por um marcador (`{{BLOCO_FUNCIONA}}` e os outros
+cinco), que é o que permite a um bloco simplesmente não existir.
 
 A seção "Explorar o acervo" precisa dizer quantos trechos existem no
 cruzamento e quais pautas há ali: isso vem de `dados/DECISIVAS_acervo_v5.xlsx`
