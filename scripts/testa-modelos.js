@@ -13,11 +13,19 @@
 //
 // O que o script faz:
 // 1. Confere o saldo de créditos da conta (GET /api/v1/credits).
-// 2. Envia o MESMO prompt de teste — o prompt de sistema real de
-//    docs/03-regras-do-agente.md com três trechos da amostra antiga
-//    (match idosos × dinheiro no bolso) — para cada modelo da lista MODELOS.
+// 2. Envia o MESMO prompt de teste para cada modelo da lista MODELOS. O prompt
+//    de sistema é lido de prompts/gerado/match.txt — o mesmo arquivo que o
+//    Worker importa, gerado no build a partir de prompts/match.txt e das
+//    planilhas de regra (etapa 5). Não existe cópia do prompt aqui: rode o
+//    build antes (`node scripts/sincroniza-tokens.js`).
 // 3. Imprime por modelo: nome, tempo de resposta, tokens de entrada e
 //    saída, custo informado pela API e se a resposta é o JSON esperado.
+//
+// Os trechos do teste saem de dados/DECISIVAS_acervo_v5.xlsx, no cruzamento de
+// CRUZAMENTO_DE_TESTE, já na taxonomia da migração 003. A mensagem é montada
+// como o Worker monta (agrupada por tipo, com o número de itens pedido); o
+// montador canônico é montaMensagemUsuario em src/worker.js, e este aqui é um
+// espelho para o teste — mexeu num, confira o outro.
 //
 // A lista ativa contém apenas modelos GRATUITOS (sufixo :free), que rodam
 // sem crédito na conta. Os pagos, de faixas de preço diferentes, estão
@@ -47,62 +55,92 @@ const MODELOS = [
   // "google/gemini-2.5-pro",
 ];
 
-// Prompt de sistema de docs/03-regras-do-agente.md, na íntegra.
-const PROMPT_SISTEMA = `Você prepara o material para que uma pessoa escreva a própria comunicação
-de um tema de interesse público a um público específico, usando exclusivamente
-os trechos de pesquisa fornecidos abaixo. Você NÃO escreve a mensagem:
-entrega o material de apoio. Regras absolutas:
+// Prompt de sistema: fonte única, gerada no build.
+const fs = require("node:fs");
+const ExcelJS = require("exceljs");
 
-1. Use somente os trechos fornecidos. Não acrescente fatos, números, exemplos
-   ou afirmações de conhecimento próprio.
-2. Nunca mencione, avalie ou aluda a candidaturas, partidos, coligações,
-   políticos ou eleições. Nunca peça voto nem sugira direção ou rejeição de voto.
-3. Nunca escreva URLs, nomes de sites ou referências a links.
-4. Cada campo preenchido deve listar os ids dos trechos usados.
-5. Campo sem trechos suficientes recebe o valor "LACUNA". Nunca preencha por
-   aproximação.
-6. Campo em lacuna recebe a string "LACUNA" no lugar do objeto inteiro — nunca
-   um objeto com "LACUNA" dentro de "texto" ou "itens".
-7. Liberdade de forma, fidelidade de substância: você pode reformular e
-   reordenar, mas toda afirmação deve estar sustentada por um trecho fornecido.
-8. Trechos com base "restrita" que afirmem prevalência mantêm o escopo
-   "entre os participantes do estudo".
-9. Responda apenas com o JSON no formato abaixo, sem nenhum texto fora dele.
+const ARQUIVO_PROMPT = "prompts/gerado/match.txt";
+if (!fs.existsSync(ARQUIVO_PROMPT)) {
+  console.error(
+    `${ARQUIVO_PROMPT} não existe. Rode o build primeiro: node scripts/sincroniza-tokens.js`
+  );
+  process.exit(1);
+}
+const PROMPT_SISTEMA = fs.readFileSync(ARQUIVO_PROMPT, "utf8").trim();
 
-Os campos:
-- "gatilho": o ângulo que mobiliza este público neste tema, em uma ou duas
-  frases, derivado dos trechos de tipo "achado". É o núcleo do que a mensagem
-  precisa tocar.
-- "ancorar": exatamente três elementos concretos que a mensagem deve conter,
-  vindos dos trechos de tipo "funciona".
-- "evitar": exatamente três elementos que a mensagem não deve conter, vindos
-  dos trechos de tipo "afasta".
-- "contexto": por que isso importa para este público, em uma ou duas frases.
-- "pesquisa": o que o acervo mostra sobre este cruzamento.
+// Cruzamento do teste. `60+` × `trabalho digno` é pequeno (6 achados, 2
+// funciona, 3 afasta, 1 contexto) e exercita o caso mais difícil do contrato:
+// "ancorar" com menos de três itens elegíveis.
+const CRUZAMENTO_DE_TESTE = { publico: "60+", macronarrativa: "trabalho digno" };
 
-Formato: {"gatilho": {"texto": "...", "ids": []},
-          "ancorar": {"itens": ["...","...","..."], "ids": []},
-          "evitar": {"itens": ["...","...","..."], "ids": []},
-          "contexto": {"texto": "...", "ids": []},
-          "pesquisa": {"texto": "...", "ids": []}}`;
+const ORDEM_DOS_TIPOS = ["achado", "funciona", "afasta", "contexto", "verbatim"];
+const CABECALHO_DO_TIPO = {
+  achado: 'Trechos do tipo "achado" — o que a pesquisa encontrou.',
+  funciona: 'Trechos do tipo "funciona" — o que aproxima este público deste tema.',
+  afasta: 'Trechos do tipo "afasta" — o que afasta este público deste tema.',
+  contexto: 'Trechos do tipo "contexto" — o cenário em que o tema chega a este público.',
+  verbatim:
+    'Trechos do tipo "verbatim" — REFERÊNCIA DE LINGUAGEM. São falas de ' +
+    "participantes, para calibrar vocabulário e tom. NÃO sustentam afirmação: " +
+    "nunca use um verbatim como evidência de um achado.",
+};
 
-// Três trechos da amostra antiga, com a taxonomia ANTIGA (idosos × dinheiro no
-// bolso). Este script é reescrito na etapa 5, quando o prompt passa a viver num
-// só lugar; até lá o exemplo aqui não reflete a taxonomia em uso.
-// Poucos trechos de propósito: mede o caso real, incluindo o dever de
-// devolver LACUNA nos campos sem evidência suficiente.
-const PROMPT_USUARIO = `Match: publico = "idosos", macronarrativa = "dinheiro no bolso".
+async function trechosDoCruzamento() {
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile("dados/DECISIVAS_acervo_v5.xlsx");
+  const ws = wb.getWorksheet("acervo");
+  const cabecalho = ws.getRow(1).values.map((v) => (v ?? "").toString().trim());
+  const coluna = (nome) => cabecalho.indexOf(nome);
+  const trechos = [];
+  ws.eachRow((linha, n) => {
+    if (n === 1) return;
+    const valor = (nome) => {
+      const v = linha.getCell(coluna(nome)).value;
+      return v === null || v === undefined ? "" : String(v).trim();
+    };
+    if (
+      valor("publico") === CRUZAMENTO_DE_TESTE.publico &&
+      valor("macronarrativa") === CRUZAMENTO_DE_TESTE.macronarrativa
+    ) {
+      trechos.push({
+        id: valor("id"), tipo: valor("tipo"), forca: valor("forca"),
+        pauta: valor("pauta"), texto: valor("texto"),
+      });
+    }
+  });
+  return trechos;
+}
 
-Trechos fornecidos:
-
-[id: D01-TR-023 | tipo: achado | força: forte | base: restrita]
-São poucos os relatos de satisfação com a aposentadoria. A razão essencial está no valor pago à maioria dos aposentados, exatamente na fase da vida em que gastos com remédios comprometem bastante o orçamento.
-
-[id: D01-TR-024 | tipo: achado | força: indício | base: restrita]
-Quando a aposentadoria não sustenta o custo de vida, restam seguir trabalhando ou depender do auxílio de filhos e netos. Essa condição impacta negativamente o emocional e chega a gerar quadros de depressão.
-
-[id: D01-TR-025 | tipo: verbatim | base: restrita]
-"A gente passa a vida sonhando com ela e quando ela chega é uma droga."`;
+function montaMensagem(trechos) {
+  const grupos = [];
+  for (const tipo of ORDEM_DOS_TIPOS) {
+    const doTipo = trechos.filter((t) => t.tipo === tipo);
+    if (!doTipo.length) continue;
+    const linhas = doTipo.map((t) => {
+      const meta = [`id: ${t.id}`];
+      if (t.forca) meta.push(`força: ${t.forca}`);
+      if (t.pauta) meta.push(`pauta: ${t.pauta}`);
+      return `[${meta.join(" | ")}]\n${t.texto}`;
+    });
+    grupos.push(`${CABECALHO_DO_TIPO[tipo]}\n\n${linhas.join("\n\n")}`);
+  }
+  const quantos = {
+    ancorar: Math.min(3, trechos.filter((t) => t.tipo === "funciona").length),
+    evitar: Math.min(3, trechos.filter((t) => t.tipo === "afasta").length),
+  };
+  const itens = ["ancorar", "evitar"]
+    .map((campo) =>
+      quantos[campo] === 0
+        ? `- "${campo}": "LACUNA" — não há trecho elegível neste recorte.`
+        : `- "${campo}": exatamente ${quantos[campo]} ${quantos[campo] === 1 ? "item" : "itens"}.`
+    )
+    .join("\n");
+  return [
+    `Match: publico = "${CRUZAMENTO_DE_TESTE.publico}", macronarrativa = "${CRUZAMENTO_DE_TESTE.macronarrativa}".`,
+    `Itens pedidos neste recorte (RS06 — nunca complete para chegar a três):\n${itens}`,
+    `Trechos fornecidos, agrupados por tipo:\n\n${grupos.join("\n\n")}`,
+  ].join("\n\n");
+}
 
 const API = "https://openrouter.ai/api/v1";
 
@@ -115,7 +153,7 @@ async function consultaCreditos(chave) {
   return (data?.total_credits ?? 0) - (data?.total_usage ?? 0);
 }
 
-async function testaModelo(chave, modelo) {
+async function testaModelo(chave, modelo, promptUsuario) {
   const inicio = Date.now();
   const r = await fetch(`${API}/chat/completions`, {
     method: "POST",
@@ -127,7 +165,7 @@ async function testaModelo(chave, modelo) {
       model: modelo,
       messages: [
         { role: "system", content: PROMPT_SISTEMA },
-        { role: "user", content: PROMPT_USUARIO },
+        { role: "user", content: promptUsuario },
       ],
       temperature: 0,
       // Pede à API o custo real da geração, junto com a contagem de tokens.
@@ -150,8 +188,12 @@ async function testaModelo(chave, modelo) {
   try {
     const semCerca = texto.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, "");
     const j = JSON.parse(semCerca);
-    jsonValido = ["gatilho", "ancorar", "evitar", "contexto", "pesquisa"]
-      .every((campo) => campo in j);
+    // Contrato da etapa 5: cinco campos; ancorar e evitar com 0 a 3 itens.
+    const campos = ["gatilho", "ancorar", "evitar", "contexto", "pesquisa"];
+    const itensOk = (c) =>
+      c === "LACUNA" || (c && Array.isArray(c.itens) && c.itens.length <= 3);
+    jsonValido =
+      campos.every((campo) => campo in j) && itensOk(j.ancorar) && itensOk(j.evitar);
   } catch {
     jsonValido = false;
   }
@@ -192,12 +234,18 @@ async function main() {
     console.warn(`Não foi possível consultar o saldo (${e.message}); seguindo.\n`);
   }
 
+  const trechos = await trechosDoCruzamento();
+  const promptUsuario = montaMensagem(trechos);
+  console.log(
+    `Cruzamento do teste: ${CRUZAMENTO_DE_TESTE.publico} × ${CRUZAMENTO_DE_TESTE.macronarrativa} ` +
+      `— ${trechos.length} trechos, prompt de sistema com ${PROMPT_SISTEMA.length} caracteres.\n`
+  );
   console.log(`Testando ${MODELOS.length} modelo(s), um por vez...\n`);
   const resultados = [];
   for (const modelo of MODELOS) {
     process.stdout.write(`- ${modelo} ... `);
     try {
-      const res = await testaModelo(chave, modelo);
+      const res = await testaModelo(chave, modelo, promptUsuario);
       resultados.push(res);
       console.log(res.erro ? `ERRO: ${res.erro}` : `${res.ms} ms`);
     } catch (e) {

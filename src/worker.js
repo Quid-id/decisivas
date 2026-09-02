@@ -2,19 +2,29 @@
 //
 // /api/match implementa docs/01 (Fluxo do match), docs/03 (regras do agente)
 // e docs/07 (mapa de recuperação), nesta ordem: checagens de código antes do
-// modelo, consulta ao D1 com teto de 60 trechos, chamada ao OpenRouter
-// (MODEL_ID), validação com uma retentativa, termos bloqueados, anexação por
-// código (chips, nota de base, mídia, exemplos, recursos), gravação em
-// registros, resposta.
+// modelo, consulta ao D1 (o recorte inteiro do cruzamento, sem teto),
+// chamada ao OpenRouter (MODEL_ID), validação com uma retentativa, termos
+// bloqueados, anexação por código, gravação em registros, resposta.
+//
+// O filtro é camada de código, sem IA (etapa 4): entrega ao modelo todos os
+// trechos do cruzamento agrupados por tipo, mais os trechos de perfil do
+// público, e produz as tags de pauta. Além da versão geral, cada tag tem um
+// recorte próprio (a pauta + a pauta transversal) do qual sai só o gatilho.
+// Cada recorte tem entrada e validade de cache próprias, então nada é gerado
+// no clique.
 //
 // Nenhuma chave de API entra neste arquivo: local em .dev.vars, produção
 // como segredo no painel do Cloudflare.
 
-// Governança de formatos (docs/08): o agente nunca inventa regra de formato,
-// aplica o que está escrito no documento. O arquivo entra no prompt no build
-// ([[rules]] no wrangler.toml), então editar o .md muda o comportamento no
-// próximo deploy.
-import REGRAS_DE_FORMATO from "../docs/08-regras-de-formato.md";
+// Prompts do agente (etapa 5). Vivem num só lugar: prompts/*.txt, com as
+// regras das três planilhas (RG, RGT, RS) e o documento de formatos (docs/08)
+// injetados no build por scripts/gera-prompts.js. O Worker importa o resultado
+// como texto ([[rules]] no wrangler.toml) e não compõe nada — mudar uma regra é
+// mudar a planilha e fazer deploy. docs/03 aponta para estes arquivos, e
+// scripts/testa-modelos.js lê os mesmos.
+import PROMPT_SISTEMA from "../prompts/gerado/match.txt";
+import PROMPT_SISTEMA_PAUTA from "../prompts/gerado/pauta.txt";
+import PROMPT_FORMATO_BASE from "../prompts/gerado/formato.txt";
 
 // Versão do acervo (dados/versao-acervo.txt, atualizada a cada carga oficial).
 // Carimba as respostas e valida o cache do navegador (nível 2).
@@ -31,57 +41,45 @@ const PUBLICOS = VOCABULARIO.publicos.map((p) => p.id);
 const MACRONARRATIVAS = VOCABULARIO.macronarrativas.map((m) => m.id);
 const FORMATOS = VOCABULARIO.formatos;
 
-// Rótulo de IA obrigatório em toda saída gerada (docs/01, item 9 do cartão).
+// Rótulo de IA obrigatório em toda saída gerada, com o texto da etapa 5 da
+// especificação. Anexado por código à resposta e ao texto copiado.
 const ROTULO_IA =
-  "Conteúdo organizado com apoio de inteligência artificial a partir do acervo de pesquisa. Não indica voto nem menciona candidaturas.";
+  "Texto organizado por inteligência artificial a partir do banco de pesquisa próprio do DECISIVAS. Não usa fontes externas, não indica voto e não menciona candidaturas.";
 
 const AVISO_LACUNA = "Evidência insuficiente no acervo para este item.";
+
+// Bloco de itens com menos de três: o que existe é mostrado, e esta é a caixa
+// que entra abaixo (RS06). É diferente da lacuna: ali não há nada; aqui há
+// menos do que o bloco pede.
+const AVISO_ITENS_PARCIAIS =
+  "O acervo tem menos de três itens para este bloco neste cruzamento.";
 
 const MENSAGEM_INDISPONIVEL =
   "O serviço está temporariamente indisponível. O acervo e as páginas fixas continuam no ar.";
 
-const TETO_TRECHOS = 60;
+// Pauta transversal (etapa 4): entra em TODO recorte por pauta, porque
+// linguagem atravessa qualquer ângulo, e nunca vira tag na tela.
+const PAUTA_TRANSVERSAL = "comunicação e linguagem";
 
-// Prompt de sistema de docs/03-regras-do-agente.md, na íntegra.
-// A pessoa escreve, a plataforma orienta (docs/08, Parte 1): o agente entrega
-// o material de escrita, nunca a mensagem pronta.
-const PROMPT_SISTEMA = `Você prepara o material para que uma pessoa escreva a própria comunicação
-de um tema de interesse público a um público específico, usando exclusivamente
-os trechos de pesquisa fornecidos abaixo. Você NÃO escreve a mensagem:
-entrega o material de apoio. Regras absolutas:
+// Pauta do cruzamento só vira tag com pelo menos este número de trechos.
+const MINIMO_TRECHOS_PARA_TAG = 3;
 
-1. Use somente os trechos fornecidos. Não acrescente fatos, números, exemplos
-   ou afirmações de conhecimento próprio.
-2. Nunca mencione, avalie ou aluda a candidaturas, partidos, coligações,
-   políticos ou eleições. Nunca peça voto nem sugira direção ou rejeição de voto.
-3. Nunca escreva URLs, nomes de sites ou referências a links.
-4. Cada campo preenchido deve listar os ids dos trechos usados.
-5. Campo sem trechos suficientes recebe o valor "LACUNA". Nunca preencha por
-   aproximação.
-6. Campo em lacuna recebe a string "LACUNA" no lugar do objeto inteiro — nunca
-   um objeto com "LACUNA" dentro de "texto" ou "itens".
-7. Liberdade de forma, fidelidade de substância: você pode reformular e
-   reordenar, mas toda afirmação deve estar sustentada por um trecho fornecido.
-8. Trechos com base "restrita" que afirmem prevalência mantêm o escopo
-   "entre os participantes do estudo".
-9. Responda apenas com o JSON no formato abaixo, sem nenhum texto fora dele.
+// Tipos que entram no prompt, na ordem em que aparecem. `exemplo` fica fora
+// de propósito: não tem linha no acervo desta versão e carrega link, e o
+// modelo nunca vê link (regra 2 do CLAUDE.md).
+const ORDEM_DOS_TIPOS = ["achado", "funciona", "afasta", "contexto", "perfil", "verbatim"];
 
-Os campos:
-- "gatilho": o ângulo que mobiliza este público neste tema, em uma ou duas
-  frases, derivado dos trechos de tipo "achado". É o núcleo do que a mensagem
-  precisa tocar.
-- "ancorar": exatamente três elementos concretos que a mensagem deve conter,
-  vindos dos trechos de tipo "funciona".
-- "evitar": exatamente três elementos que a mensagem não deve conter, vindos
-  dos trechos de tipo "afasta".
-- "contexto": por que isso importa para este público, em uma ou duas frases.
-- "pesquisa": o que o acervo mostra sobre este cruzamento.
-
-Formato: {"gatilho": {"texto": "...", "ids": []},
-          "ancorar": {"itens": ["...","...","..."], "ids": []},
-          "evitar": {"itens": ["...","...","..."], "ids": []},
-          "contexto": {"texto": "...", "ids": []},
-          "pesquisa": {"texto": "...", "ids": []}}`;
+const CABECALHO_DO_TIPO = {
+  achado: 'Trechos do tipo "achado" — o que a pesquisa encontrou.',
+  funciona: 'Trechos do tipo "funciona" — o que aproxima este público deste tema.',
+  afasta: 'Trechos do tipo "afasta" — o que afasta este público deste tema.',
+  contexto: 'Trechos do tipo "contexto" — o cenário em que o tema chega a este público.',
+  perfil: 'Trechos do tipo "perfil" — quem é este público. Não dependem do tema.',
+  verbatim:
+    'Trechos do tipo "verbatim" — REFERÊNCIA DE LINGUAGEM. São falas de ' +
+    'participantes, para calibrar vocabulário e tom. NÃO sustentam afirmação: ' +
+    'nunca use um verbatim como evidência de um achado.',
+};
 
 function respostaJson(corpo, status = 200) {
   return new Response(JSON.stringify(corpo, null, 2), {
@@ -184,59 +182,110 @@ async function rotaMatch(corpo, env, request) {
     );
   }
 
-  // 5. Cache nível 1 (docs/06): antes de qualquer chamada ao modelo. Com o
-  // interruptor desligado, abreCachePagina não toca o banco — nem a consulta
-  // de validade, nem a tabela paginas. Qualquer falha ali (tabela ausente,
-  // coluna ausente) devolve cache indisponível e a rota segue para geração.
   const cacheLigado = env.CACHE_ENABLED !== "false";
-  const cache = await abreCachePagina(env, cacheLigado, publico, macronarrativa);
-  if (cache.guardada) {
-    const pagina = JSON.parse(cache.guardada.resposta);
+
+  // O recorte do banco é carregado no máximo uma vez por requisição, e só
+  // quando há algo a gerar: com tudo em cache, a rota não consulta trechos.
+  // Guarda a promessa, não o resultado, para que as gerações por pauta, que
+  // rodam em paralelo, compartilhem a mesma consulta.
+  let recortePendente = null;
+  const carregaRecorte = () =>
+    (recortePendente ??= consultaRecorte(env, publico, macronarrativa));
+
+  // 5. Cache nível 1 do recorte geral (pauta vazia), antes de qualquer chamada
+  // ao modelo. Com o interruptor desligado, abreCachePagina não toca o banco —
+  // nem a consulta de validade, nem a tabela paginas. Qualquer falha ali
+  // (tabela ausente, coluna ausente) devolve cache indisponível e a rota segue
+  // para geração.
+  const cacheGeral = await abreCachePagina(env, cacheLigado, publico, macronarrativa, "");
+
+  let pagina;
+  if (cacheGeral.guardada) {
+    pagina = JSON.parse(cacheGeral.guardada.resposta);
     pagina.origem = "cache";
-    pagina.versao_acervo = VERSAO_ACERVO;
-    pagina.cache_habilitado = true;
     await gravaRegistro(env, {
       rota: "match", publico, macronarrativa,
-      ids: cache.guardada.ids_trechos, modelo: cache.guardada.modelo, origem: "cache", resposta: pagina,
+      ids: cacheGeral.guardada.ids_trechos, modelo: cacheGeral.guardada.modelo,
+      origem: "cache", resposta: pagina,
     });
-    return respostaJson(pagina);
+  } else {
+    const { trechos, perfil, recursos } = await carregaRecorte();
+    const gerada = await geraPaginaGeral(env, publico, macronarrativa, trechos, perfil, recursos);
+    if (gerada === null) return respostaIndisponivel();
+    pagina = gerada.pagina;
+
+    // 7. Guarda no cache (páginas de lacuna também: não custam nada e a
+    // validade por ids_acervo invalida sozinha quando o acervo mudar).
+    await guardaCache(
+      env, cacheGeral,
+      "INSERT OR REPLACE INTO paginas (publico, macronarrativa, pauta, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, '', ?3, ?4, ?5, ?6, datetime('now'))",
+      [publico, macronarrativa, JSON.stringify(pagina), gerada.ids, cacheGeral.idsAcervo, gerada.modelo]
+    );
+
+    // 8. Gravação em registros antes de devolver. Sem IP, sem identidade.
+    await gravaRegistro(env, {
+      rota: "match", publico, macronarrativa,
+      ids: gerada.ids, modelo: gerada.modelo, origem: "geracao", resposta: pagina,
+    });
   }
 
-  // Consultas fixas (docs/07): o modelo não decide onde buscar.
-  const [trechosMatch, trechosMidia, recursos] = await Promise.all([
-    consulta(env, "SELECT * FROM trechos WHERE publico = ?1 AND macronarrativa = ?2", [publico, macronarrativa]),
-    consulta(env, "SELECT * FROM trechos WHERE publico = ?1 AND pauta = 'consumo de mídia'", [publico]),
-    consulta(env, "SELECT titulo, url, descricao FROM recursos WHERE publico = ?1 AND macronarrativa = ?2", [publico, macronarrativa]),
-  ]);
+  // 9. Recortes por pauta: um gatilho por tag, cada um com entrada e validade
+  // próprias no cache. Vai fora do JSON guardado do recorte geral, porque cada
+  // pauta invalida sozinha quando os trechos dela mudam.
+  pagina.gatilhos_por_pauta = await gatilhosPorPauta(
+    env, cacheLigado, publico, macronarrativa, pagina.tags ?? [], carregaRecorte
+  );
 
-  // Blocos e mínimos (docs/07). Abaixo do mínimo → lacuna declarada, por código.
-  // O gatilho deriva dos achados, então compartilha os trechos e o mínimo
-  // do bloco pesquisa.
-  const achados = trechosMatch.filter((t) => t.tipo === "achado");
-  const minimoAchados = achados.length >= 2 && achados.some((t) => t.forca === "forte");
+  pagina.versao_acervo = VERSAO_ACERVO;
+  // O front usa esta flag: com o cache desligado, descarta o que guardou.
+  pagina.cache_habilitado = cacheLigado;
+
+  return respostaJson(pagina);
+}
+
+// Página do recorte geral: todos os trechos do cruzamento mais os de perfil do
+// público. Devolve a página montada, os ids usados e o modelo, ou null quando
+// a geração não pode ser entregue (fuga de formato ou termo bloqueado).
+async function geraPaginaGeral(env, publico, macronarrativa, trechos, perfil, recursos) {
+  // Blocos e mínimos (docs/07), na versão da etapa 5:
+  //
+  // - gatilho e pesquisa pedem 1 achado de QUALQUER força. A RGT07 é explícita:
+  //   com um único achado elegível de força "indício", o gatilho é construído
+  //   com ele; a recorrência ("forte") é desempate, não requisito.
+  // - "por que falar" (contexto) pede 1 trecho de tipo contexto, e só isso —
+  //   achado não substitui contexto. Sem contexto, lacuna.
+  // - ancorar e evitar pedem 1 trecho elegível e entregam ATÉ 3, pelas RS: o
+  //   número pedido ao modelo é o de trechos elegíveis, no máximo três (RS06).
+  //
+  // Abaixo do mínimo → lacuna declarada, por código, sem chamar o modelo.
+  const achados = trechos.filter((t) => t.tipo === "achado");
   const blocos = {
     gatilho: achados,
-    ancorar: trechosMatch.filter((t) => t.tipo === "funciona"),
-    evitar: trechosMatch.filter((t) => t.tipo === "afasta"),
-    contexto: trechosMatch.filter((t) => t.tipo === "contexto" || t.tipo === "achado"),
+    ancorar: trechos.filter((t) => t.tipo === "funciona"),
+    evitar: trechos.filter((t) => t.tipo === "afasta"),
+    contexto: trechos.filter((t) => t.tipo === "contexto"),
     pesquisa: achados,
-    exemplos: trechosMatch.filter((t) => t.tipo === "exemplo" && t.link),
-    midia: trechosMidia,
+    exemplos: trechos.filter((t) => t.tipo === "exemplo" && t.link),
   };
   const minimos = {
-    gatilho: minimoAchados,
-    ancorar: blocos.ancorar.length >= 3,
-    evitar: blocos.evitar.length >= 3,
+    gatilho: achados.length >= 1,
+    ancorar: blocos.ancorar.length >= 1,
+    evitar: blocos.evitar.length >= 1,
     contexto: blocos.contexto.length >= 1,
-    pesquisa: minimoAchados,
+    pesquisa: achados.length >= 1,
     exemplos: blocos.exemplos.length >= 2,
-    midia: blocos.midia.length >= 1,
+  };
+  // Quantos itens o modelo deve entregar em cada bloco de lista. É código que
+  // decide, não o modelo: ele escolhe quais, pelas RS, nunca quantos.
+  const quantosItens = {
+    ancorar: Math.min(3, blocos.ancorar.length),
+    evitar: Math.min(3, blocos.evitar.length),
   };
 
   const camposDoModelo = ["gatilho", "ancorar", "evitar", "contexto", "pesquisa"];
   const algumCampoViavel = camposDoModelo.some((c) => minimos[c]);
 
-  // 5. Subconjunto vazio ou abaixo dos mínimos → lacuna por código, SEM modelo.
+  // 5. Recorte vazio ou abaixo dos mínimos → lacuna por código, SEM modelo.
   let gerado;
   let modeloUsado = null;
   let subconjunto = [];
@@ -246,36 +295,44 @@ async function rotaMatch(corpo, env, request) {
       contexto: "LACUNA", pesquisa: "LACUNA",
     };
   } else {
-    // Teto de 60 trechos, priorizando força forte e diversidade de pauta.
-    const candidatos = unicosPorId(
-      camposDoModelo.filter((c) => minimos[c]).flatMap((c) => blocos[c])
-    );
-    subconjunto = limitaSubconjunto(candidatos, TETO_TRECHOS);
+    // Sem teto: o recorte inteiro vai ao modelo, agrupado por tipo. A geração
+    // acontece uma vez por recorte e vai para o cache, então o custo é fixo.
+    subconjunto = [...trechos, ...perfil];
 
-    gerado = await geraComValidacao(env, publico, macronarrativa, subconjunto);
-    if (gerado === null) return respostaIndisponivel();
+    gerado = await geraComValidacao(env, publico, macronarrativa, subconjunto, quantosItens);
+    if (gerado === null) return null;
     modeloUsado = modeloAtual(env);
 
     // Verificação de segurança na saída: termos bloqueados (variável de
     // ambiente, fora do repositório) → descarta e responde indisponibilidade.
     if (contemTermoBloqueado(JSON.stringify(gerado), env)) {
       console.error("resposta descartada por termo bloqueado");
-      return respostaIndisponivel();
+      return null;
     }
   }
 
-  // 6. Anexação por código: lacunas, chips de fonte, nota de base,
-  // mídia, exemplos (links do banco), recursos.
+  // 6. Anexação por código: lacunas, tags de pauta, hábitos de mídia,
+  // exemplos (links do banco), recursos.
   const idsValidos = new Set(subconjunto.map((t) => t.id));
 
   const pagina = { match: { publico, macronarrativa } };
-  for (const campo of camposDoModelo) {
-    pagina[campo] = montaCampo(gerado[campo], minimos[campo], campo, idsValidos, subconjunto);
+  for (const campo of ["gatilho", "contexto", "pesquisa"]) {
+    pagina[campo] = montaCampo(gerado[campo], minimos[campo], idsValidos);
+  }
+  for (const campo of ["ancorar", "evitar"]) {
+    pagina[campo] = montaItens(gerado[campo], quantosItens[campo], idsValidos);
   }
 
-  pagina.habitos_de_midia = minimos.midia
-    ? { itens: blocos.midia.map((t) => ({ id: t.id, texto: t.texto })), lacuna: false }
-    : { lacuna: true, aviso: AVISO_LACUNA };
+  // Tags de pauta (etapa 4): as pautas do cruzamento com 3 trechos ou mais,
+  // fora a transversal. Ficam no JSON guardado porque derivam exatamente dos
+  // trechos que definem a validade desta entrada.
+  pagina.tags = tagsDoCruzamento(trechos);
+
+  // Hábitos de mídia: a planilha própria ainda não existe e a pauta
+  // `consumo de mídia` não está entre as 59 da migração 003, então o bloco é
+  // lacuna declarada — não erro. Volta a ter conteúdo quando a planilha chegar
+  // (etapa 6 da especificação).
+  pagina.habitos_de_midia = { lacuna: true, aviso: AVISO_LACUNA };
 
   pagina.exemplos = minimos.exemplos
     ? {
@@ -287,31 +344,74 @@ async function rotaMatch(corpo, env, request) {
   // Materiais complementares: só da tabela recursos; vazio → bloco omitido.
   pagina.materiais_complementares = recursos;
 
-  const idsUsados = idsDaPagina(pagina);
   // Data da última atualização do acervo: definida na carga, via variável
-  // de ambiente (ex.: ACERVO_ATUALIZADO_EM="08/2026").
+  // de ambiente (ex.: ACERVO_ATUALIZADO_EM="02/09/2026").
   pagina.atualizado_em = env.ACERVO_ATUALIZADO_EM ?? null;
   pagina.rotulo_ia = ROTULO_IA;
-  pagina.versao_acervo = VERSAO_ACERVO;
   pagina.origem = "geracao";
-  // O front usa esta flag: com o cache desligado, descarta o que guardou.
-  pagina.cache_habilitado = cacheLigado;
 
-  // 7. Guarda no cache (páginas de lacuna também: não custam nada e a
-  // validade por ids_acervo invalida sozinha quando o acervo mudar).
+  return { pagina, ids: [...idsDaPagina(pagina)].join(","), modelo: modeloUsado };
+}
+
+// Um gatilho por tag, em paralelo: são recortes independentes, e sequenciar
+// faria a primeira pessoa de um cruzamento esperar uma geração atrás da outra.
+// Falha de uma pauta não derruba a página: aquele ângulo fica em lacuna e não
+// é guardado, para a próxima requisição tentar de novo.
+async function gatilhosPorPauta(env, cacheLigado, publico, macronarrativa, tags, carregaRecorte) {
+  if (!tags.length) return {};
+  const pares = await Promise.all(
+    tags.map(async ({ pauta }) => [
+      pauta,
+      await gatilhoDaPauta(env, cacheLigado, publico, macronarrativa, pauta, carregaRecorte),
+    ])
+  );
+  return Object.fromEntries(pares);
+}
+
+async function gatilhoDaPauta(env, cacheLigado, publico, macronarrativa, pauta, carregaRecorte) {
+  const cache = await abreCachePagina(env, cacheLigado, publico, macronarrativa, pauta);
+  if (cache.guardada) {
+    const campo = JSON.parse(cache.guardada.resposta);
+    await gravaRegistro(env, {
+      rota: "match", publico, macronarrativa,
+      ids: cache.guardada.ids_trechos, modelo: cache.guardada.modelo,
+      origem: "cache", resposta: { recorte: { pauta }, gatilho: campo },
+    });
+    return campo;
+  }
+
+  const { trechos } = await carregaRecorte();
+  // O recorte da pauta: os trechos dela mais os da pauta transversal.
+  const recorte = recorteDaPauta(trechos, pauta);
+  // Mesmo mínimo do gatilho geral (RGT07): 1 achado de qualquer força.
+  const achados = recorte.filter((t) => t.tipo === "achado");
+  const minimoOk = achados.length >= 1;
+
+  let campo;
+  let modeloUsado = null;
+  if (!minimoOk) {
+    campo = { lacuna: true, aviso: AVISO_LACUNA };
+  } else {
+    const gerado = await geraGatilhoDaPauta(env, publico, macronarrativa, pauta, recorte);
+    if (gerado === null) {
+      // Sem entrega válida: lacuna nesta pauta, sem guardar no cache.
+      return { lacuna: true, aviso: AVISO_LACUNA };
+    }
+    modeloUsado = modeloAtual(env);
+    campo = montaCampo(gerado.gatilho, true, new Set(recorte.map((t) => t.id)));
+  }
+
   await guardaCache(
     env, cache,
-    "INSERT OR REPLACE INTO paginas (publico, macronarrativa, pauta, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, '', ?3, ?4, ?5, ?6, datetime('now'))",
-    [publico, macronarrativa, JSON.stringify(pagina), [...idsUsados].join(","), cache.idsAcervo, modeloUsado]
+    "INSERT OR REPLACE INTO paginas (publico, macronarrativa, pauta, resposta, ids_trechos, ids_acervo, modelo, gerado_em) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))",
+    [publico, macronarrativa, pauta, JSON.stringify(campo), (campo.ids ?? []).join(","), cache.idsAcervo, modeloUsado]
   );
-
-  // 8. Gravação em registros antes de devolver. Sem IP, sem identidade.
   await gravaRegistro(env, {
     rota: "match", publico, macronarrativa,
-    ids: [...idsUsados].join(","), modelo: modeloUsado, origem: "geracao", resposta: pagina,
+    ids: (campo.ids ?? []).join(","), modelo: modeloUsado, origem: "geracao",
+    resposta: { recorte: { pauta }, gatilho: campo },
   });
-
-  return respostaJson(pagina);
+  return campo;
 }
 
 // ---------------------------------------------------------------------------
@@ -323,13 +423,13 @@ async function rotaMatch(corpo, env, request) {
 // consulta: devolve indisponível de imediato. Com o cache ligado, qualquer
 // erro (tabela ou coluna ausente, falha do D1) é registrado e devolve
 // indisponível, para a rota gerar normalmente em vez de responder 503.
-async function abreCachePagina(env, ligado, publico, macronarrativa) {
+async function abreCachePagina(env, ligado, publico, macronarrativa, pauta) {
   if (!ligado) return { disponivel: false, idsAcervo: null, guardada: null };
   try {
-    const idsAcervo = await idsAcervoAtual(env, publico, macronarrativa);
+    const idsAcervo = await idsAcervoAtual(env, publico, macronarrativa, pauta);
     const guardada = await env.DB.prepare(
-      "SELECT resposta, ids_trechos, modelo FROM paginas WHERE publico = ?1 AND macronarrativa = ?2 AND pauta = '' AND ids_acervo = ?3 AND (modelo IS NULL OR modelo = ?4)"
-    ).bind(publico, macronarrativa, idsAcervo, modeloAtual(env)).first();
+      "SELECT resposta, ids_trechos, modelo FROM paginas WHERE publico = ?1 AND macronarrativa = ?2 AND pauta = ?3 AND ids_acervo = ?4 AND (modelo IS NULL OR modelo = ?5)"
+    ).bind(publico, macronarrativa, pauta, idsAcervo, modeloAtual(env)).first();
     return { disponivel: true, idsAcervo, guardada };
   } catch (e) {
     console.error("cache de páginas indisponível, gerando normalmente:", e.message);
@@ -341,7 +441,7 @@ async function abreCachePagina(env, ligado, publico, macronarrativa) {
 async function abreCacheFormato(env, ligado, publico, macronarrativa, formato) {
   if (!ligado) return { disponivel: false, idsAcervo: null, guardada: null };
   try {
-    const idsAcervo = await idsAcervoAtual(env, publico, macronarrativa);
+    const idsAcervo = await idsAcervoAtual(env, publico, macronarrativa, "");
     const guardada = await env.DB.prepare(
       "SELECT resposta, ids_trechos, modelo FROM formatos WHERE publico = ?1 AND macronarrativa = ?2 AND formato = ?3 AND pauta = '' AND ids_acervo = ?4 AND (modelo IS NULL OR modelo = ?5)"
     ).bind(publico, macronarrativa, formato, idsAcervo, modeloAtual(env)).first();
@@ -370,16 +470,26 @@ function modeloAtual(env) {
   return env.SIMULAR_MODELO === "true" ? "simulacao" : env.MODEL_ID;
 }
 
-// Conjunto atual de ids de trechos que alimentam a página do cruzamento
-// (match exato + hábitos de mídia), ordenado e serializado. É o mecanismo de
-// validade do cache: comparação literal do conjunto inteiro, sem hash — não
-// há colisão possível e a string guardada é auditável direto no banco.
-async function idsAcervoAtual(env, publico, macronarrativa) {
-  const linhas = await consulta(
-    env,
-    "SELECT id FROM trechos WHERE publico = ?1 AND (macronarrativa = ?2 OR pauta = 'consumo de mídia') ORDER BY id",
-    [publico, macronarrativa]
-  );
+// Conjunto atual de ids de trechos que alimentam UM recorte, ordenado e
+// serializado. É o mecanismo de validade do cache: comparação literal do
+// conjunto inteiro, sem hash — não há colisão possível e a string guardada é
+// auditável direto no banco.
+//
+// O recorte geral (pauta vazia) é o cruzamento inteiro mais os trechos de
+// perfil do público; o recorte de uma pauta é a pauta mais a transversal. Cada
+// um invalida sozinho: mexer numa pauta não derruba as outras.
+async function idsAcervoAtual(env, publico, macronarrativa, pauta) {
+  const linhas = pauta
+    ? await consulta(
+        env,
+        "SELECT id FROM trechos WHERE publico = ?1 AND macronarrativa = ?2 AND pauta IN (?3, ?4) ORDER BY id",
+        [publico, macronarrativa, pauta, PAUTA_TRANSVERSAL]
+      )
+    : await consulta(
+        env,
+        "SELECT id FROM trechos WHERE publico = ?1 AND (macronarrativa = ?2 OR tipo = 'perfil') ORDER BY id",
+        [publico, macronarrativa]
+      );
   return linhas.map((l) => l.id).join(",");
 }
 
@@ -409,13 +519,35 @@ async function gravaRegistro(env, dados) {
 
 // Chama o modelo e valida o JSON; fuga de formato → uma nova retentativa;
 // persistindo → null (indisponibilidade).
-async function geraComValidacao(env, publico, macronarrativa, subconjunto) {
-  const usuario = montaMensagemUsuario(publico, macronarrativa, subconjunto);
+async function geraComValidacao(env, publico, macronarrativa, subconjunto, quantosItens) {
+  const usuario = montaMensagemUsuario(publico, macronarrativa, subconjunto, "", quantosItens);
   for (let tentativa = 0; tentativa < 2; tentativa++) {
-    const texto = await chamaModelo(env, PROMPT_SISTEMA, usuario, () => simulaModelo(subconjunto));
+    const texto = await chamaModelo(env, PROMPT_SISTEMA, usuario, () =>
+      simulaModelo(subconjunto, quantosItens)
+    );
     const json = normalizaLacunas(extraiJson(texto));
     if (json && formatoValido(json)) return json;
     console.error(`resposta fora do formato (tentativa ${tentativa + 1})`);
+  }
+  return null;
+}
+
+// Mesma mecânica para o recorte de uma pauta, com o prompt de um campo só.
+async function geraGatilhoDaPauta(env, publico, macronarrativa, pauta, recorte) {
+  const usuario = montaMensagemUsuario(publico, macronarrativa, recorte, pauta);
+  for (let tentativa = 0; tentativa < 2; tentativa++) {
+    const texto = await chamaModelo(env, PROMPT_SISTEMA_PAUTA, usuario, () =>
+      simulaGatilhoDaPauta(recorte)
+    );
+    const json = normalizaLacunas(extraiJson(texto));
+    if (json && gatilhoValido(json)) {
+      if (contemTermoBloqueado(JSON.stringify(json), env)) {
+        console.error(`gatilho da pauta "${pauta}" descartado por termo bloqueado`);
+        return null;
+      }
+      return json;
+    }
+    console.error(`gatilho da pauta "${pauta}": resposta fora do formato (tentativa ${tentativa + 1})`);
   }
   return null;
 }
@@ -468,35 +600,77 @@ async function chamaModelo(env, sistema, usuario, simulador) {
   return corpo.choices?.[0]?.message?.content ?? "";
 }
 
-function simulaModelo(subconjunto) {
+// Simulador do recorte geral (SIMULAR_MODELO=true). Segue os mesmos mínimos e
+// o mesmo número de itens que o código pede ao modelo real — é o que torna o
+// teste sem rede comparável ao caminho de produção. A escolha, aqui, é a
+// primeira ocorrência: as RS e as RGT são critério de redação, e simulador não
+// redige.
+function simulaModelo(subconjunto, quantosItens = { ancorar: 3, evitar: 3 }) {
   const dos = (tipos, n) => subconjunto.filter((t) => tipos.includes(t.tipo)).slice(0, n);
   const campoTexto = (trechos) =>
     trechos.length
       ? { texto: trechos.map((t) => t.texto).join(" "), ids: trechos.map((t) => t.id) }
       : "LACUNA";
-  const campoItens = (trechos, minimo) =>
-    trechos.length >= minimo
+  const campoItens = (trechos) =>
+    trechos.length
       ? { itens: trechos.map((t) => t.texto), ids: trechos.map((t) => t.id) }
       : "LACUNA";
-  const achadoForte = subconjunto.find((t) => t.tipo === "achado" && t.forca === "forte");
+  // RGT07: achado de força "indício" serve de base para o gatilho.
+  const achado = dos(["achado"], 1);
   return JSON.stringify({
-    gatilho: achadoForte
-      ? { texto: achadoForte.texto, ids: [achadoForte.id] }
-      : "LACUNA",
-    ancorar: campoItens(dos(["funciona"], 3), 3),
-    evitar: campoItens(dos(["afasta"], 3), 3),
-    contexto: campoTexto(dos(["contexto", "achado"], 1)),
+    gatilho: campoTexto(achado),
+    ancorar: campoItens(dos(["funciona"], quantosItens.ancorar ?? 0)),
+    evitar: campoItens(dos(["afasta"], quantosItens.evitar ?? 0)),
+    contexto: campoTexto(dos(["contexto"], 1)),
     pesquisa: campoTexto(dos(["achado"], 2)),
   });
 }
 
-function montaMensagemUsuario(publico, macronarrativa, subconjunto) {
-  const linhas = subconjunto.map((t) => {
-    const meta = [`id: ${t.id}`, `tipo: ${t.tipo}`];
-    if (t.forca) meta.push(`força: ${t.forca}`);
-    return `[${meta.join(" | ")}]\n${t.texto}`;
+// Simulador do recorte por pauta (SIMULAR_MODELO=true). Primeiro achado do
+// recorte, de qualquer força (RGT07), como no simulador do recorte geral.
+function simulaGatilhoDaPauta(recorte) {
+  const achado = recorte.find((t) => t.tipo === "achado");
+  return JSON.stringify({
+    gatilho: achado ? { texto: achado.texto, ids: [achado.id] } : "LACUNA",
   });
-  return `Match: publico = "${publico}", macronarrativa = "${macronarrativa}".\n\nTrechos fornecidos:\n\n${linhas.join("\n\n")}`;
+}
+
+// Quantos itens cada bloco de lista deve trazer. Vai na mensagem, não no
+// prompt de sistema, porque depende do que o filtro entregou neste recorte.
+function instrucaoDeItens(quantosItens) {
+  const linhas = ["ancorar", "evitar"].map((campo) => {
+    const n = quantosItens[campo] ?? 0;
+    return n === 0
+      ? `- "${campo}": "LACUNA" — não há trecho elegível neste recorte.`
+      : `- "${campo}": exatamente ${n} ${n === 1 ? "item" : "itens"}.`;
+  });
+  return `Itens pedidos neste recorte (RS06 — nunca complete para chegar a três):\n${linhas.join("\n")}`;
+}
+
+// Os trechos vão ao modelo agrupados por tipo, com o cabeçalho que diz o que
+// cada tipo é — em especial o verbatim, que é referência de linguagem e não
+// sustenta afirmação. A pauta de cada trecho vai na etiqueta: é o que permite
+// ao modelo separar ângulos dentro do mesmo cruzamento.
+function montaMensagemUsuario(publico, macronarrativa, trechos, pauta = "", quantosItens = null) {
+  const grupos = [];
+  for (const tipo of ORDEM_DOS_TIPOS) {
+    const doTipo = trechos.filter((t) => t.tipo === tipo);
+    if (!doTipo.length) continue;
+    const linhas = doTipo.map((t) => {
+      const meta = [`id: ${t.id}`];
+      if (t.forca) meta.push(`força: ${t.forca}`);
+      if (t.pauta) meta.push(`pauta: ${t.pauta}`);
+      return `[${meta.join(" | ")}]\n${t.texto}`;
+    });
+    grupos.push(`${CABECALHO_DO_TIPO[tipo]}\n\n${linhas.join("\n\n")}`);
+  }
+  const cabecalho = pauta
+    ? `Match: publico = "${publico}", macronarrativa = "${macronarrativa}", recorte da pauta = "${pauta}".`
+    : `Match: publico = "${publico}", macronarrativa = "${macronarrativa}".`;
+  const partes = [cabecalho];
+  if (quantosItens) partes.push(instrucaoDeItens(quantosItens));
+  partes.push(`Trechos fornecidos, agrupados por tipo:\n\n${grupos.join("\n\n")}`);
+  return partes.join("\n\n");
 }
 
 function extraiJson(texto) {
@@ -508,7 +682,10 @@ function extraiJson(texto) {
 }
 
 // Formato fixo dos cinco campos. Cada campo é "LACUNA" ou o objeto esperado.
-// "ancorar" e "evitar" carregam exatamente três elementos (docs/03).
+// "ancorar" e "evitar" carregam de zero a três elementos: o contrato deixou de
+// exigir exatamente três na etapa 5 (RS06 — havendo menos trechos elegíveis, o
+// bloco traz os que existem e a lacuna). Quantos são pedidos é decidido por
+// código e dito na mensagem; a validação só recusa o que passa do teto.
 function formatoValido(json) {
   if (typeof json !== "object" || json === null) return false;
   const textoOk = (c) =>
@@ -516,12 +693,20 @@ function formatoValido(json) {
     (c && typeof c.texto === "string" && Array.isArray(c.ids)) ;
   const itensOk = (c) =>
     c === "LACUNA" ||
-    (c && Array.isArray(c.itens) && c.itens.length === 3 &&
+    (c && Array.isArray(c.itens) && c.itens.length <= 3 &&
       c.itens.every((i) => typeof i === "string") && Array.isArray(c.ids));
   return (
     textoOk(json.gatilho) && textoOk(json.contexto) && textoOk(json.pesquisa) &&
     itensOk(json.ancorar) && itensOk(json.evitar)
   );
+}
+
+// Recorte de pauta: um campo só, "LACUNA" ou o objeto de texto. A string
+// "LACUNA" já foi tratada por normalizaLacunas e vira lacuna declarada aqui,
+// como no recorte geral.
+function gatilhoValido(json) {
+  const g = json?.gatilho;
+  return g === "LACUNA" || (!!g && typeof g.texto === "string" && Array.isArray(g.ids));
 }
 
 // BLOCKED_TERMS traz SOMENTE nomes próprios: sobrenomes de figuras políticas,
@@ -551,7 +736,7 @@ function normaliza(texto) {
 
 // Um campo da página: lacuna quando abaixo do mínimo OU quando o modelo
 // devolveu LACUNA ou "LACUNA" no texto. Ids fora do subconjunto são removidos.
-function montaCampo(valor, minimoOk, campo, idsValidos, subconjunto) {
+function montaCampo(valor, minimoOk, idsValidos) {
   const ehLacuna =
     !minimoOk || valor === "LACUNA" || valor?.texto === "LACUNA" || valor == null;
   if (ehLacuna) return { lacuna: true, aviso: AVISO_LACUNA };
@@ -560,6 +745,27 @@ function montaCampo(valor, minimoOk, campo, idsValidos, subconjunto) {
   const resultado = { lacuna: false, ids };
   if ("itens" in valor) resultado.itens = valor.itens;
   else resultado.texto = valor.texto;
+  return resultado;
+}
+
+// Bloco de lista (ancorar, evitar). O contrato da etapa 5: de zero a três
+// itens mais o sinal de lacuna. `quantos` é o número de trechos elegíveis, no
+// máximo três — o que passar disso é cortado, porque item sem trecho por trás
+// é invenção. Menos de três itens acende a caixa de lacuna abaixo do bloco;
+// o aviso distingue os dois casos: o acervo não tem três, ou não tem nenhum.
+function montaItens(valor, quantos, idsValidos) {
+  const vazio = { lacuna: true, itens: [], ids: [], aviso: AVISO_LACUNA };
+  if (!quantos || valor === "LACUNA" || valor == null) return vazio;
+
+  const itens = (valor.itens ?? [])
+    .filter((i) => typeof i === "string" && i.trim())
+    .slice(0, quantos);
+  if (!itens.length) return vazio;
+
+  const resultado = { lacuna: itens.length < 3, itens, ids: (valor.ids ?? []).filter((id) => idsValidos.has(id)) };
+  if (resultado.lacuna) {
+    resultado.aviso = quantos < 3 ? AVISO_ITENS_PARCIAIS : AVISO_LACUNA;
+  }
   return resultado;
 }
 
@@ -573,35 +779,42 @@ function idsDaPagina(pagina) {
   return ids;
 }
 
-// Teto de trechos priorizando força forte e diversidade de pauta:
-// rodadas entre as pautas, fortes primeiro dentro de cada uma.
-function limitaSubconjunto(trechos, teto) {
-  const porPauta = new Map();
-  for (const t of trechos) {
-    if (!porPauta.has(t.pauta)) porPauta.set(t.pauta, []);
-    porPauta.get(t.pauta).push(t);
-  }
-  for (const lista of porPauta.values()) {
-    lista.sort((a, b) => (b.forca === "forte") - (a.forca === "forte"));
-  }
-  const resultado = [];
-  while (resultado.length < teto) {
-    let pegou = false;
-    for (const lista of porPauta.values()) {
-      if (lista.length && resultado.length < teto) {
-        resultado.push(lista.shift());
-        pegou = true;
-      }
-    }
-    if (!pegou) break;
-  }
-  return resultado;
+// ---------------------------------------------------------------------------
+// Filtro (etapa 4): camada de código, sem IA. Decide o que vai ao modelo e
+// quais pautas viram tag. Não há teto de trechos: cada recorte é gerado uma
+// vez e vai para o cache.
+// ---------------------------------------------------------------------------
+
+// O que alimenta a página de um cruzamento: os trechos do cruzamento, os de
+// perfil do público (que não dependem do tema) e os recursos curados.
+async function consultaRecorte(env, publico, macronarrativa) {
+  const [trechos, perfil, recursos] = await Promise.all([
+    consulta(env, "SELECT * FROM trechos WHERE publico = ?1 AND macronarrativa = ?2", [publico, macronarrativa]),
+    consulta(env, "SELECT * FROM trechos WHERE publico = ?1 AND tipo = 'perfil'", [publico]),
+    consulta(env, "SELECT titulo, url, descricao FROM recursos WHERE publico = ?1 AND macronarrativa = ?2", [publico, macronarrativa]),
+  ]);
+  return { trechos, perfil, recursos };
 }
 
-function unicosPorId(trechos) {
-  const vistos = new Map();
-  for (const t of trechos) if (!vistos.has(t.id)) vistos.set(t.id, t);
-  return [...vistos.values()];
+// As tags da página: pautas do cruzamento com MINIMO_TRECHOS_PARA_TAG trechos
+// ou mais, da mais frequente para a menos. A pauta transversal fica de fora —
+// ela entra em todo recorte, mas não é um ângulo que a pessoa escolhe.
+function tagsDoCruzamento(trechos) {
+  const contagem = new Map();
+  for (const t of trechos) {
+    const pauta = t.pauta ?? "";
+    if (!pauta || pauta === PAUTA_TRANSVERSAL) continue;
+    contagem.set(pauta, (contagem.get(pauta) ?? 0) + 1);
+  }
+  return [...contagem.entries()]
+    .filter(([, n]) => n >= MINIMO_TRECHOS_PARA_TAG)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR"))
+    .map(([pauta, n]) => ({ pauta, trechos: n }));
+}
+
+// O recorte de uma pauta: os trechos dela mais os da pauta transversal.
+function recorteDaPauta(trechos, pauta) {
+  return trechos.filter((t) => t.pauta === pauta || t.pauta === PAUTA_TRANSVERSAL);
 }
 
 async function consulta(env, sqlTexto, parametros = []) {
@@ -629,31 +842,13 @@ const NOMES_FORMATO = {
 const AVISO_ORIENTACAO_GERAL =
   "Orientação geral do formato: o acervo ainda não tem, para este cruzamento, trechos do que funciona ou do que afasta.";
 
-// Prompt fixo por formato: preâmbulo com as regras 2 e 3 de docs/03 e o
-// contrato de entrega da Parte 3 de docs/08 + o documento de governança
-// na íntegra. A pessoa escreve, a plataforma orienta: o modelo NUNCA
-// entrega a mensagem final.
+// Prompt da rota de formato: vem pronto de prompts/gerado/formato.txt, com as
+// regras gerais (RG, da planilha) e o documento de formatos (docs/08) já
+// dentro. O único marcador resolvido aqui é o nome do formato, que só se
+// conhece na requisição. Em conflito entre a planilha e o documento, o próprio
+// prompt manda seguir a planilha.
 function promptFormato(formato) {
-  return `Você orienta a escrita de uma comunicação no formato "${NOMES_FORMATO[formato]}", em português do Brasil, a partir de uma página de apoio fornecida. Você NÃO escreve a mensagem final: entrega o material para que a pessoa escreva a própria mensagem.
-
-Regras absolutas:
-1. Toda orientação específica de público ou tema vem da página fornecida. O documento de regras de formato abaixo é a única fonte externa permitida. Não acrescente fatos, números ou exemplos de conhecimento próprio.
-2. Nunca mencione, avalie ou aluda a candidaturas, partidos, coligações, políticos ou eleições. Nunca peça voto nem sugira direção ou rejeição de voto.
-3. Nunca escreva URLs, nomes de sites ou referências a links.
-4. Aplique as Regras gerais e a seção "${NOMES_FORMATO[formato]}" do documento abaixo. Nunca invente regra de formato.
-5. Se a página não trouxer itens de "O que ancorar" ou "O que evitar", use apenas as regras do documento.
-6. Responda apenas com o JSON no formato indicado, sem nenhum texto fora dele.
-
-Entregue três coisas, nesta ordem (Parte 3 do documento):
-- "gatilho": o gatilho da página adaptado a este formato — qual ângulo funciona melhor neste meio, considerando a extensão e a estrutura definidas no documento (uma a duas frases).
-- "ancorar": lista do que deve aparecer, a partir dos itens de "O que ancorar" da página, adaptados à estrutura do formato.
-- "evitar": lista do que evitar, a partir dos itens de "O que evitar" da página somados aos cuidados específicos do formato.
-
-Formato: {"gatilho": "...", "ancorar": ["..."], "evitar": ["..."]}
-
-Documento de regras de formato:
-
-${REGRAS_DE_FORMATO}`;
+  return PROMPT_FORMATO_BASE.split("{{NOME_DO_FORMATO}}").join(NOMES_FORMATO[formato]);
 }
 
 function validaOrientacao(j) {
@@ -775,8 +970,10 @@ function paginaCanonica(pagina) {
     typeof valor === "string" ? limpaTexto(valor) : null;
   const campoTexto = (campo) =>
     pagina[campo]?.lacuna === false ? texto(pagina[campo].texto) : null;
+  // Bloco de lista com menos de três itens tem `lacuna: true` e itens dentro
+  // (contrato da etapa 5), então o que vale aqui é a lista, não o sinal.
   const campoItens = (campo) =>
-    pagina[campo]?.lacuna === false && Array.isArray(pagina[campo].itens)
+    Array.isArray(pagina[campo]?.itens)
       ? pagina[campo].itens.map(texto).filter(Boolean)
       : [];
   const idsDe = (campo) =>

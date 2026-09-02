@@ -27,6 +27,7 @@ Não é ferramenta eleitoral. Não menciona candidaturas. É um acervo de pesqui
 6. **Interruptor de desligamento:** o Worker verifica a variável de ambiente `AGENT_ENABLED`; se for `false`, responde com mensagem estática de indisponibilidade. Toda rota do agente passa por essa checagem.
 7. **Rótulo de IA visível** em toda saída gerada, com o texto definido na especificação.
 8. **Interface exclusivamente com os tokens de `brand/tokens.css`.** Sem cores ou fontes fora deles.
+8.1. **O prompt de sistema vive num só lugar: `prompts/`.** Nenhuma cópia dele em `docs/`, em script ou no Worker. As regras do agente vêm das planilhas de `dados/` e entram no prompt no build (`scripts/gera-prompts.js`); mudar uma regra é mudar a planilha e fazer deploy. Em conflito entre planilha e `docs/08`, a planilha prevalece.
 9. Todo texto de interface em português do Brasil.
 10. **Alterar o schema sem entregar os comandos de migração remota é entrega incompleta.** O D1 não migra sozinho: `docs/02-schema.sql` é só um arquivo, e um `CREATE TABLE` commitado não cria nada em produção. Toda mudança de schema entrega junto os comandos prontos para o console do painel (um por bloco, uma linha, sem comentários), um comando de verificação, e a linha nova no registro de migrações de `docs/06-operacao.md`. A aplicação no remoto vem ANTES do deploy do código que depende dela.
 
@@ -55,7 +56,8 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 - `dados/vocabulario.json` — **fonte única** dos vocabulários fechados
 - `dados/DECISIVAS_acervo_v5.xlsx` — o acervo (2.405 linhas); fonte da carga da etapa 3
 - `dados/DECISIVAS_pautas_de_para_v1.xlsx` — as 59 pautas consolidadas
-- `dados/Regra_geral_formatos.xlsx`, `dados/Regra_gatilho.xlsx`, `dados/Regra_selecao.xlsx` — regras que entram no prompt (etapa 5)
+- `dados/Regra_geral_formatos.xlsx`, `dados/Regra_gatilho.xlsx`, `dados/Regra_selecao.xlsx` — as regras RG, RGT e RS; entram no prompt pelo build, nunca à mão
+- `prompts/` — **fonte única** dos prompts do agente (`match.txt`, `pauta.txt`, `formato.txt`); `scripts/gera-prompts.js` injeta as regras e escreve `prompts/gerado/`, fora do versionamento
 - `referencia/decisivas_prototipo_v3.html` — referência visual das telas (etapa 6)
 - `brand/` — tokens de design, logotipo e guia (entregues pela equipe de identidade)
 - `dados/versao-acervo.txt` — marca de versão do acervo; muda a cada carga e invalida o cache do navegador

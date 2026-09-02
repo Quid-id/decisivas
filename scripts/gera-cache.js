@@ -5,6 +5,11 @@
 // próprio Worker guarda cada página gerada no cache; cruzamento sem acervo
 // suficiente vira página de lacunas, sem custo de modelo.
 //
+// Cada chamada cobre mais de um recorte (etapa 4): o recorte geral do
+// cruzamento e o gatilho de cada tag de pauta, cada um com entrada e validade
+// próprias no cache. O relatório conta os dois: cruzamentos e recortes de
+// pauta. Nada é gerado no clique da pessoa — é aqui que o custo acontece.
+//
 // Uso:
 //   local:     npx wrangler dev  (em outro terminal)  e então
 //              node scripts/gera-cache.js
@@ -45,6 +50,7 @@ async function main() {
   const usoAntes = chave ? await usoAtual(chave) : null;
 
   let geradas = 0, jaEmCache = 0, soLacunas = 0, erros = 0;
+  let tags = 0, tagsComGatilho = 0;
 
   for (const publico of PUBLICOS) {
     for (const macronarrativa of MACRONARRATIVAS) {
@@ -56,18 +62,26 @@ async function main() {
           body: JSON.stringify({ publico, macronarrativa }),
         });
         const corpo = await r.json();
+        if (r.ok) {
+          const porPauta = corpo.gatilhos_por_pauta ?? {};
+          tags += Object.keys(porPauta).length;
+          tagsComGatilho += Object.values(porPauta).filter((g) => g?.lacuna === false).length;
+        }
         if (!r.ok) {
           erros++;
           console.log(`ERRO   ${rotulo}: ${corpo.erro ?? `HTTP ${r.status}`}`);
         } else if (corpo.origem === "cache") {
           jaEmCache++;
-          console.log(`cache  ${rotulo}`);
+          // O recorte geral veio do cache; as tags têm validade própria e
+          // podem ter sido geradas nesta mesma chamada.
+          console.log(`cache  ${rotulo} (${Object.keys(corpo.gatilhos_por_pauta ?? {}).length} tag(s) de pauta)`);
         } else if (paginaSoLacunas(corpo)) {
           soLacunas++;
           console.log(`lacuna ${rotulo} (sem acervo suficiente; sem custo)`);
         } else {
           geradas++;
-          console.log(`GERADA ${rotulo} (modelo: ${corpo.origem === "geracao" ? "sim" : "?"})`);
+          const quantasTags = Object.keys(corpo.gatilhos_por_pauta ?? {}).length;
+          console.log(`GERADA ${rotulo} (${quantasTags} tag(s) de pauta)`);
         }
       } catch (e) {
         erros++;
@@ -81,6 +95,7 @@ async function main() {
   console.log(`Já estavam em cache:    ${jaEmCache}`);
   console.log(`Sem acervo suficiente:  ${soLacunas}`);
   console.log(`Erros:                  ${erros}`);
+  console.log(`Tags de pauta cobertas: ${tags} (com gatilho: ${tagsComGatilho}; o resto em lacuna)`);
 
   if (chave && usoAntes !== null) {
     const usoDepois = await usoAtual(chave);

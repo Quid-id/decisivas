@@ -21,3 +21,7 @@ public/versao-acervo.js
 
 # Gerado no build a partir de dados/vocabulario.json (scripts/sincroniza-tokens.js)
 public/vocabulario.js
+
+# Gerado no build a partir de prompts/*.txt e das planilhas de regra de dados/
+# (scripts/gera-prompts.js) — é o prompt que vai ao modelo, não editar à mão
+prompts/gerado/

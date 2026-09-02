@@ -1,5 +1,7 @@
 # Especificação funcional
 
+> **Versão 1.** As telas descritas abaixo (7 públicos, chips de fonte, nota de base restrita, blocos de exemplos e materiais) foram redefinidas na etapa 6 de `docs/DECISIVAS_especificacao_claude_code.md`, que prevalece. O que segue atualizado aqui é a seção "Fluxo do match", corrigida na etapa 4 junto com o filtro.
+
 ## Telas
 
 ### 1. Home
@@ -16,7 +18,7 @@ Estrutura fixa, nesta ordem:
 3. **O que a pesquisa mostra** — 1 a 2 parágrafos, com chips de fonte (nome do estudo, método, período). Se `base = restrita`, exibir a nota: "Achado referente aos participantes do estudo citado, não generalizável ao conjunto do público."
 4. **O que costuma funcionar** / **O que costuma afastar** — duas colunas, três tópicos cada
 5. **Síntese do tema** — uma frase em destaque
-6. **Hábitos de mídia** — bloco com filtro próprio: `publico = selecionado AND pauta = 'consumo de mídia'`, ignorando a macronarrativa
+6. **Hábitos de mídia** — a consulta por pauta `consumo de mídia` saiu na etapa 4 (a pauta não existe entre as 59 da migração 003). O bloco é lacuna declarada até a planilha própria de hábitos de mídia chegar
 7. **Materiais complementares** — links da tabela `recursos` filtrados pelo match, anexados por código (nunca gerados pelo modelo)
 8. Barra "Adaptar formato": botões WhatsApp, Carrossel, Roteiro de vídeo, Copiar
 9. Rodapé do cartão: "Conteúdo organizado com apoio de inteligência artificial a partir do acervo de pesquisa. Não indica voto nem menciona candidaturas."
@@ -35,10 +37,10 @@ Conteúdo dessas páginas vem de arquivos versionados no repositório; a redaç�
 
 1. Front chama `POST /api/match` com `{ publico, macronarrativa }` (valores dos vocabulários fechados; qualquer outro valor → 400).
 2. Worker checa `AGENT_ENABLED`, Turnstile e limite por IP.
-3. Consulta D1: trechos do match (e o filtro próprio do bloco de mídia). Limitar o subconjunto (padrão: 60 trechos, priorizando `forte` e diversidade de `pauta`).
+3. Consulta D1: **todos** os trechos do match, mais os de tipo `perfil` do público. Sem teto — cada recorte é gerado uma vez e vai para o cache (etapa 4; ver docs/07). O filtro também conta as pautas do cruzamento: as com 3 trechos ou mais viram tag, e cada tag tem um recorte próprio (a pauta + `comunicação e linguagem`) do qual sai só o gatilho.
 4. Monta o prompt de sistema (docs/03) + trechos e chama o OpenRouter. Modelo definido por variável de ambiente `MODEL_ID` para facilitar troca.
 5. Valida a resposta: JSON no formato fixo dos campos; qualquer fuga de formato → uma nova tentativa; persistindo → resposta de indisponibilidade.
-6. Anexa por código: chips de fonte, nota de base, links de `recursos`, links dos trechos tipo `exemplo` (coluna `link`), bloco de mídia.
+6. Anexa por código: as tags de pauta, o bloco de hábitos de mídia (hoje sempre em lacuna) e o rótulo de IA.
 7. Grava em `registros`: timestamp, match, ids dos trechos usados, resposta integral, modelo. Sem IP, sem identidade.
 8. Devolve ao front.
 

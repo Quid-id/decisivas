@@ -427,9 +427,18 @@ Dois níveis, ambos desligáveis pela variável `CACHE_ENABLED=false` (em
 consultam o cache antes de qualquer chamada ao modelo; havendo entrada
 válida, devolvem-na e gravam em `registros` com `origem = 'cache'`. O
 mecanismo de validade é a **comparação literal do conjunto ordenado de ids
-de trechos do cruzamento** (match + hábitos de mídia): o conjunto é guardado
-na coluna `ids_acervo` no momento da geração e comparado com o conjunto
-atual do banco a cada consulta. Escolhemos comparação do conjunto inteiro,
+de trechos do recorte**: o conjunto é guardado na coluna `ids_acervo` no
+momento da geração e comparado com o conjunto atual do banco a cada consulta.
+
+A unidade do cache é o **recorte**, não o cruzamento (etapa 4). Cada
+cruzamento tem uma linha do recorte geral, com `pauta` vazia, e uma linha por
+tag de pauta, com o nome da pauta — a chave primária das duas tabelas é
+`(publico, macronarrativa, pauta)`. Cada linha guarda a validade do seu
+próprio recorte: o geral é o cruzamento inteiro mais os trechos de `perfil` do
+público; o de uma pauta é a pauta mais a `comunicação e linguagem`. Mexer numa
+pauta invalida aquela tag e o recorte geral, e deixa as outras tags de pé —
+dá para conferir isso no `registros`, que registra `origem` por recorte, com a
+pauta dentro do JSON da resposta. Escolhemos comparação do conjunto inteiro,
 não hash nem data: não existe colisão possível, e a string guardada é
 auditável direto no banco (`SELECT ids_acervo FROM paginas WHERE ...`).
 Qualquer linha incluída, removida ou com id trocado invalida a entrada na
@@ -441,7 +450,7 @@ obrigatório após qualquer carga.
 
 A validade tem **dois critérios**, ambos verificados na leitura:
 
-1. o conjunto de ids de trechos do cruzamento, como descrito acima;
+1. o conjunto de ids de trechos do recorte, como descrito acima;
 2. o **modelo** que gerou a entrada, comparado com o `MODEL_ID` atual — página
    feita por outro modelo não é reutilizada. Páginas só de lacuna têm `modelo`
    nulo (nenhum modelo foi chamado) e seguem válidas em qualquer modelo.
@@ -466,7 +475,9 @@ o cache desligado, o front não lê nada guardado e **apaga todas** as páginas
 que tinha, não só a do match atual.
 
 **Gerar o cache em lote** (`scripts/gera-cache.js`): percorre os 20
-cruzamentos chamando `/api/match`; cruzamento sem acervo suficiente vira
+cruzamentos chamando `/api/match`. Cada chamada gera o recorte geral **e** o
+gatilho de cada tag de pauta, então o lote cobre bem mais que 20 recortes (com
+o acervo v5, 20 gerais + 164 de pauta); cruzamento sem acervo suficiente vira
 página de lacunas, sem custo de modelo. Reporta quantas páginas gerou,
 quantas já estavam em cache, quantas ficaram em lacuna e o custo total do
 lote (medido pela diferença de uso na conta OpenRouter, se
