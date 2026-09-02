@@ -125,6 +125,9 @@ main { padding: var(--espaco-6) 0 var(--espaco-7); }
   padding: var(--espaco-1) var(--espaco-4); margin: 0 var(--espaco-2) var(--espaco-2) 0; cursor: pointer;
 }
 .pautas button[aria-pressed="true"] { background: var(--cor-tag-ativa); color: var(--cor-tag-ativa-texto); font-weight: var(--peso-forte); }
+/* Tag cujo gatilho ainda não está no cache: existe no acervo, mas não há o que
+   mostrar ainda. Desabilitada, não escondida. */
+.pautas button[disabled] { opacity: 0.45; cursor: not-allowed; border-style: dashed; }
 .selo {
   display: inline-block; font-size: var(--texto-m); background: var(--cor-tag-ativa);
   color: var(--cor-tag-ativa-texto); border-radius: var(--raio-pilula);

@@ -142,14 +142,22 @@
   function montaTags(dados) {
     const caixa = document.getElementById("botoes-pauta");
     caixa.textContent = "";
-    const tags = [{ pauta: "", rotulo: "Visão geral" }].concat(
-      (dados.tags ?? []).map((t) => ({ pauta: t.pauta, rotulo: t.pauta }))
+    // Tag sem gatilho no cache vem com disponivel: false — o botão aparece
+    // desabilitado, porque o ângulo existe no acervo mas ainda não foi gerado.
+    const tags = [{ pauta: "", rotulo: "Visão geral", disponivel: true }].concat(
+      (dados.tags ?? []).map((t) => ({
+        pauta: t.pauta, rotulo: t.pauta, disponivel: t.disponivel !== false,
+      }))
     );
     for (const tag of tags) {
       const botao = el("button", null, tag.rotulo);
       botao.type = "button";
       botao.dataset.pauta = tag.pauta;
       botao.setAttribute("aria-pressed", String(tag.pauta === pautaAtiva));
+      if (!tag.disponivel) {
+        botao.disabled = true;
+        botao.title = "Este ângulo está sendo preparado. Recarregue em instantes.";
+      }
       botao.addEventListener("click", () => {
         pautaAtiva = tag.pauta;
         for (const irma of caixa.children) {

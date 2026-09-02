@@ -456,8 +456,16 @@ A validade tem **dois critérios**, ambos verificados na leitura:
    nulo (nenhum modelo foi chamado) e seguem válidas em qualquer modelo.
 
 Limitação conhecida: mudanças de **prompt** não entram na validade. Editar
-`docs/03-regras-do-agente.md` ou `docs/08-regras-de-formato.md` não invalida
-nada — nesses deploys, limpe o cache à mão (ver o fim desta seção).
+`prompts/*.txt`, uma planilha de regra ou `docs/08-regras-de-formato.md` não
+invalida nada — nesses deploys, esvazie o cache à mão (ver "Regenerar e
+publicar o cache", acima).
+
+**A resposta não espera as tags.** A rota devolve a página do recorte geral e
+só inclui os gatilhos de pauta que já estão no cache; tag sem gatilho vem com
+`disponivel: false` e a tela mostra o botão desabilitado. O que falta é gerado
+depois de responder, em `waitUntil`, e aparece na requisição seguinte. Com o
+cache desligado nada é guardado, então nem se gera: as tags ficam todas
+indisponíveis e quem preenche é o lote.
 
 **Nível 2 — navegador (localStorage).** A página de resultado guarda as
 páginas já vistas com a marca de versão de `dados/versao-acervo.txt`
@@ -474,11 +482,10 @@ mesmo ciclo que regenera o arquivo, então os dois lados nunca discordam. Com
 o cache desligado, o front não lê nada guardado e **apaga todas** as páginas
 que tinha, não só a do match atual.
 
-**Gerar o cache em lote** (`scripts/gera-cache.js`): percorre os 20
-cruzamentos chamando `/api/match`. Cada chamada gera o recorte geral **e** o
-gatilho de cada tag de pauta, então o lote cobre bem mais que 20 recortes (com
-o acervo v5, 20 gerais + 164 de pauta); cruzamento sem acervo suficiente vira
-página de lacunas, sem custo de modelo. Reporta quantas páginas gerou,
+**Gerar o cache em lote** (`scripts/gera-cache.js`): ver "Regenerar e publicar
+o cache (etapa 7)", acima — percorre os 20 cruzamentos, os 164 recortes por
+pauta e os 60 formatos; cruzamento sem acervo suficiente vira página de
+lacunas, sem custo de modelo. Reporta quantas páginas gerou,
 quantas já estavam em cache, quantas ficaram em lacuna e o custo total do
 lote (medido pela diferença de uso na conta OpenRouter, se
 `OPENROUTER_API_KEY` estiver no ambiente).
@@ -507,6 +514,99 @@ CREATE TABLE formatos (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, form
 ```sh
 npx wrangler d1 execute decisivas --remote --command="DELETE FROM paginas; DELETE FROM formatos;"
 ```
+
+## Regenerar e publicar o cache (etapa 7)
+
+A ordem importa, e cada passo protege o seguinte.
+
+### 1. Ligar o cache e publicar
+
+`CACHE_ENABLED = "true"` em `[vars]`, commitado e no ar **antes** do lote. Com
+`"false"` a geração é paga e não grava nada, e a rota nem prepara os gatilhos
+das tags — o script recusa rodar e diz isso.
+
+**Sem `[env.*]` no `wrangler.toml`, a pré-visualização de branch usa o MESMO D1
+e o mesmo cache da produção.** Rode o lote só a partir da main, depois do
+deploy: rodar de uma branch grava no cache de produção com o código da branch.
+
+### 2. Esvaziar o cache
+
+Prompt e regra mudaram nas etapas 5 e 6, e **isso não invalida o cache
+sozinho**: a validade cobre o conjunto de trechos e o modelo, não o texto do
+prompt. Antes de gerar, esvazie as duas tabelas.
+
+No console do painel, um comando por bloco, na ordem:
+
+```
+DELETE FROM paginas;
+```
+
+```
+DELETE FROM formatos;
+```
+
+Conferência, que deve devolver `0` e `0`:
+
+```
+SELECT (SELECT COUNT(*) FROM paginas) AS paginas, (SELECT COUNT(*) FROM formatos) AS formatos;
+```
+
+Com terminal autenticado, o equivalente é
+`npx wrangler d1 execute decisivas --remote --command="DELETE FROM paginas; DELETE FROM formatos;"`.
+
+### 3. Rodar o lote
+
+```sh
+BASE_URL=https://SEU-DOMINIO node scripts/gera-cache.js
+```
+
+O script percorre, na ordem em que uma pessoa encontraria: os 20 cruzamentos,
+os recortes por pauta de cada um (o gatilho de cada tag) e os três formatos de
+cada cruzamento — 20 + 164 + 60 = **244 recortes** com o acervo v5.
+
+Como a rota devolve a página sem esperar as tags e as gera em segundo plano, o
+script **volta a pedir a página** até todas as tags ficarem disponíveis
+(`TENTATIVAS_TAGS` e `ESPERA_TAGS_MS` ajustam a espera). Ele reporta páginas,
+tags e formatos gerados, os tempos médios, o custo real do lote (com
+`OPENROUTER_API_KEY` no ambiente) e sai com código 1 se sobrar qualquer tag sem
+gatilho.
+
+**Atrás do Cloudflare Access**, use um token de serviço (Access → Service Auth)
+em vez de tentar autenticar no navegador:
+
+```sh
+BASE_URL=https://SEU-DOMINIO ACESSO_CLIENT_ID=... ACESSO_CLIENT_SECRET=... node scripts/gera-cache.js
+```
+
+Sem isso, a rota responde a tela de login e o script diz exatamente isso, em
+vez de contar erro de JSON.
+
+### 4. Varrer os termos bloqueados
+
+```sh
+BLOCKED_TERMS="..." BASE_URL=https://SEU-DOMINIO node scripts/varre-termos.js
+```
+
+Lê o que o cache entrega — as 20 páginas, os gatilhos de pauta dentro delas e
+os 60 formatos — e procura qualquer item de `BLOCKED_TERMS`, com a mesma
+comparação do Worker (ignora maiúsculas e acentos, casa palavra inteira). O
+resultado esperado é **zero ocorrências**; qualquer achado sai com o termo, o
+lugar e o trecho ao redor, e o script sai com código 1.
+
+A lista vive em variável de ambiente, fora do repositório, e traz somente nomes
+próprios. Exporte a mesma que está no painel; sem ela o script recusa rodar.
+
+Com wrangler autenticado, `node scripts/varre-termos.js --d1=remote` varre as
+tabelas direto, inclusive linhas que ninguém pediu ainda.
+
+### 5. Registro dos lotes
+
+| Quando | Onde | Resultado |
+|---|---|---|
+| — | — | Nenhum lote em produção registrado ainda |
+
+Uma linha por lote: data, destino, o que o relatório devolveu (páginas, tags,
+formatos, custo) e o resultado da varredura de termos.
 
 ## O build, e o que ele gera
 

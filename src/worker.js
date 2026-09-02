@@ -93,7 +93,7 @@ function respostaIndisponivel() {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
     // Fora de /api/*, entrega o site estático.
@@ -119,7 +119,7 @@ export default {
     }
 
     try {
-      if (url.pathname === "/api/match") return await rotaMatch(corpo, env, request);
+      if (url.pathname === "/api/match") return await rotaMatch(corpo, env, request, ctx);
       if (url.pathname === "/api/formato") return await rotaFormato(corpo, env, request);
     } catch (e) {
       console.error("erro na rota", url.pathname, e.message);
@@ -164,7 +164,7 @@ async function limitePorIpOk(env, request, rota) {
 // Rota /api/match
 // ---------------------------------------------------------------------------
 
-async function rotaMatch(corpo, env, request) {
+async function rotaMatch(corpo, env, request, ctx) {
   const { publico, macronarrativa } = corpo ?? {};
 
   if (!(await verificaTurnstile(corpo, env, request))) {
@@ -229,12 +229,36 @@ async function rotaMatch(corpo, env, request) {
     });
   }
 
-  // 9. Recortes por pauta: um gatilho por tag, cada um com entrada e validade
-  // próprias no cache. Vai fora do JSON guardado do recorte geral, porque cada
-  // pauta invalida sozinha quando os trechos dela mudam.
-  pagina.gatilhos_por_pauta = await gatilhosPorPauta(
-    env, cacheLigado, publico, macronarrativa, pagina.tags ?? [], carregaRecorte
-  );
+  // 9. Recortes por pauta: cada tag tem entrada e validade próprias no cache,
+  // fora do JSON guardado do recorte geral, porque cada pauta invalida sozinha
+  // quando os trechos dela mudam.
+  //
+  // A resposta NÃO espera geração de tag: só lê o que já está no cache. O que
+  // falta é gerado depois de responder, em waitUntil, e aparece na próxima
+  // requisição — a página do recorte geral é o que a pessoa está esperando, e
+  // fazê-la esperar mais uma rodada de modelo por causa das tags é somar
+  // latência a quem já pagou a espera da página.
+  const tags = pagina.tags ?? [];
+  pagina.gatilhos_por_pauta = await gatilhosEmCache(env, cacheLigado, publico, macronarrativa, tags);
+
+  // Tag sem gatilho no cache vem marcada como indisponível: a tela desabilita
+  // o botão em vez de oferecer um ângulo que ainda não existe.
+  pagina.tags = tags.map((tag) => ({
+    ...tag,
+    disponivel: Object.prototype.hasOwnProperty.call(pagina.gatilhos_por_pauta, tag.pauta),
+  }));
+
+  const faltando = tags.filter((tag) => !pagina.gatilhos_por_pauta[tag.pauta]);
+  if (faltando.length && cacheLigado && ctx?.waitUntil) {
+    // Com o cache desligado nada disso é guardado, então gerar aqui seria
+    // chamada paga jogada fora: nesse caso as tags ficam todas indisponíveis
+    // e quem gera o cache é scripts/gera-cache.js.
+    ctx.waitUntil(
+      gatilhosPorPauta(env, cacheLigado, publico, macronarrativa, faltando, carregaRecorte).catch(
+        (e) => console.error("falha ao gerar gatilho de pauta em segundo plano:", e.message)
+      )
+    );
+  }
 
   pagina.versao_acervo = VERSAO_ACERVO;
   // O front usa esta flag: com o cache desligado, descarta o que guardou.
@@ -347,6 +371,27 @@ async function geraPaginaGeral(env, publico, macronarrativa, trechos, perfil) {
   pagina.origem = "geracao";
 
   return { pagina, ids: [...idsDaPagina(pagina)].join(","), modelo: modeloUsado };
+}
+
+// O que já está no cache, sem gerar nada: é o que entra na resposta. As
+// leituras vão em paralelo — são independentes, e cada uma é uma consulta de
+// validade mais uma de leitura.
+async function gatilhosEmCache(env, cacheLigado, publico, macronarrativa, tags) {
+  if (!cacheLigado || !tags.length) return {};
+  const pares = await Promise.all(
+    tags.map(async ({ pauta }) => {
+      const cache = await abreCachePagina(env, cacheLigado, publico, macronarrativa, pauta);
+      if (!cache.guardada) return null;
+      const campo = JSON.parse(cache.guardada.resposta);
+      await gravaRegistro(env, {
+        rota: "match", publico, macronarrativa,
+        ids: cache.guardada.ids_trechos, modelo: cache.guardada.modelo,
+        origem: "cache", resposta: { recorte: { pauta }, gatilho: campo },
+      });
+      return [pauta, campo];
+    })
+  );
+  return Object.fromEntries(pares.filter(Boolean));
 }
 
 // Um gatilho por tag, em paralelo: são recortes independentes, e sequenciar
@@ -572,6 +617,13 @@ function normalizaLacunas(json) {
 // fluxo (validação, termos bloqueados, registro) não muda.
 async function chamaModelo(env, sistema, usuario, simulador) {
   if (env.SIMULAR_MODELO === "true") {
+    // Instrumento de teste: com SIMULAR_LATENCIA_MS, o simulador espera esse
+    // tempo antes de responder. Serve para medir o efeito da ESTRUTURA do
+    // código (quantas chamadas ficam no caminho da resposta) sob uma latência
+    // conhecida, sem gastar chamada paga. Não tem efeito nenhum fora de
+    // SIMULAR_MODELO, que nunca está ligado em produção.
+    const espera = Number(env.SIMULAR_LATENCIA_MS ?? 0);
+    if (espera > 0) await new Promise((pronto) => setTimeout(pronto, espera));
     return simulador();
   }
   const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
