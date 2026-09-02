@@ -21,10 +21,11 @@ public/vocabulario.js
 
 # Telas geradas no build a partir de paginas/ e parciais/ (scripts/gera-paginas.js)
 public/index.html
+public/resultado.html
 public/sobre.html
 public/privacidade.html
+public/caminhos/
 public/estilos.css
-public/rodape.js
 public/configuracao.js
 public/_redirects
 public/assets/

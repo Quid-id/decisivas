@@ -476,14 +476,43 @@ arquivo está em `public/`, ele é saída de build; edite a fonte, nunca a cópi
 |---|---|---|
 | `brand/tokens.css` | `public/tokens.css` | `sincroniza-tokens.js` |
 | `dados/vocabulario.json` | `public/vocabulario.js` | `sincroniza-tokens.js` |
-| `paginas/*.html` + `parciais/*.html` | `public/*.html` | `gera-paginas.js` |
-| `paginas/estilos.css`, `rodape.js`, `_redirects` | `public/` | `gera-paginas.js` |
+| `paginas/index.html`, `paginas/resultado.html` + `parciais/*.html` | `public/*.html` | `gera-paginas.js` |
+| **`conteudo/<publico>.json` + `paginas/caminho.html`** | **`public/caminhos/<publico>/<tema>.html`** (20) | `gera-caminhos.js` |
+| `conteudo/sobre.json` + `paginas/sobre.html` | `public/sobre.html` | `gera-caminhos.js` |
+| `conteudo/sobre.json` + `paginas/privacidade.html` | `public/privacidade.html` | `gera-caminhos.js` |
+| `paginas/estilos.css`, `_redirects` | `public/` | `gera-paginas.js` |
 | `dados/configuracao.json` | `public/configuracao.js` | `gera-paginas.js` |
-| `assets/*` | `public/assets/` | `gera-paginas.js` |
+| `assets/*`, inclusive `assets/fonts/` | `public/assets/` | `gera-paginas.js` |
 
 Saíram na etapa 8A: `public/versao-acervo.js`, que servia ao cache do
-navegador, e `prompts/gerado/*.txt`, os prompts do agente. As 20 páginas de
-caminho entram nesta tabela na 8B, geradas de `conteudo/*.json`.
+navegador, e `prompts/gerado/*.txt`, os prompts do agente. Na 8B saiu
+`public/rodape.js`: o rodapé passou a ser montado no build, com a assinatura e
+o contato já dentro.
+
+### O conteúdo, e o que o build recusa
+
+`scripts/conteudo.js` é a única porta de entrada do texto das páginas. Ele
+carrega os quatro arquivos de público pelo **mapa explícito** — `jovens.json`,
+`70mais.json`, `mulheres-beneficiarias.json`, `mulheres-2-a-5-sm.json` — porque
+identificador do banco, nome na tela, slug da URL e nome do arquivo são quatro
+coisas diferentes, e o 70+ é a prova (id `60+`, slug `70-mais`, arquivo
+`70mais.json`).
+
+Antes de gerar, ele confere: os 4 públicos, os 5 temas de cada um, os campos
+obrigatórios, 1 a 3 cards em "o que funciona" e em "o que não funciona", 3
+cards de dados, 2 parágrafos em "por que falar", 3 cards em "como chegar" e 5
+linhas de resumo. **Qualquer falha derruba o build com o caminho do campo**, do
+tipo `conteudo/70mais.json.paginas["trabalho digno"].resumo: deveria ter de 5 a
+5 itens, tem 4`.
+
+`revisado_em` é opcional em cada arquivo. Sem ele, o cabeçalho da página diz
+"texto em revisão" em vez de uma data.
+
+A seção "Explorar o acervo" precisa dizer quantos trechos existem no
+cruzamento e quais pautas há ali: isso vem de `dados/DECISIVAS_acervo_v5.xlsx`
+no build (`scripts/acervo.js`), a mesma planilha da carga — nunca de número
+escrito à mão. No beta a seção está desligada: os controles aparecem
+desabilitados e um aviso diz que o recurso chega em breve.
 
 **Cabeçalho e rodapé são um parcial só** (`parciais/cabecalho.html` e
 `parciais/rodape.html`), incluídos em cada tela pelo marcador `{{CABECALHO}}` e
@@ -495,15 +524,15 @@ O build é **idempotente**: só reescreve arquivo cujo conteúdo mudou
 observado pelo `wrangler dev` dispara o watcher e o Worker reinicia no meio das
 requisições.
 
-Falha de build é dura, de propósito: marcador não substituído ou cor de público
-fora da paleta de `brand/tokens.css` derrubam o build em vez de publicar tela
-pela metade. Na 8B entra a validação dos JSON de conteúdo, com o mesmo
-comportamento.
+Falha de build é dura, de propósito: marcador não substituído, cor de público
+fora da paleta de `brand/tokens.css` ou conteúdo com estrutura errada derrubam
+o build em vez de publicar tela pela metade.
 
 ### Assets
 
-`assets/` é a pasta única de imagens (banner, logotipos, cards semióticos,
-favicon), copiada para `public/assets/` no build. **Enquanto um arquivo não
+`assets/` é a pasta única de imagens e fontes (banner, logotipos, favicon e os
+arquivos da Inclusive Sans em `assets/fonts/`), copiada para `public/assets/`
+no build. **Enquanto um arquivo não
 existir, a tela mostra um placeholder tracejado com o nome esperado** — nada
 quebra e nada é inventado. Os nomes estão em `assets/LEIA-ME.md`. Sem nenhum
 `banner-*`, o cabeçalho usa a faixa provisória de linhas coloridas do protótipo.
@@ -515,11 +544,13 @@ responde 307 para `/sobre`. Os links internos apontam direto para a forma sem
 extensão. As rotas antigas saem em `paginas/_redirects`: `/metodologia` e
 `/transparencia`, com e sem `.html`, respondem 301 para `/sobre`.
 
-Na etapa 8A a tela de resultado saiu, e com ela a rota `/resultado`. O botão
-**VER CAMINHOS** passa a apontar para `/caminhos/<slug do público>/<slug do
-tema>`, com os slugs de `dados/vocabulario.json` — as 20 páginas desse endereço
-são geradas na 8B. **Enquanto a 8B não entrar, esse endereço não existe: a 8A
-não vai sozinha para produção.**
+Os caminhos ficam em `/caminhos/<slug do público>/<slug do tema>`, com os
+slugs de `dados/vocabulario.json`: 20 páginas de HTML estático, geradas no
+build. `VER CAMINHOS`, na home, monta esse endereço.
+
+A rota antiga `/resultado?publico=...&tema=...` continua de pé: virou uma
+página que lê os dois parâmetros, traduz para os slugs e redireciona para o
+caminho novo. Link já compartilhado não morre.
 
 ## Seções a completar
 

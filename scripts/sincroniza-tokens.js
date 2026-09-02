@@ -37,6 +37,12 @@ console.log(
   `vocabulário publicado: ${vocabulario.publicos.length} públicos, ${vocabulario.macronarrativas.length} temas`
 );
 
-// Monta as telas: parciais de cabeçalho e rodapé, configuração e assets
-// (etapa 6). As fontes ficam em paginas/ e parciais/; public/ é só saída.
-require("./gera-paginas").main();
+// Monta as telas: as fixas, as 20 páginas de caminho de conteudo/*.json, o
+// Sobre e a privacidade. As fontes ficam em paginas/, parciais/ e conteudo/;
+// public/ é só saída.
+require("./gera-paginas")
+  .main()
+  .catch((e) => {
+    console.error("FALHA ao gerar as telas:", e.message);
+    process.exit(1);
+  });

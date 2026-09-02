@@ -37,7 +37,17 @@
   /* ---------- Regra de contraste ----------
      Texto corrido em off-white sobre roxo, vermelho, azul e verde.
      Texto em preto sobre amarelo, verde claro, laranja, azul claro
-     e rosa. Estes tokens existem para ninguém decidir de novo. */
+     e rosa. Estes tokens existem para ninguém decidir de novo.
+
+     MEDIDO (WCAG 2.1, texto normal exige 4,5:1):
+       roxo + off-white ....... 5,26  passa
+       azul + off-white ....... alto  passa
+       vermelho + off-white ... 3,40  REPROVA (passa só em texto grande)
+       verde + off-white ...... 2,19  REPROVA
+       amarelo, verde claro, laranja, azul claro, rosa + preto .. 7 a 14  passam
+     Trocar o texto do vermelho e do verde para preto dá 5,74 e 8,91, e os
+     dois valores continuam na paleta. É decisão de identidade, não de código:
+     por isso os tokens seguem como a regra manda, e a medição fica aqui. */
   --sobre-roxo:        var(--off-white);
   --sobre-vermelho:    var(--off-white);
   --sobre-azul:        var(--off-white);
@@ -67,6 +77,17 @@
   --cor-texto-suave: #5a5a52;   /* metadados, legendas, rótulos */
   --cor-texto-fraco: #9b9b90;   /* apoio sobre fundo preto */
 
+  /* ---------- Cartões e sombra dura (protótipo v5) ----------
+     A identidade não usa sombra difusa: o cartão tem borda preta e um
+     deslocamento sólido, do mesmo preto. */
+  --sombra-dura:   4px 4px 0 var(--preto);
+  --sombra-dura-p: 3px 3px 0 var(--preto);
+  --sombra-dura-g: 6px 6px 0 var(--preto);
+  --raio-card:   10px;
+  --raio-card-g: 12px;
+  --raio-campo:  8px;
+  --borda-grossa: 3px;   /* pílulas da home e caixa do Explorar */
+
   /* ---------- Linhas ---------- */
   --cor-borda:        #d8d8cc;  /* divisórias internas */
   --cor-borda-forte:  var(--preto);
@@ -81,6 +102,7 @@
   --cor-ancorar:       var(--verde);      /* marcador do que ancorar */
   --cor-evitar:        var(--vermelho);   /* marcador do que evitar */
   --cor-foco:          var(--azul);       /* anel de foco */
+  --cor-acao-campo:    var(--amarelo);    /* botão de campo: Entendi, explorar */
 
   /* Cores dos três formatos, na barra de adaptação. */
   --cor-formato-whatsapp: var(--verde-claro);
@@ -114,6 +136,12 @@
   --texto-g:      1.3125rem; /* 21px — títulos de bloco */
   --texto-gg:     1.375rem;  /* 22px — marca na barra e no rodapé */
   --texto-titulo: clamp(1.75rem, 4.4vw, 2.875rem); /* chamada da home */
+  --texto-pergunta: clamp(1.875rem, 5vw, 3.25rem);  /* pergunta da home */
+  --texto-h1:      clamp(1.75rem, 4vw, 2.5rem);     /* título do caminho */
+  --texto-linha:   1.25rem;   /* 20px — linha de resumo do caminho */
+  --texto-card:    0.9375rem; /* 15px — corpo de card */
+  --texto-card-titulo: 1.125rem; /* 18px — título de card */
+  --texto-numero:  2.5rem;    /* 40px — número em destaque */
 
   --peso-normal: 400;
   --peso-forte:  700;
@@ -138,7 +166,12 @@
   --largura-conteudo: 1040px;
   --largura-texto:    70ch;
   --altura-banner:       220px;
-  --altura-banner-movel: 150px;
+  --altura-banner-movel: 140px;
+  --altura-barra:        60px;
+  /* Barra de compartilhamento: tamanho do botão e a folga que ela respeita
+     nas duas pontas, para não cobrir o menu nem o rodapé. */
+  --tamanho-share: 44px;
+  --folga-share:   60px;
 
   /* ---------- Foco (acessibilidade) ---------- */
   --foco-espessura: 3px;

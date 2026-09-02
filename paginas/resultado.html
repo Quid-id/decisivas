@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+{{CABECA}}
+<meta name="robots" content="noindex">
+</head>
+<body>
+{{CABECALHO}}
+
+<main><div class="larg">
+  <h1 class="chamada">Este endereço mudou</h1>
+  <p class="apoio" id="aviso">Levando você para o caminho novo…</p>
+  <div class="acao"><a class="caminhos" href="/">Ir para o início</a></div>
+</div></main>
+
+{{RODAPE}}
+
+<script src="/vocabulario.js"></script>
+<script>
+  // A rota antiga era /resultado?publico=...&tema=..., com a página gerada por
+  // modelo. Os caminhos agora são estáticos, em /caminhos/<publico>/<tema>:
+  // este redirecionamento mantém de pé qualquer link já compartilhado.
+  (function () {
+    var p = new URLSearchParams(window.location.search);
+    var slugDe = function (lista, id) {
+      var achado = (lista || []).find(function (v) { return v.id === id; });
+      return achado && achado.slug;
+    };
+    var publico = slugDe(window.VOCABULARIO.publicos, p.get("publico"));
+    var tema = slugDe(window.VOCABULARIO.macronarrativas, p.get("tema"));
+    if (publico && tema) {
+      window.location.replace("/caminhos/" + publico + "/" + tema);
+      return;
+    }
+    document.getElementById("aviso").textContent =
+      "Os caminhos agora ficam em endereços próprios. Escolha um público e um tema no início.";
+  })();
+</script>
+</body>
+</html>

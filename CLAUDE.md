@@ -65,8 +65,8 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 - `dados/DECISIVAS_acervo_v5.xlsx` — o acervo (2.405 linhas); fonte da carga da etapa 3
 - `dados/DECISIVAS_pautas_de_para_v1.xlsx` — as 59 pautas consolidadas
 - `conteudo/` — **o texto das 20 páginas**, um JSON por público, mais `sobre.json`. Escrito e revisado pela equipe; o build monta o HTML
-- `paginas/` — fonte das telas (Início, Sobre, Política de privacidade), mais `estilos.css` e `_redirects`
-- `parciais/` — cabeça, cabeçalho e rodapé comuns a todas as telas, incluídos no build
+- `paginas/` — fonte das telas: `index.html` (Início), `caminho.html` (o molde das 20 páginas), `sobre.html`, `privacidade.html`, `resultado.html` (redireciona a rota antiga), mais `estilos.css` e `_redirects`
+- `parciais/` — cabeça, cabeçalho, rodapé e barra de compartilhamento, comuns às telas e incluídos no build
 - `dados/configuracao.json` — textos e identificadores das telas; o que falta redigir está como `[preencher]`
 - `assets/` — pasta única de imagens (banner, logotipos, cards semióticos, favicon); enquanto um arquivo não existe, a tela mostra placeholder com o nome esperado
 - `referencia/decisivas_prototipo_v5.html` — referência visual oficial da etapa 8
@@ -80,16 +80,18 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 
 **O acervo v5 está no remoto:** 2.405 trechos, aplicados em 02/09/2026 pelo console, a partir dos blocos de `arquivo/carga-003/`. A verificação devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59`.
 
-**A migração 004 está escrita e não aplicada.** Ela remove `trechos_ate_002` e as duas tabelas de cache, `paginas` e `formatos`. Comandos em `migracao-004.sql`; registro e procedimento em `docs/06`. Até ela ser aplicada, o banco remoto tem três tabelas que o repositório já não descreve.
+**A migração 004 foi aplicada em 02/09/2026, pelo console.** Removeu `trechos_ate_002` e as duas tabelas de cache. O banco remoto tem hoje as cinco tabelas de `docs/02-schema.sql`; comandos e resultado em `migracao-004.sql` e no registro do `docs/06`.
 
 A fonte do acervo é `dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`, 2.405 linhas, já na taxonomia nova. Consolidado por regras aprovadas em lote, sem revisão linha a linha: tudo que estava nas extrações entrou, exceto o que a regra 4 veda. Conferido contra as restrições do banco: as 2.405 linhas passam, nenhuma violação.
 
-As 273 linhas da amostra antiga seguem em `trechos_ate_002` até a 004 ser aplicada. **Elas não podem ser publicadas** e nenhuma consulta do código as alcança.
+As 273 linhas da amostra antiga saíram do banco com a migração 004.
 
-**O texto das 20 páginas está em `conteudo/`**, em revisão pela equipe e pelo jurídico. Falta redigir: "quem faz" no Sobre, assinatura e contato do rodapé, o id do vídeo — tudo marcado `[preencher]`. Faltam também os assets da identidade (banner, cards semióticos, logos, arquivos da fonte).
+**O texto das 20 páginas está em `conteudo/` e já monta as páginas**, em revisão pela equipe e pelo jurídico. Falta redigir: "quem faz" no Sobre, assinatura e contato do rodapé, o id do vídeo — tudo marcado `[preencher]`. Nenhum arquivo traz `revisado_em`, então as páginas mostram "texto em revisão" no lugar da data. Faltam também os assets da identidade (banner, cards semióticos, logos, arquivos da fonte em `assets/fonts/`).
 
 Onde o acervo não sustenta um bloco, a página declara a lacuna: hoje isso acontece em 70+ com dinheiro, trabalho e Brasil, e em trabalho digno para os dois públicos femininos. Lacuna é conteúdo, não erro. O tipo `exemplo` tem zero linhas no acervo e a coluna `link` está sempre vazia.
 
-**Estado das etapas:** 0 a 7 concluídas (a 7 teve o lote de geração cancelado pela decisão de páginas fixas). 8A é esta limpeza; 8B monta as páginas fixas; 8C verifica e publica. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (`70+` no banco).
+**Endereços:** `/` (Início), `/caminhos/<slug do público>/<slug do tema>` (as 20 páginas), `/sobre`, `/privacidade`. `/resultado?publico=...&tema=...` redireciona para o caminho novo; `/metodologia` e `/transparencia` vão para `/sobre`.
+
+**Estado das etapas:** 0 a 7 concluídas (a 7 teve o lote de geração cancelado pela decisão de páginas fixas). 8A limpou o repositório e aplicou a migração 004; 8B montou as 20 páginas fixas, o compartilhamento e o aviso de privacidade; 8C verifica e publica. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (`70+` no banco).
 
 **Datas:** beta em 04/09/2026, lançamento em 14/09/2026.

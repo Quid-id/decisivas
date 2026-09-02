@@ -1,5 +1,9 @@
 // DECISIVAS — monta as telas a partir das fontes e publica em public/.
 //
+// Este script cuida das telas que NÃO vêm de conteudo/: o Início e o
+// redirecionador da rota antiga. As 20 páginas de caminho, o Sobre e a
+// privacidade são montados por scripts/gera-caminhos.js, chamado no fim.
+//
 // Roda no build (chamado por scripts/sincroniza-tokens.js), antes de
 // `wrangler dev` e `wrangler deploy`, inclusive nos deploys por push.
 //
@@ -8,30 +12,44 @@
 // fontes ficam em paginas/ e parciais/; tudo que sai em public/ é gerado e
 // está fora do versionamento.
 //
-//   paginas/*.html   + parciais/{cabeca,cabecalho,rodape}.html → public/*.html
-//   paginas/estilos.css, paginas/rodape.js, paginas/_redirects → public/
-//   dados/configuracao.json                                    → public/configuracao.js
-//   assets/*                                                   → public/assets/
+//   paginas/*.html   + parciais/*.html         → public/*.html
+//   conteudo/*.json  + paginas/caminho.html    → public/caminhos/<pub>/<tema>.html
+//   paginas/estilos.css, paginas/_redirects    → public/
+//   dados/configuracao.json                    → public/configuracao.js
+//   assets/* (inclusive assets/fonts/)         → public/assets/
 //
 // Marcadores nas telas: {{CABECA}} (o <head> comum), {{CABECALHO}} (banner +
-// barra) e {{RODAPE}}. No cabeçalho, {{BANNER}} vira as imagens de assets/ ou,
-// enquanto não houver nenhuma, a faixa provisória de linhas coloridas.
+// barra), {{RODAPE}} (rodapé e aviso de privacidade) e {{COMPARTILHAR}} (a
+// barra lateral, só nas páginas de caminho). No cabeçalho, {{BANNER}} vira as
+// imagens de assets/ ou, enquanto não houver nenhuma, a faixa provisória de
+// linhas coloridas.
 
 const fs = require("node:fs");
 const path = require("node:path");
 const { escreveSeMudou } = require("./escreve-se-mudou");
+const { escapa, troca, confereMarcadores, leParciais, ehPendente, pendentes } = require("./html");
+const geraCaminhos = require("./gera-caminhos");
 
 const SAIDA = "public";
 const ASSETS = "assets";
 
-// Título e item de navegação ativo de cada tela. A lista é fechada: tela nova
-// entra aqui, senão não é publicada. A tela de resultado saiu na etapa 8A com
-// a geração por modelo; as 20 páginas de caminho entram na 8B, geradas de
-// conteudo/*.json.
+// Telas montadas aqui: as que não vêm de `conteudo/`. O Sobre, a privacidade e
+// as 20 páginas de caminho são montados por scripts/gera-caminhos.js, a partir
+// do conteúdo escrito pela equipe.
 const PAGINAS = [
-  { arquivo: "index.html", titulo: "DECISIVAS — Com quem você quer falar hoje?", atual: "inicio" },
-  { arquivo: "sobre.html", titulo: "DECISIVAS — Sobre o projeto", atual: "sobre" },
-  { arquivo: "privacidade.html", titulo: "DECISIVAS — Política de privacidade", atual: null },
+  {
+    arquivo: "index.html",
+    titulo: "DECISIVAS · Com quem você quer falar hoje?",
+    descricao:
+      "Escolha um público e um tema e receba o que a pesquisa mostra sobre essa conversa: o que funciona, o que não funciona e como chegar nessas pessoas.",
+    atual: "inicio",
+  },
+  {
+    arquivo: "resultado.html",
+    titulo: "Este endereço mudou · DECISIVAS",
+    descricao: "Os caminhos agora ficam em /caminhos/<público>/<tema>.",
+    atual: "inicio",
+  },
 ];
 
 // Faixa provisória do protótipo v3, enquanto os assets de banner não chegam.
@@ -121,14 +139,43 @@ function copia(origem, destino) {
   return escreveSeMudou(destino, fs.readFileSync(origem, "utf8"));
 }
 
-function main() {
+// Logotipo de parceiro: o arquivo em assets/, quando existir; senão o
+// placeholder com o nome esperado.
+function logo(arquivo, nome) {
+  const caminho = path.join(ASSETS, arquivo);
+  return fs.existsSync(caminho)
+    ? `<span class="logo"><img src="/assets/${arquivo}" alt="${escapa(nome)}"></span>`
+    : `<span class="logo">[assets/${escapa(arquivo)}]</span>`;
+}
+
+// Contato do rodapé: link quando existe, caixa [preencher] quando não.
+function contato(valor, oQue, endereco) {
+  if (ehPendente(valor)) return `<span class="tagline">[preencher] ${escapa(oQue)}</span>`;
+  return `<a href="${escapa(endereco(valor))}" rel="noopener noreferrer">${escapa(valor)}</a>`;
+}
+
+async function main() {
   const vocabulario = JSON.parse(fs.readFileSync("dados/vocabulario.json", "utf8"));
   conferePaletaDosPublicos(vocabulario);
+  const configuracao = JSON.parse(fs.readFileSync("dados/configuracao.json", "utf8"));
 
-  const cabeca = fs.readFileSync("parciais/cabeca.html", "utf8").trim();
-  const cabecalhoBase = fs.readFileSync("parciais/cabecalho.html", "utf8").trim();
-  const rodape = fs.readFileSync("parciais/rodape.html", "utf8").trim();
-  const cabecalho = cabecalhoBase.replace("{{BANNER}}", montaBanner()) + "\n" + RODA_BANNER;
+  const parciais = leParciais();
+  parciais.cabecalho = parciais.cabecalho.replace("{{BANNER}}", montaBanner()) + "\n" + RODA_BANNER;
+  // O rodapé é igual em toda tela, e o que falta redigir aparece nele como
+  // [preencher] — inclusive a assinatura e o contato.
+  parciais.rodape = troca(parciais.rodape, {
+    ASSINATURA: ehPendente(configuracao.assinatura)
+      ? "[preencher] assinatura do projeto"
+      : escapa(configuracao.assinatura),
+    CONTATO_EMAIL: contato(configuracao.contato?.email, "e-mail", (v) => `mailto:${v}`),
+    CONTATO_INSTAGRAM: contato(
+      configuracao.contato?.instagram,
+      "Instagram",
+      (v) => `https://instagram.com/${String(v).replace(/^@/, "")}`
+    ),
+    LOGO_QUID: logo("logo-quid.svg", "Quid"),
+    LOGO_BRIEF: logo("logo-brief.svg", "BRIEF"),
+  });
 
   fs.mkdirSync(SAIDA, { recursive: true });
   let escritos = 0;
@@ -136,32 +183,31 @@ function main() {
   for (const pagina of PAGINAS) {
     const origem = path.join("paginas", pagina.arquivo);
     let html = fs.readFileSync(origem, "utf8");
-    html = html
-      .split("{{CABECA}}").join(cabeca.replace("{{TITULO}}", pagina.titulo))
-      .split("{{CABECALHO}}").join(cabecalho)
-      .split("{{RODAPE}}").join(rodape)
-      .split("{{ATUAL_INICIO}}").join(pagina.atual === "inicio" ? ' aria-current="page"' : "")
-      .split("{{ATUAL_SOBRE}}").join(pagina.atual === "sobre" ? ' aria-current="page"' : "");
-
-    const restantes = [...html.matchAll(/\{\{([A-Z_]+)\}\}/g)].map((m) => m[1]);
-    if (restantes.length) {
-      throw new Error(`${origem}: marcador não substituído: ${[...new Set(restantes)].join(", ")}`);
-    }
+    html = troca(html, {
+      CABECA: troca(parciais.cabeca, { TITULO: pagina.titulo, DESCRICAO: escapa(pagina.descricao) }),
+      CABECALHO: parciais.cabecalho,
+      RODAPE: parciais.rodape,
+      ATUAL_INICIO: pagina.atual === "inicio" ? ' aria-current="page"' : "",
+      ATUAL_SOBRE: pagina.atual === "sobre" ? ' aria-current="page"' : "",
+    });
+    confereMarcadores(html, origem);
     if (escreveSeMudou(path.join(SAIDA, pagina.arquivo), html)) escritos++;
   }
 
-  // Estilos, script do rodapé e redirecionamentos das rotas antigas.
+  // As 20 páginas de caminho, o Sobre e a privacidade, de conteudo/*.json.
+  const doConteudo = await geraCaminhos.main({ parciais, vocabulario, configuracao });
+  escritos += doConteudo.escritos;
+
+  // Estilos e redirecionamentos das rotas antigas.
   if (copia("paginas/estilos.css", path.join(SAIDA, "estilos.css"))) escritos++;
-  if (copia("paginas/rodape.js", path.join(SAIDA, "rodape.js"))) escritos++;
   if (copia("paginas/_redirects", path.join(SAIDA, "_redirects"))) escritos++;
 
   // Configuração das telas, publicada como os demais vocabulários.
-  const configuracao = fs.readFileSync("dados/configuracao.json", "utf8");
   if (
     escreveSeMudou(
       path.join(SAIDA, "configuracao.js"),
       "// ARQUIVO GERADO no build a partir de dados/configuracao.json — NÃO EDITAR AQUI.\n" +
-        `window.CONFIGURACAO = ${JSON.stringify(JSON.parse(configuracao))};\n`
+        `window.CONFIGURACAO = ${JSON.stringify(configuracao)};\n`
     )
   ) {
     escritos++;
@@ -175,7 +221,13 @@ function main() {
     for (const arquivo of fs.readdirSync(ASSETS)) {
       if (arquivo === "LEIA-ME.md") continue;
       const origem = path.join(ASSETS, arquivo);
-      if (!fs.statSync(origem).isFile()) continue;
+      // A pasta de fontes vai inteira: as telas servem a Inclusive Sans do
+      // próprio site, sem chamada ao Google Fonts.
+      if (fs.statSync(origem).isDirectory()) {
+        fs.cpSync(origem, path.join(destinoAssets, arquivo), { recursive: true });
+        copiados += fs.readdirSync(origem).length;
+        continue;
+      }
       const destino = path.join(destinoAssets, arquivo);
       const igual =
         fs.existsSync(destino) && fs.readFileSync(destino).equals(fs.readFileSync(origem));
@@ -186,9 +238,10 @@ function main() {
 
   const banners = arquivosDeBanner().length;
   console.log(
-    `telas publicadas: ${PAGINAS.length} páginas (${escritos} arquivo(s) reescrito(s)) | ` +
+    `telas publicadas: ${PAGINAS.length} fixas + ${doConteudo.caminhos} caminhos + Sobre e privacidade ` +
+      `(${escritos} arquivo(s) reescrito(s)) | ` +
       `banner: ${banners ? `${banners} imagem(ns) de assets/` : "faixa provisória"} | ` +
-      `assets copiados: ${copiados}`
+      `assets copiados: ${copiados} | [preencher] pendentes: ${pendentes().length}`
   );
 }
 
