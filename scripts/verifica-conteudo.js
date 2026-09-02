@@ -21,9 +21,13 @@
 //
 // Sem a variável, o que acontece depende de ONDE o build está rodando:
 //
-//   - build do Cloudflare (ou qualquer CI): **falha**. Publicar sem a
-//     varredura é publicar sem a rede que sustenta a regra 4, e a falta da
+//   - build de esteira da branch que publica (a main): **falha**. Publicar sem
+//     a varredura é publicar sem a rede que sustenta a regra 4, e a falta da
 //     variável no painel passa a ser um erro visível, não um aviso no log.
+//   - build de pré-visualização (qualquer outra branch): só avisa. As
+//     variáveis de build ficam no ambiente de produção do painel, e o build de
+//     branch não as recebe — reprovar aí seria reprovar por um detalhe da
+//     esteira, não por conteúdo.
 //   - máquina de quem desenvolve: só avisa, para `wrangler dev` rodar sem a
 //     lista à mão.
 //
@@ -66,6 +70,13 @@ const CONFIGURACAO = "dados/configuracao.json";
 // Pages e GitHub Actions, para a conferência não depender de uma só.
 const MARCAS_DE_CI = ["CI", "WORKERS_CI", "CF_PAGES", "GITHUB_ACTIONS"];
 
+// E de qual branch? Cada esteira publica o nome numa variável própria.
+const MARCAS_DE_RAMO = ["WORKERS_CI_BRANCH", "CF_PAGES_BRANCH", "GITHUB_REF_NAME", "BRANCH"];
+
+// A branch que publica: é a dela que o site vai ao ar, e só nela a falta da
+// lista derruba o build.
+const RAMO_DE_PUBLICACAO = "main";
+
 function marcaLigada(marca) {
   const valor = String(process.env[marca] ?? "").trim().toLowerCase();
   return valor !== "" && valor !== "false" && valor !== "0";
@@ -73,6 +84,21 @@ function marcaLigada(marca) {
 
 function ehCI() {
   return MARCAS_DE_CI.some(marcaLigada);
+}
+
+function ramoDoBuild() {
+  for (const marca of MARCAS_DE_RAMO) {
+    const valor = String(process.env[marca] ?? "").trim();
+    if (valor) return valor;
+  }
+  return "";
+}
+
+// Build que publica: esteira, na branch principal. É o único lugar onde a
+// falta da lista é erro — no de pré-visualização as variáveis de produção do
+// painel não chegam.
+function ehBuildQuePublica() {
+  return ehCI() && ramoDoBuild() === RAMO_DE_PUBLICACAO;
 }
 
 // Uma linha no começo do log dizendo em que ambiente o build está e se a lista
@@ -84,13 +110,14 @@ function ehCI() {
 function ambienteDoBuild() {
   const marcas = MARCAS_DE_CI.filter(marcaLigada);
   const onde = marcas.length ? `esteira (${marcas.join(", ")})` : "máquina local (nenhuma marca de esteira)";
+  const ramo = `ramo ${ramoDoBuild() || "desconhecido"}`;
   const quantos = listaDeTermos().length;
   const lista = quantos
     ? `BLOCKED_TERMS: ${quantos} termo(s)`
-    : "BLOCKED_TERMS: AUSENTE ou vazia — se isto está num build do Cloudflare, " +
-      "a variável não chegou ao processo do build (confira em Settings → Build → Build variables, " +
-      "e não em Variables and Secrets, que é runtime)";
-  return `${onde} | ${lista}`;
+    : "BLOCKED_TERMS: AUSENTE ou vazia — no painel ela vive no ambiente de PRODUÇÃO " +
+      "(Settings → Builds → Variables and secrets), e o build de pré-visualização de branch " +
+      "não recebe as variáveis de produção; no build da main, ausente derruba a publicação";
+  return `${onde} | ${ramo} | ${lista}`;
 }
 
 function listaDeTermos() {
@@ -176,7 +203,7 @@ function trecho(texto, posicao) {
 function varre() {
   const lista = listaDeTermos();
   if (!lista.length) {
-    return { rodou: false, ci: ehCI(), termos: 0, arquivos: 0, campos: 0, ocorrencias: [] };
+    return { rodou: false, publica: ehBuildQuePublica(), termos: 0, arquivos: 0, campos: 0, ocorrencias: [] };
   }
 
   const compilados = padroes(lista);
@@ -201,7 +228,7 @@ function varre() {
 
   return {
     rodou: true,
-    ci: ehCI(),
+    publica: ehBuildQuePublica(),
     termos: lista.length,
     siglas: compilados.filter((c) => c.sigla).length,
     arquivos: arquivos.length,
@@ -221,9 +248,9 @@ function verifica({ vocabulario }) {
 
   // 2. Termos bloqueados.
   const resultado = varre();
-  if (!resultado.rodou && resultado.ci) {
+  if (!resultado.rodou && resultado.publica) {
     throw new Error(
-      "BLOCKED_TERMS ausente ou vazia num build de esteira (CI).\n" +
+      `BLOCKED_TERMS ausente ou vazia no build que publica (esteira, ramo ${RAMO_DE_PUBLICACAO}).\n` +
         "Sem a lista, a varredura de termos bloqueados não roda, e publicar sem ela é\n" +
         "publicar sem a rede que sustenta a regra 4. Defina a variável nas variáveis de\n" +
         "build do painel do Cloudflare (docs/06-operacao.md, seção da varredura)."
@@ -243,7 +270,7 @@ function verifica({ vocabulario }) {
   return { paginas, ...resultado };
 }
 
-module.exports = { verifica, varre, ehSigla, listaDeTermos, ambienteDoBuild };
+module.exports = { verifica, varre, ehSigla, listaDeTermos, ambienteDoBuild, ehBuildQuePublica };
 
 if (require.main === module) {
   const vocabulario = JSON.parse(fs.readFileSync("dados/vocabulario.json", "utf8"));
@@ -254,7 +281,12 @@ if (require.main === module) {
         `${vocabulario.macronarrativas.length} temas`
     );
     if (!r.rodou) {
-      console.log("varredura NÃO executada: BLOCKED_TERMS ausente ou vazia");
+      // Execução na mão sem a lista é engano de quem rodou: o script existe
+      // para varrer. No build é diferente — lá só o da main reprova.
+      console.log(
+        "varredura NÃO executada: BLOCKED_TERMS ausente ou vazia. " +
+          'Rode com a lista: BLOCKED_TERMS="Nome|SIGLA" node scripts/verifica-conteudo.js'
+      );
       process.exit(1);
     }
     console.log(
