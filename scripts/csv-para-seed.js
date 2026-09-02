@@ -27,25 +27,17 @@
 
 const fs = require("node:fs");
 
-// Vocabulários fechados (CLAUDE.md). Não criar valores novos.
-const PUBLICOS = [
-  "idosos",
-  "jovens",
-  "mulheres beneficiárias",
-  "mulheres de 2 a 5 salários mínimos",
-  "trabalhadoras informais",
-  "pequenas empreendedoras",
-  "plataformizadas",
-];
-const MACRONARRATIVAS = [
-  "dinheiro no bolso",
-  "proteção do trabalhador",
-  "proteção da família",
-  "brasil soberano",
-  "engajamento cívico",
-];
-const TIPOS = ["achado", "funciona", "afasta", "exemplo", "contexto", "verbatim"];
-const FORCAS = ["forte", "indício"];
+// ATENÇÃO: este script escreve para o schema ANTERIOR à migração 003 (colunas
+// base, despersonalizado, id_documento) e lê CSV. Ele é substituído na etapa 3
+// por um carregador do xlsx contra o schema novo. Está aqui só pelo histórico:
+// rodá-lo hoje gera INSERTs que o banco recusa.
+//
+// Vocabulários fechados: fonte única em dados/vocabulario.json.
+const VOCABULARIO = require("../dados/vocabulario.json");
+const PUBLICOS = VOCABULARIO.publicos.map((p) => p.id);
+const MACRONARRATIVAS = VOCABULARIO.macronarrativas.map((m) => m.id);
+const TIPOS = VOCABULARIO.tipos;
+const FORCAS = VOCABULARIO.forcas;
 const BASES = ["geral", "restrita"];
 const DECISOES_ACEITAS = ["aceitar", "corrigir e aceitar"];
 

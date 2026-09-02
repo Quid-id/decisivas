@@ -23,11 +23,11 @@
     <div id="erro" class="lacuna" hidden></div>
 
     <article id="cartao" class="cartao" hidden>
-      <!-- 1. Etiquetas do match + contagem de fontes + última atualização -->
+      <!-- 1. Identificação: público, tema e data da última atualização do acervo -->
       <div class="etiquetas">
         <span class="etiqueta" id="etiqueta-publico"></span>
         <span class="etiqueta" id="etiqueta-tema"></span>
-        <span class="suave" id="info-fontes"></span>
+        <span class="suave" id="info-acervo"></span>
       </div>
 
       <!-- 2. O gatilho: o núcleo do que a mensagem precisa tocar -->
@@ -113,23 +113,11 @@
       return el("div", "lacuna", AVISO_LACUNA);
     }
 
-    function chips(campo) {
-      const grupo = el("div", "chips");
-      for (const chip of campo.chips ?? []) {
-        grupo.appendChild(el("span", "chip", `${chip.fonte} · ${chip.metodo} · ${chip.periodo}`));
-      }
-      return grupo;
-    }
-
     // Lacuna declarada: a caixa de aviso sempre aparece; o campo nunca some.
-    function preencheTexto(idBloco, campo, comChips, comNota, classe) {
+    function preencheTexto(idBloco, campo, classe) {
       const bloco = document.getElementById(idBloco);
       if (!campo || campo.lacuna) { bloco.appendChild(caixaLacuna()); return; }
       bloco.appendChild(el("p", classe ?? null, campo.texto));
-      if (comChips) bloco.appendChild(chips(campo));
-      if (comNota && pagina.nota_base_restrita) {
-        bloco.appendChild(el("p", "nota-restrita", pagina.nota_base_restrita));
-      }
     }
 
     function preencheItens(idBloco, campo) {
@@ -144,16 +132,15 @@
       pagina = dados;
       document.getElementById("etiqueta-publico").textContent = dados.match.publico;
       document.getElementById("etiqueta-tema").textContent = dados.match.macronarrativa;
-      const atualizado = dados.atualizado_em ? ` · acervo atualizado em ${dados.atualizado_em}` : "";
-      document.getElementById("info-fontes").textContent =
-        `${dados.fontes} fonte${dados.fontes === 1 ? "" : "s"}${atualizado}`;
+      // Identificação: sem contador de fontes e sem chips (CONTEXTO v2, bloco 1).
+      document.getElementById("info-acervo").textContent =
+        dados.atualizado_em ? `acervo atualizado em ${dados.atualizado_em}` : "";
 
-      // O gatilho é o núcleo do material: em destaque, com as fontes.
-      preencheTexto("bloco-gatilho", dados.gatilho, true, false, "gatilho");
+      preencheTexto("bloco-gatilho", dados.gatilho, "gatilho");
       preencheItens("bloco-ancorar", dados.ancorar);
       preencheItens("bloco-evitar", dados.evitar);
-      preencheTexto("bloco-contexto", dados.contexto, true, false);
-      preencheTexto("bloco-pesquisa", dados.pesquisa, true, true);
+      preencheTexto("bloco-contexto", dados.contexto);
+      preencheTexto("bloco-pesquisa", dados.pesquisa);
 
       const midia = document.getElementById("bloco-midia");
       if (dados.habitos_de_midia.lacuna) {
