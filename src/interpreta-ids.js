@@ -7,8 +7,11 @@
 // O modelo recebe a pergunta e a lista numerada de trechos do cruzamento
 // (prompts/explorar.txt) e só pode responder `{"ids": [n, n, ...]}`. Aqui:
 //
-//   - qualquer coisa que não seja esse JSON vira lista vazia — prosa, cerca de
-//     código, JSON de outro formato, resposta em branco;
+//   - cerca de código é tolerada: modelo que responde ```json {...} ``` teve a
+//     cerca removida antes da leitura, porque o JSON dentro dela é a resposta
+//     certa e recusá-la só apagaria resultado bom;
+//   - qualquer outra coisa vira lista vazia — prosa, JSON de outro formato,
+//     resposta em branco;
 //   - número que não aponta para um trecho da lista é descartado;
 //   - repetido é descartado;
 //   - acima do teto, o excedente é cortado.
@@ -16,10 +19,19 @@
 // Lista vazia significa "sem resultado" na tela, com o aviso da configuração.
 // Não existe caminho pelo qual texto do modelo chegue a uma página.
 
+// Tira a cerca de código, quando houver: ```json na abertura (ou só ```) e
+// ``` no fim. Nada além disso é tolerado — texto antes ou depois da cerca
+// continua invalidando a resposta.
+function semCerca(bruto) {
+  const texto = String(bruto).trim();
+  const cercado = texto.match(/^```(?:[a-zA-Z]+)?\s*([\s\S]*?)\s*```$/);
+  return cercado ? cercado[1].trim() : texto;
+}
+
 export function interpretaIds(bruto, quantos, teto) {
   let dados;
   try {
-    dados = JSON.parse(String(bruto).trim());
+    dados = JSON.parse(semCerca(bruto));
   } catch (e) {
     return [];
   }

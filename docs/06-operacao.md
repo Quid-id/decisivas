@@ -227,7 +227,7 @@ linha só vira "aplicada" com o resultado da verificação em mãos.
 | 001 | schema inicial | Tabelas `documentos`, `trechos`, `recursos`, `registros`; índices `idx_trechos_match`, `idx_trechos_midia`, `idx_recursos_match` | Aplicada em 08/2026, pelo console |
 | 002 | `8bbaf24` | Coluna `registros.origem` (`'geracao'` ou `'cache'`); tabelas `paginas` e `formatos` (cache nível 1) | **Aplicada em 02/09/2026, pelo console.** Verificação devolveu `1, 1, 1`. Foi a ausência desta migração que causou `no such table: paginas` e `table registros has no column named origem` nos logs de produção |
 | 003 | etapa 2 | Tabela `pautas` com as 59 pautas; tabela `trechos` recriada com as nove colunas, a taxonomia final e as restrições (a antiga vira `trechos_ate_002`, preservada); `paginas` e `formatos` recriadas com `pauta` na chave; índices recriados | **Aplicada em 02/09/2026, pelo console.** Bloco 15 devolveu `59, 9, 0, 1, 1, 2` e `preservados: 273`, igual ao esperado; o INSERT de teste falhou com `CHECK constraint failed` em `publico`. O bloco 3 não foi executado — o bloco 4 rodou antes —, sem consequência: com `CACHE_ENABLED="false"` o Worker nunca gravou nas tabelas que a 002 acabara de criar, então estavam vazias, e o bloco 15 confirmou as duas recriadas com `pauta` na chave |
-| 005 | etapa 10 | Tabela `consultas`, o cache das perguntas livres do "Explorar o acervo" (chave `publico + macronarrativa + pergunta`, validade pela versão do acervo). Aditiva: não toca em nada existente | **Preparada, não aplicada.** Comandos em `migracao-005.sql`, um por bloco. Conferida na réplica local: bloco 1 devolveu `trechos 2405, pautas 59, consultas_ja_existe 0`; bloco 3, `consultas 1, linhas 0, trechos 2405, pautas 59`. **A aplicação no remoto vem ANTES do deploy da etapa 10**: sem a tabela, o modo pergunta funciona e não guarda cache (o Worker registra `cache indisponível` e chama o modelo toda vez) |
+| 005 | etapa 10 | Tabela `consultas`, o cache das perguntas livres do "Explorar o acervo" (chave `publico + macronarrativa + pergunta`, validade pela versão do acervo). Aditiva: não toca em nada existente | **Aplicada em 03/09/2026, pelo console.** Bloco 1 devolveu `trechos 2405, pautas 59, consultas_ja_existe 0`; bloco 3 devolveu `consultas 1, linhas 0, trechos 2405, pautas 59`, igual ao esperado e igual ao que a réplica local devolvera. Aplicada **antes** do deploy do código da etapa 10, como a regra 10 manda |
 | 004 | etapa 8A | Remove `trechos_ate_002` (as 273 linhas da amostra anterior, já substituídas pela carga v5) e as tabelas de cache `paginas` e `formatos`, que saíram com a geração de página por modelo | **Aplicada em 02/09/2026, pelo console.** Bloco 1 devolveu `trechos 2405, antigos 273, pautas 59, paginas 12, formatos 1`; bloco 5 devolveu `0, 2405, 59`, igual ao esperado. As 12 páginas e o formato descartados eram o que o cache tinha guardado entre o deploy da etapa 7 e a decisão de páginas fixas — conteúdo gerado por modelo, que não vai ao ar |
 
 A migração 002 foi a **etapa 0** da especificação em etapas versão 2 (hoje em `arquivo/DECISIVAS_especificacao_claude_code.md`):
@@ -449,10 +449,11 @@ Conferida na réplica local antes de ir ao painel: bloco 1 devolveu
 linhas 0, trechos 2405, pautas 59`.
 
 **A aplicação no remoto vem ANTES do deploy do código da etapa 10** (regra 10
-do CLAUDE.md). Se o deploy for antes, nada quebra na tela: o modo pergunta
-funciona e simplesmente não guarda cache — o Worker registra `cache
-indisponível` no log e chama o modelo em toda pergunta, o que custa dinheiro e
-tempo, não correção.
+do CLAUDE.md) — e foi o que aconteceu: aplicada em **03/09/2026**, pelo
+console, com os dois blocos de conferência devolvendo o esperado. Se o deploy
+tivesse vindo antes, nada quebraria na tela: o modo pergunta funciona e
+simplesmente não guarda cache — o Worker registra `cache indisponível` no log e
+chama o modelo em toda pergunta, o que custa dinheiro e tempo, não correção.
 
 ### O que o código faz quando o schema está atrasado
 
@@ -494,10 +495,13 @@ não é sobre comunicação com aquele público e tema.
 
 **Ele não tem canal para escrever nada.** Quem lê a resposta é
 `src/interpreta-ids.js`, módulo próprio justamente para ser testável fora do
-Worker: prosa, cerca de código, JSON de outro formato, número que não existe
-na lista, repetido, resposta em branco — tudo vira lista vazia, e a tela mostra
-o aviso de sem resultado. O texto que vai à tela é sempre lido de `trechos`,
-palavra por palavra.
+Worker: prosa, JSON de outro formato, número que não existe na lista,
+repetido, resposta em branco — tudo vira lista vazia, e a tela mostra o aviso
+de sem resultado. **Cerca de código é tolerada**: modelo que responde
+```` ```json {"ids": […]} ``` ```` tem a cerca removida antes da leitura,
+porque o JSON dentro dela é a resposta certa e recusá-la apagaria resultado
+bom. Texto antes ou depois da cerca continua invalidando. O texto que vai à
+tela é sempre lido de `trechos`, palavra por palavra.
 
 ### As guardas
 
@@ -608,7 +612,11 @@ cinco), que é o que permite a um bloco simplesmente não existir.
 A seção "Explorar o acervo" precisa dizer quantos trechos existem no
 cruzamento e quais pautas há ali: isso vem de `dados/DECISIVAS_acervo_v5.xlsx`
 no build (`scripts/acervo.js`), a mesma planilha da carga — nunca de número
-escrito à mão. No beta a seção está desligada: os controles aparecem
+escrito à mão. **Os botões de pauta são as pautas com 3 ou mais trechos no
+cruzamento, no máximo oito, as de mais trechos primeiro**, e `comunicação e
+linguagem` fica de fora: ela vale para os cinco temas e casaria em todo
+cruzamento sem dizer nada sobre este. Sem o teto, um cruzamento chegava a 18
+botões e a fileira de pílulas virava lista. No beta a seção está desligada: os controles aparecem
 desabilitados e um aviso diz que o recurso chega em breve.
 
 **Cabeçalho e rodapé são um parcial só** (`parciais/cabecalho.html` e

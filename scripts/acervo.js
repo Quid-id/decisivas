@@ -12,6 +12,9 @@ const ABA = "acervo";
 // Uma pauta só vira botão com 3 ou mais trechos no cruzamento (etapa 4, e
 // mantido na 10): com um ou dois, o botão entrega quase nada.
 const MINIMO_DE_TRECHOS = 3;
+// E no máximo oito botões por página, as pautas com mais trechos: o corte de
+// 3 sozinho chegava a 18 num cruzamento, e a fileira de pílulas virava lista.
+const MAXIMO_DE_BOTOES = 8;
 // A pauta transversal não vira botão: ela vale para os cinco temas e casaria
 // em todo cruzamento, sem dizer nada sobre este.
 const PAUTA_TRANSVERSAL = "comunicação e linguagem";
@@ -60,6 +63,7 @@ async function resumo() {
       pautas: [...item.pautas.entries()]
         .filter(([pauta, n]) => n >= MINIMO_DE_TRECHOS && pauta !== PAUTA_TRANSVERSAL)
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR"))
+        .slice(0, MAXIMO_DE_BOTOES)
         .map(([pauta]) => pauta),
     });
   }
