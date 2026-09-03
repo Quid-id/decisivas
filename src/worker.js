@@ -1,8 +1,16 @@
 // DECISIVAS — Worker do Cloudflare, rota /api/*
 //
-// Uma rota só: `POST /api/explorar`, o "Explorar o acervo" (etapa 10). Fora de
-// /api/*, o Worker entrega o site estático — as 20 páginas de caminho e as
-// telas de apoio, todas HTML gerado no build.
+// Duas frentes, e nada além delas:
+//
+//   `POST /api/explorar`   o "Explorar o acervo" (etapa 10), governado por
+//                          AGENT_ENABLED. É a única rota que chama modelo.
+//   `/api/cms/*`           o painel de edição (etapa 9), governado por
+//                          CMS_ENABLED e pelo crachá do Cloudflare Access. Vive
+//                          em src/cms.js; nenhuma delas chama modelo.
+//
+// Fora de /api/*, o Worker entrega o site estático — as 20 páginas de caminho e
+// as telas de apoio, todas HTML gerado no build. A exceção é `/admin`, que
+// passa por aqui antes dos assets para exigir o crachá do Access.
 //
 // O que esta rota faz, e o que ela NÃO faz:
 //
@@ -26,6 +34,7 @@
 // segredo no painel do Cloudflare.
 
 import { interpretaIds } from "./interpreta-ids.js";
+import * as cms from "./cms.js";
 import PROMPT_EXPLORAR from "../prompts/explorar.txt";
 import VERSAO_ACERVO_BRUTA from "../dados/versao-acervo.txt";
 import VOCABULARIO from "../dados/vocabulario.json";
@@ -429,14 +438,28 @@ async function rotaExplorar(request, env) {
   });
 }
 
+// O painel: /admin e o que ele carrega. Exige crachá do Access antes de
+// entregar o arquivo, então precisa de run_worker_first no wrangler.toml.
+function ehTelaDoPainel(caminho) {
+  return caminho === "/admin" || caminho === "/admin.html" || caminho.startsWith("/admin/");
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Fora de /api/*, o site estático: as 20 páginas fixas e as telas de
-    // apoio, todas HTML gerado no build.
     if (!url.pathname.startsWith("/api/")) {
+      // A tela do painel passa pela conferência de identidade; o resto do site
+      // é público e vai direto para os assets.
+      if (ehTelaDoPainel(url.pathname)) return cms.tela(request, env);
+      // Fora de /api/*, o site estático: as 20 páginas fixas e as telas de
+      // apoio, todas HTML gerado no build.
       return env.ASSETS.fetch(request);
+    }
+
+    // O painel de edição (etapa 9), em src/cms.js.
+    if (url.pathname.startsWith("/api/cms/")) {
+      return cms.rota(request, env, url);
     }
 
     if (url.pathname === "/api/explorar") {

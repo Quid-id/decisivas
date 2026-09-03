@@ -29,3 +29,13 @@ public/estilos.css
 public/configuracao.js
 public/_redirects
 public/assets/
+
+# Painel de edição, gerado no build (etapa 9): a tela, o estilo e o script de
+# tela que o build copia de scripts/admin/
+public/admin.html
+public/admin.css
+public/admin/
+
+# Gerados no build para o painel conferir cor e estado do deploy (etapa 9)
+public/paleta.json
+public/versao-build.json

@@ -57,6 +57,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const conteudo = require("./conteudo");
+// A varredura em si vive em src/varre-termos.cjs, compartilhada com o Worker:
+// o painel da etapa 9 barra os mesmos termos, do mesmo jeito, antes de gravar.
+const varredura = require("../src/varre-termos.cjs");
 
 const PASTA_CONTEUDO = "conteudo";
 const CONFIGURACAO = "dados/configuracao.json";
@@ -120,70 +123,15 @@ function ambienteDoBuild() {
   return `${onde} | ${ramo} | ${lista}`;
 }
 
+// A lista vem da variável de ambiente; a leitura e o formato são do módulo
+// compartilhado, para o build e o Worker aceitarem a mesma coisa.
 function listaDeTermos() {
-  return (process.env.BLOCKED_TERMS ?? "")
-    .split("|")
-    .map((t) => t.trim())
-    .filter(Boolean);
-}
-
-// Sigla: só maiúsculas, admitindo conectores curtos em minúscula no meio
-// (`PCdoB`). Sem espaço — "União Brasil" é nome, não sigla.
-function ehSigla(termo) {
-  return /^\p{Lu}{2,}(?:\p{Ll}{1,3}\p{Lu}+)*$/u.test(termo);
-}
-
-function semAcento(texto) {
-  return String(texto).normalize("NFD").replace(/\p{M}/gu, "");
-}
-
-function escapaRegex(texto) {
-  return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-// Cada termo virou um padrão de palavra inteira, com o modo de comparação que
-// ele pede. O padrão é montado uma vez, e não a cada campo.
-function padroes(lista) {
-  return lista.map((termo) => {
-    const sigla = ehSigla(termo);
-    const alvo = sigla ? termo : semAcento(termo);
-    return {
-      termo,
-      sigla,
-      padrao: new RegExp(
-        `(?<![\\p{L}\\p{N}])${escapaRegex(alvo)}(?![\\p{L}\\p{N}])`,
-        sigla ? "gu" : "giu"
-      ),
-    };
-  });
+  return varredura.listaDeTermos(process.env.BLOCKED_TERMS);
 }
 
 // ---------------------------------------------------------------------------
 // A varredura
 // ---------------------------------------------------------------------------
-
-// Caminho legível do campo, do tipo `paginas["trabalho digno"].resumo[2]`.
-function juntaCaminho(base, chave) {
-  if (typeof chave === "number") return `${base}[${chave}]`;
-  if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(chave)) return base ? `${base}.${chave}` : chave;
-  return `${base}["${chave}"]`;
-}
-
-function textos(valor, caminho, destino) {
-  if (typeof valor === "string") {
-    destino.push({ campo: caminho, texto: valor });
-    return;
-  }
-  if (Array.isArray(valor)) {
-    valor.forEach((item, i) => textos(item, juntaCaminho(caminho, i), destino));
-    return;
-  }
-  if (valor && typeof valor === "object") {
-    for (const [chave, dentro] of Object.entries(valor)) {
-      textos(dentro, juntaCaminho(caminho, chave), destino);
-    }
-  }
-}
 
 function arquivosVarridos() {
   const doConteudo = fs
@@ -194,36 +142,22 @@ function arquivosVarridos() {
   return [...doConteudo, CONFIGURACAO];
 }
 
-// Um trecho curto em volta da ocorrência, para a equipe achar a frase.
-function trecho(texto, posicao) {
-  const inicio = Math.max(0, posicao - 50);
-  return (inicio ? "…" : "") + texto.slice(inicio, posicao + 50).replace(/\s+/g, " ") + "…";
-}
-
 function varre() {
   const lista = listaDeTermos();
   if (!lista.length) {
     return { rodou: false, publica: ehBuildQuePublica(), termos: 0, arquivos: 0, campos: 0, ocorrencias: [] };
   }
 
-  const compilados = padroes(lista);
+  const compilados = varredura.padroes(lista);
   const ocorrencias = [];
   const arquivos = arquivosVarridos();
   let campos = 0;
 
   for (const arquivo of arquivos) {
-    const encontrados = [];
-    textos(JSON.parse(fs.readFileSync(arquivo, "utf8")), "", encontrados);
-    campos += encontrados.length;
-    for (const { campo, texto } of encontrados) {
-      for (const { termo, sigla, padrao } of compilados) {
-        const alvo = sigla ? texto : semAcento(texto);
-        padrao.lastIndex = 0;
-        for (const achado of alvo.matchAll(padrao)) {
-          ocorrencias.push({ arquivo, campo, termo, trecho: trecho(texto, achado.index) });
-        }
-      }
-    }
+    const dados = JSON.parse(fs.readFileSync(arquivo, "utf8"));
+    const achado = varredura.varreValor(dados, compilados, arquivo);
+    campos += achado.campos;
+    ocorrencias.push(...achado.ocorrencias);
   }
 
   return {
@@ -247,7 +181,7 @@ function pendenciasNaFonte() {
   const achadas = [];
   for (const arquivo of arquivosVarridos()) {
     const campos = [];
-    textos(JSON.parse(fs.readFileSync(arquivo, "utf8")), "", campos);
+    varredura.textos(JSON.parse(fs.readFileSync(arquivo, "utf8")), "", campos);
     for (const { campo, texto } of campos) {
       // `pendencias` guarda o FORMATO do aviso de pendência, não uma
       // pendência: o "[preencher]" dele é o prefixo que a tela usa.
@@ -292,7 +226,7 @@ function verifica({ vocabulario }) {
 module.exports = {
   verifica,
   varre,
-  ehSigla,
+  ehSigla: varredura.ehSigla,
   listaDeTermos,
   ambienteDoBuild,
   ehBuildQuePublica,

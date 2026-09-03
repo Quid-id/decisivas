@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!-- Painel de edição (etapa 9). Tela da equipe, atrás do Cloudflare Access, e
+     por isso fora do índice dos buscadores e fora da navegação do site.
+
+     O molde é só estrutura: nenhuma palavra é escrita aqui. O que aparece na
+     tela vem de dados/configuracao.json — os rótulos do quadro, por marcador do
+     build; o resto do formulário, montado por scripts/admin/painel.js, que lê o
+     mesmo arquivo em window.CONFIGURACAO.admin.
+
+     Não tem cabeçalho nem rodapé do site: não é uma tela pública, é ferramenta. -->
+<html lang="pt-BR">
+<head>
+{{CABECA}}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="/admin.css">
+</head>
+<body class="painel">
+<header class="barra-painel">
+  <span class="marca-painel">{{MARCA}}</span>
+  <h1>{{TITULO_PAINEL}}</h1>
+  <p class="quem" id="quem"><span class="rotulo">{{ROTULO_EMAIL}}</span> <strong id="email"></strong></p>
+  <p class="estado" id="estado" aria-live="polite"></p>
+</header>
+
+<main class="quadro">
+  <nav class="coluna colecoes" aria-labelledby="titulo-colecoes">
+    <h2 id="titulo-colecoes">{{ROTULO_COLECOES}}</h2>
+    <ul id="lista-colecoes"></ul>
+  </nav>
+
+  <nav class="coluna itens" aria-labelledby="titulo-itens">
+    <h2 id="titulo-itens">{{ROTULO_ITENS}}</h2>
+    <ul id="lista-itens"></ul>
+  </nav>
+
+  <section class="coluna edicao" aria-labelledby="titulo-edicao">
+    <h2 id="titulo-edicao">{{ROTULO_FORMULARIO}}</h2>
+    <p class="vazio" id="sem-selecao">{{SEM_SELECAO}}</p>
+    <div id="formulario"></div>
+    <div class="acoes" id="acoes" hidden>
+      <button type="button" id="previsualizar"></button>
+      <button type="button" id="publicar" class="principal"></button>
+      <button type="button" id="reverter" class="discreto"></button>
+    </div>
+    <p class="recado" id="recado" aria-live="polite"></p>
+
+    <section class="historico" aria-labelledby="titulo-historico">
+      <h3 id="titulo-historico">{{TITULO_HISTORICO}}</h3>
+      <ol id="lista-historico"></ol>
+    </section>
+  </section>
+</main>
+
+<aside class="previa" id="previa" hidden>
+  <div class="cabeca-previa">
+    <p class="aviso-previa" id="aviso-previa"></p>
+    <button type="button" id="fechar-previa"></button>
+  </div>
+  <iframe id="quadro-previa" title="{{ROTULO_FORMULARIO}}"></iframe>
+</aside>
+
+<script src="/vocabulario.js"></script>
+<script src="/configuracao.js"></script>
+<script src="/admin/painel.js"></script>
+</body>
+</html>

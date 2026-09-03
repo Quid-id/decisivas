@@ -6,15 +6,9 @@
 // em JSON, e um `<` perdido não pode virar marcação.
 
 const fs = require("node:fs");
-
-function escapa(valor) {
-  return String(valor)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+// O escape vive em src/escapa-html.cjs, compartilhado com o Worker: a
+// pré-visualização do painel precisa escapar igual para achar o texto na tela.
+const { escapa } = require("../src/escapa-html.cjs");
 
 function troca(html, marcadores) {
   let resultado = html;

@@ -872,6 +872,175 @@ A rota antiga `/resultado?publico=...&tema=...` continua de pé: virou uma
 página que lê os dois parâmetros, traduz para os slugs e redireciona para o
 caminho novo. Link já compartilhado não morre.
 
+## O painel de edição (etapa 9)
+
+O conteúdo é editado em `https://decisivas.com.br/admin`, por quem está na lista
+de e-mails do Cloudflare Access. Salvar no painel **é um commit na main**: o
+deploy automático publica em cerca de um minuto. Não existe banco de conteúdo
+separado — **o estado é o repositório**, e é por isso que o painel e o build
+nunca podem divergir.
+
+### O que o painel edita
+
+| Coleção | Arquivo | O que abre |
+|---|---|---|
+| Caminhos | `conteudo/<publico>.json` → `paginas[tema]` | as 20 páginas, uma por vez |
+| Públicos | `conteudo/<publico>.json` + `dados/vocabulario.json` | quem é, como chegar, nome na tela, cor e retrato |
+| Temas | `conteudo/sobre.json` → `temas` | o texto dos cinco temas |
+| Sobre | `conteudo/sobre.json` | projeto, como foi feito, abertura dos públicos, aviso de IA, receba |
+| Privacidade | `conteudo/sobre.json` | a política e a data da revisão |
+| Site | `dados/configuracao.json` | marca, navegação, home, caminho, Explorar, compartilhar, rodapé, banner, embeds |
+| Imagens | `assets/` | troca o arquivo de cada imagem que o site usa, mantendo o nome |
+
+Fora dessa lista, o painel **não grava**. A lista de arquivos editáveis é
+conferida no servidor (`src/cms.js`), e não no navegador: o token do GitHub tem
+permissão de conteúdo no repositório inteiro, e é essa lista que impede o painel
+de escrever em `src/`, em `.github/` ou no próprio `wrangler.toml`.
+
+O formulário é **montado da forma do JSON**, e não de um esquema escrito à parte:
+texto vira campo, lista vira lista de campos, objeto vira grupo. Campo novo no
+arquivo aparece no painel sem tocar em código. Os rótulos dos campos vivem em
+`configuracao.admin.campos`; campo sem rótulo aparece com a própria chave do
+arquivo, e a equipe pode nomeá-lo ali sem passar por quem programa (regra 2.1).
+
+### As rotas
+
+Todas sob `/api/cms/*`, todas exigindo o crachá do Access, e nenhuma delas chama
+modelo:
+
+| Rota | O que faz |
+|---|---|
+| `GET /api/cms/estado` | quem está autenticado, o que é editável, os nomes de asset, o commit do site e o do topo da main |
+| `GET /api/cms/arquivo` | o conteúdo e o `sha` de um arquivo editável |
+| `PUT /api/cms/arquivo` | valida e grava — um commit na main |
+| `POST /api/cms/asset` | sobe uma imagem, com nome fixo por uso |
+| `GET /api/cms/historico` | os últimos commits do painel (os que começam com `CMS:`) |
+| `POST /api/cms/reverter` | grava de volta a versão anterior, em **commit novo** |
+| `POST /api/cms/previa` | a tela publicada com o texto novo trocado dentro; não grava nada |
+
+`CMS_ENABLED` governa o painel e só ele, como `AGENT_ENABLED` governa o
+`/api/explorar`: desligado, `/admin` e `/api/cms/*` respondem 503 e o site segue
+de pé. `CMS_REPO` e `CMS_RAMO` dizem onde gravar (`wrangler.toml`, não segredo).
+
+### Identidade: o Access na frente, e a conferência dentro
+
+O painel não tem login próprio. Quem autentica é o **Cloudflare Access**, com
+e-mail e código de uso único (One-time PIN) sobre uma lista de e-mails. Não há
+senha guardada, não há cadastro novo, e nada de quem edita é gravado em banco
+(regra 5) — o e-mail vive no **autor do commit**, que é a auditoria, e em nenhum
+outro lugar.
+
+Dentro do Worker, `src/acesso.js` confere o crachá que o Access emite (JWT
+RS256, em `Cf-Access-Jwt-Assertion` ou no cookie `CF_Authorization`): emissor de
+domínio `*.cloudflareaccess.com`, assinatura fechando com a chave pública que
+esse emissor publica, `aud` igual ao `ACCESS_AUD` da aplicação, e prazo. O
+e-mail sai do JWT, **não** do cabeçalho de conveniência: cabeçalho se escreve à
+mão, assinatura não.
+
+São duas trancas, de propósito: o Access protege o caminho, e o Worker protege a
+rota. Sem a segunda, bastaria alguém chamar `/api/cms/*` direto para gravar no
+repositório. Por isso `/admin` também passa pelo Worker antes dos assets
+(`run_worker_first` no `wrangler.toml`): sem crachá, nem o formulário aparece.
+
+### O que a gravação confere, e por quê
+
+1. **Caminho** na lista de editáveis (acima).
+2. **Estrutura**, pelas MESMAS funções que o build usa — `src/valida-conteudo.cjs`,
+   compartilhado por `scripts/conteudo.js` e pelo Worker. Dois parágrafos em "por
+   que importa", três cards de dados, de 1 a 3 cards em "funciona" e "não
+   funciona", cinco linhas de resumo, número em destaque de até 8 caracteres. O
+   erro volta com o CAMPO, e o painel acende o campo: **erro de formulário, não
+   deploy vermelho**.
+3. **Nada apagado** em `configuracao.json` e em `vocabulario.json`: toda chave que
+   existia continua existindo, com o mesmo tipo. Campo apagado sem querer derruba
+   o build da main, e o painel edita a interface inteira num arquivo só.
+4. **Vocabulário fechado continua fechado**: `id` e `slug` não mudam (o id é chave
+   no banco e o slug é endereço publicado), são sempre 4 públicos e 5 temas, e cor
+   só da paleta de `brand/tokens.css` — que o build publica em
+   `public/paleta.json` justamente para o Worker poder conferir sem ler disco.
+5. **Termos bloqueados**, pela MESMA varredura do build (`src/varre-termos.cjs`),
+   nomeando campo e termo. **Sem `BLOCKED_TERMS` no Worker, a gravação é
+   recusada**: salvar sem a varredura seria empurrar para o build a chance de
+   barrar, e o build só barra depois de o commit existir.
+
+A gravação usa o `sha` que o servidor acabou de ler, não o que o navegador diz:
+se o arquivo mudou no meio, a API do GitHub recusa em vez de sobrescrever a
+edição de outra pessoa. E gravação que não muda nada não vira commit.
+
+### Publicar, e saber que publicou
+
+A mensagem do commit é `CMS: <coleção> · <item> · <e-mail>`, e o **autor** é o
+e-mail de quem editou (o committer é a identidade do token — separar os dois é o
+que torna a auditoria útil).
+
+O painel mostra o estado do deploy comparando duas coisas: o commit que gerou o
+site no ar, que o build grava em `public/versao-build.json`, e o commit do topo
+da main. Diferentes, está publicando; iguais, o site no ar é o da última edição.
+
+**Limite conhecido:** o painel não lê o log do build. O check do GitHub não expõe
+texto (esta seção já registra isso na parte da varredura), e não há credencial de
+painel do Cloudflare no Worker. Então o painel sabe dizer "publicando" e
+"publicado", mas **não** "falhou com a mensagem do build" — se um build falhar, o
+estado fica em "publicando" e quem confere é o painel do Cloudflare. A defesa
+contra isso é a validação antes do commit: o que o build recusaria, o painel
+recusa antes.
+
+### Reverter
+
+`POST /api/cms/reverter` pega o penúltimo commit que tocou aquele arquivo, lê o
+conteúdo dele e grava de volta **em um commit novo**. Nada de reescrever
+histórico. A versão anterior passa pelas mesmas conferências na volta: reverter
+para um estado que hoje não passa na validação seria trocar um problema por
+outro.
+
+### Pré-visualizar
+
+A prévia é a **tela como está publicada**, com o texto novo trocado dentro —
+`POST /api/cms/previa` lê a página dos assets do próprio site e substitui o texto
+antigo pelo novo, os dois escapados pelo mesmo módulo que o build usa
+(`src/escapa-html.cjs`). Não passa pelo build e não grava nada.
+
+O que a prévia não alcança, e o painel diz na tela: mudança de **estrutura** —
+card que entra ou sai, linha de resumo acrescentada — porque quem monta a página
+é o build. E texto repetido palavra por palavra em dois lugares da mesma tela é
+trocado nos dois.
+
+### Segredos e variáveis do painel
+
+No painel do Cloudflare, em **Workers → decisivas → Settings → Variables and
+Secrets** (runtime, não as de build):
+
+| Nome | Tipo | O que é |
+|---|---|---|
+| `GITHUB_TOKEN` | segredo | token refinado, só este repositório, permissão de conteúdo (leitura e escrita). É com ele que o painel comita |
+| `ACCESS_AUD` | segredo | o Application Audience (AUD) da aplicação do Access que protege `/admin` |
+| `BLOCKED_TERMS` | segredo | a mesma lista da varredura do build. Sem ela o painel não grava |
+
+Nenhum deles entra em arquivo do repositório (regra 1). Em desenvolvimento,
+`.dev.vars` — e ali existem dois instrumentos que **nunca** vão para produção:
+`SIMULAR_ACESSO`, que declara um e-mail e dispensa o crachá, e `SIMULAR_GITHUB`,
+que lê o ramo pelo conteúdo cru e deixa a gravação na memória do isolate.
+
+### Aplicação do Access
+
+Zero Trust → Access → Applications, aplicação nova, self-hosted:
+
+- domínio `decisivas.com.br`, caminho `admin*`;
+- política **Allow**, regra **Emails** com a lista da equipe;
+- método de login **One-time PIN** (código por e-mail);
+- sessão de 24 horas;
+- o **AUD** da aplicação é o valor de `ACCESS_AUD`.
+
+A aplicação que hoje protege o site inteiro no `workers.dev` sai no lançamento
+(14/09). Até lá o beta segue atrás dela, com os e-mails da equipe.
+
+### Domínios
+
+- `decisivas.com.br` é o domínio principal (Workers → decisivas → Settings →
+  Domains & Routes → Custom domain). `configuracao.json` traz `site.url`;
+- `decisivas.com` e `decisivas.org` redirecionam com 301 para o principal,
+  mantendo o caminho (regra de redirecionamento no painel do Cloudflare).
+
 ## Seções a completar
 
 - Cadastrar `OPENROUTER_API_KEY` como segredo

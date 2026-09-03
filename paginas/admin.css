@@ -1,0 +1,157 @@
+/* DECISIVAS — estilos do painel de edição (etapa 9).
+   Só tokens de brand/tokens.css, como toda a interface (regra 8). É ferramenta
+   interna, então o desenho é sóbrio: três colunas, campos largos, nada de
+   ornamento. A identidade aparece na tipografia e nas cores, que são as mesmas
+   do site. */
+
+.painel {
+  margin: 0;
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-m);
+  color: var(--cor-texto);
+  background: var(--cor-superficie-alt);
+}
+
+/* ---------- Barra ---------- */
+.barra-painel {
+  display: flex; align-items: baseline; gap: var(--espaco-3);
+  flex-wrap: wrap;
+  padding: var(--espaco-3) var(--espaco-4);
+  background: var(--preto); color: var(--branco);
+}
+.barra-painel h1 {
+  font-family: var(--fonte-titulo); font-size: var(--texto-g);
+  font-weight: var(--peso-normal); margin: 0; flex: 1;
+}
+.marca-painel { font-family: var(--fonte-titulo); font-size: var(--texto-m); letter-spacing: .04em; }
+.barra-painel .quem, .barra-painel .estado { margin: 0; font-size: var(--texto-p); }
+.barra-painel .rotulo { color: var(--cor-texto-fraco); }
+.barra-painel .estado { color: var(--verde-claro); }
+.barra-painel .estado.publicando { color: var(--amarelo); }
+
+/* ---------- Três colunas ---------- */
+.quadro {
+  display: grid;
+  grid-template-columns: 12rem 16rem minmax(0, 1fr);
+  gap: var(--espaco-4);
+  align-items: start;
+  padding: var(--espaco-4);
+  max-width: var(--largura-conteudo);
+}
+.coluna {
+  background: var(--cor-fundo);
+  border: var(--borda-cartao) solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  padding: var(--espaco-3);
+}
+.coluna h2 {
+  font-size: var(--texto-rodape-titulo); text-transform: uppercase; letter-spacing: .08em;
+  color: var(--cor-texto-suave); margin: 0 0 var(--espaco-2);
+}
+.coluna ul { list-style: none; margin: 0; padding: 0; }
+.coluna li { margin: 0 0 var(--espaco-1); }
+.coluna li button {
+  font: inherit; text-align: left; width: 100%; cursor: pointer;
+  background: transparent; border: 0; border-radius: var(--raio-campo);
+  padding: var(--espaco-1) var(--espaco-2); color: var(--cor-texto);
+}
+.coluna li button:hover { background: var(--cor-superficie); }
+.coluna li button[aria-current="true"] { background: var(--cor-tag-ativa); color: var(--cor-tag-ativa-texto); }
+.coluna li .ajuda { display: block; font-size: var(--texto-pp); color: var(--cor-texto-suave); }
+.vazio { color: var(--cor-texto-suave); }
+
+/* ---------- Formulário ---------- */
+.campo-painel { margin: 0 0 var(--espaco-3); }
+.campo-painel > label, .grupo > .rotulo-grupo {
+  display: block; font-weight: var(--peso-forte); font-size: var(--texto-p);
+  margin: 0 0 var(--espaco-1);
+}
+.campo-painel .regra { font-weight: var(--peso-normal); color: var(--cor-texto-suave); }
+.campo-painel input[type="text"], .campo-painel textarea, .campo-painel input[type="number"] {
+  font: inherit; width: 100%; box-sizing: border-box;
+  background: var(--cor-acao-campo); color: var(--cor-texto);
+  border: var(--borda-cartao) solid var(--cor-borda); border-radius: var(--raio-campo);
+  padding: var(--espaco-1) var(--espaco-2);
+}
+.campo-painel textarea { min-height: 6rem; resize: vertical; line-height: var(--entrelinha-normal); }
+.campo-painel input:focus-visible, .campo-painel textarea:focus-visible {
+  outline: var(--foco-espessura) solid var(--cor-foco); outline-offset: var(--foco-offset);
+}
+.campo-painel.errado input, .campo-painel.errado textarea { border-color: var(--cor-erro); background: var(--cor-erro-fundo); }
+.campo-painel .erro { color: var(--cor-erro); font-size: var(--texto-p); margin: var(--espaco-1) 0 0; }
+.campo-painel.fechado input { color: var(--cor-texto-suave); }
+
+.grupo {
+  border: var(--borda-cartao) solid var(--cor-borda);
+  border-radius: var(--raio-card); padding: var(--espaco-3);
+  margin: 0 0 var(--espaco-3);
+}
+.grupo .rotulo-grupo { font-size: var(--texto-card); }
+.grupo .grupo { background: var(--cor-superficie-alt); }
+.item-lista { position: relative; }
+.item-lista .remover {
+  position: absolute; top: var(--espaco-2); right: var(--espaco-2);
+  font: inherit; font-size: var(--texto-pp); cursor: pointer;
+  background: transparent; border: var(--borda-cartao) solid var(--cor-borda);
+  border-radius: var(--raio-pilula); padding: 0 var(--espaco-2);
+}
+
+/* ---------- Ações ---------- */
+.acoes { display: flex; gap: var(--espaco-2); flex-wrap: wrap; margin: var(--espaco-4) 0 0; }
+.acoes button, .grupo .acrescentar, .asset button {
+  font: inherit; cursor: pointer; border-radius: var(--raio-pilula);
+  border: var(--borda-cartao) solid var(--cor-borda-forte);
+  background: transparent; padding: var(--espaco-1) var(--espaco-3);
+}
+.acoes button.principal { background: var(--cor-acao); color: var(--cor-acao-texto); border-color: var(--cor-acao); }
+.acoes button.discreto { border-color: var(--cor-borda); color: var(--cor-texto-suave); }
+.acoes button[disabled] { opacity: .5; cursor: progress; }
+.recado { margin: var(--espaco-3) 0 0; font-size: var(--texto-p); }
+.recado.erro { color: var(--cor-erro); }
+.recado.bom { color: var(--verde); }
+
+/* ---------- Histórico ---------- */
+.historico { margin: var(--espaco-5) 0 0; border-top: var(--borda-cartao) solid var(--cor-borda); padding-top: var(--espaco-3); }
+.historico h3 { font-size: var(--texto-rodape-titulo); text-transform: uppercase; letter-spacing: .08em; color: var(--cor-texto-suave); margin: 0 0 var(--espaco-2); }
+.historico ol { list-style: none; margin: 0; padding: 0; font-size: var(--texto-p); }
+.historico li { padding: var(--espaco-1) 0; border-bottom: var(--borda-cartao) solid var(--cor-borda); }
+.historico .quando { color: var(--cor-texto-suave); }
+
+/* ---------- Imagens ---------- */
+.asset {
+  display: grid; grid-template-columns: 5rem minmax(0, 1fr); gap: var(--espaco-3);
+  align-items: center; padding: var(--espaco-2) 0;
+  border-bottom: var(--borda-cartao) solid var(--cor-borda);
+}
+.asset img { width: 5rem; height: auto; background: var(--cor-superficie); border-radius: var(--raio-campo); }
+.asset .nome { font-size: var(--texto-p); word-break: break-all; }
+
+/* ---------- Prévia ---------- */
+.previa {
+  position: fixed; inset: 0 0 0 40%; z-index: 30;
+  display: flex; flex-direction: column;
+  background: var(--cor-fundo); border-left: var(--borda-grossa) solid var(--cor-borda-forte);
+}
+.cabeca-previa {
+  display: flex; align-items: center; gap: var(--espaco-3);
+  padding: var(--espaco-2) var(--espaco-3);
+  border-bottom: var(--borda-cartao) solid var(--cor-borda);
+}
+.aviso-previa {
+  margin: 0; flex: 1;
+  font-size: var(--texto-aviso); font-style: var(--estilo-aviso); text-transform: var(--caixa-aviso);
+  color: var(--cor-aviso-texto);
+}
+.cabeca-previa button {
+  font: inherit; cursor: pointer; border-radius: var(--raio-pilula);
+  border: var(--borda-cartao) solid var(--cor-borda-forte); background: transparent;
+  padding: var(--espaco-1) var(--espaco-3);
+}
+.previa iframe { flex: 1; width: 100%; border: 0; background: var(--cor-fundo); }
+
+/* Em tela estreita as colunas empilham. O painel é de trabalho em tela grande,
+   mas ninguém deve ficar sem conseguir corrigir uma linha no celular. */
+@media (max-width: 900px) {
+  .quadro { grid-template-columns: 1fr; }
+  .previa { inset: 0; }
+}

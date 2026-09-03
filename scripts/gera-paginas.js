@@ -26,7 +26,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { escreveSeMudou } = require("./escreve-se-mudou");
-const { troca, confereMarcadores, leParciais, pendentes } = require("./html");
+const { escapa, troca, confereMarcadores, leParciais, pendentes } = require("./html");
 const monta = require("./interface");
 const geraCaminhos = require("./gera-caminhos");
 const verificaLiterais = require("./verifica-literais");
@@ -44,13 +44,20 @@ const PAGINAS = [
   { arquivo: "resultado.html", meta: "redirecionamento", atual: "/" },
 ];
 
+// As cores declaradas em brand/tokens.css. Servem a duas coisas: conferir a cor
+// dos públicos aqui e ser publicada em public/paleta.json, que é de onde o
+// painel da etapa 9 confere a cor antes de gravar (src/cms.js).
+function paletaDeTokens() {
+  const tokens = fs.readFileSync("brand/tokens.css", "utf8");
+  return new Set(
+    [...tokens.matchAll(/^\s*--[a-z-]+:\s*(#[0-9a-f]{6});/gim)].map((m) => m[1].toLowerCase())
+  );
+}
+
 // Confere que toda cor de público existe na paleta de brand/tokens.css. É o
 // que impede a identidade de escapar por dados/vocabulario.json.
 function conferePaletaDosPublicos(vocabulario) {
-  const tokens = fs.readFileSync("brand/tokens.css", "utf8");
-  const paleta = new Set(
-    [...tokens.matchAll(/^\s*--[a-z-]+:\s*(#[0-9a-f]{6});/gim)].map((m) => m[1].toLowerCase())
-  );
+  const paleta = paletaDeTokens();
   for (const publico of vocabulario.publicos) {
     for (const campo of ["cor", "texto"]) {
       const valor = String(publico[campo] ?? "").toLowerCase();
@@ -65,6 +72,25 @@ function conferePaletaDosPublicos(vocabulario) {
 
 function copia(origem, destino) {
   return escreveSeMudou(destino, fs.readFileSync(origem, "utf8"));
+}
+
+// O commit que gerou este build. As esteiras publicam o sha no ambiente; na
+// máquina de quem desenvolve, o git responde. Sem nenhum dos dois, fica nulo —
+// e o painel então só não mostra o estado do deploy, sem quebrar.
+const MARCAS_DE_COMMIT = ["WORKERS_CI_COMMIT_SHA", "CF_PAGES_COMMIT_SHA", "GITHUB_SHA", "COMMIT_SHA"];
+
+function versaoDoBuild() {
+  for (const marca of MARCAS_DE_COMMIT) {
+    const valor = String(process.env[marca] ?? "").trim();
+    if (valor) return { commit: valor, quando: new Date().toISOString(), de: marca };
+  }
+  try {
+    const { execFileSync } = require("node:child_process");
+    const sha = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+    return { commit: sha, quando: new Date().toISOString(), de: "git" };
+  } catch (e) {
+    return { commit: null, quando: new Date().toISOString(), de: null };
+  }
 }
 
 async function main() {
@@ -131,6 +157,47 @@ async function main() {
     escritos++;
   }
 
+  // Painel de edição (etapa 9). Tela da equipe, montada como as outras — molde
+  // em paginas/admin.html, rótulos da configuração — e servida em /admin, que o
+  // Worker só entrega com o crachá do Access (wrangler.toml, run_worker_first).
+  const painel = fs.readFileSync("paginas/admin.html", "utf8");
+  const htmlDoPainel = troca(painel, {
+    CABECA: comum.cabeca(configuracao.meta.admin),
+    MARCA: escapa(configuracao.marca.nome),
+    TITULO_PAINEL: escapa(configuracao.admin.titulo),
+    ROTULO_EMAIL: escapa(configuracao.admin.rotulo_email),
+    ROTULO_COLECOES: escapa(configuracao.admin.rotulo_colecoes),
+    ROTULO_ITENS: escapa(configuracao.admin.rotulo_itens),
+    ROTULO_FORMULARIO: escapa(configuracao.admin.rotulo_formulario),
+    SEM_SELECAO: escapa(configuracao.admin.sem_selecao),
+    TITULO_HISTORICO: escapa(configuracao.admin.historico.titulo),
+  });
+  confereMarcadores(htmlDoPainel, "paginas/admin.html");
+  if (escreveSeMudou(path.join(SAIDA, "admin.html"), htmlDoPainel)) escritos++;
+  if (copia("paginas/admin.css", path.join(SAIDA, "admin.css"))) escritos++;
+  fs.mkdirSync(path.join(SAIDA, "admin"), { recursive: true });
+  for (const arquivo of fs.readdirSync("scripts/admin")) {
+    if (!arquivo.endsWith(".js")) continue;
+    if (copia(path.join("scripts/admin", arquivo), path.join(SAIDA, "admin", arquivo))) escritos++;
+  }
+
+  // A paleta da identidade, para o painel conferir cor sem ler brand/tokens.css
+  // (o Worker não tem disco): é a mesma lista que o build usa acima.
+  if (
+    escreveSeMudou(
+      path.join(SAIDA, "paleta.json"),
+      `${JSON.stringify({ cores: [...paletaDeTokens()].sort() }, null, 2)}\n`
+    )
+  ) {
+    escritos++;
+  }
+
+  // Qual commit gerou este site. É o que o painel compara com o topo da main
+  // para dizer se o deploy da última edição já passou.
+  if (escreveSeMudou(path.join(SAIDA, "versao-build.json"), `${JSON.stringify(versaoDoBuild(), null, 2)}\n`)) {
+    escritos++;
+  }
+
   // Assets, quando existirem. O LEIA-ME fica de fora: é documentação.
   const destinoAssets = path.join(SAIDA, "assets");
   fs.mkdirSync(destinoAssets, { recursive: true });
@@ -160,7 +227,7 @@ async function main() {
 
   const banners = monta.imagensDeBanner(configuracao).length;
   console.log(
-    `telas publicadas: ${PAGINAS.length} fixas + ${doConteudo.caminhos} caminhos + Sobre e privacidade ` +
+    `telas publicadas: ${PAGINAS.length} fixas + ${doConteudo.caminhos} caminhos + Sobre, privacidade e painel ` +
       `(${escritos} arquivo(s) reescrito(s)) | ` +
       `banner: ${banners ? `${banners} imagem(ns) de assets/` : "faixa provisória"} | ` +
       `assets copiados: ${copiados}`
