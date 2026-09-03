@@ -1,5 +1,8 @@
 {
   "_leia_me": "Textos, rótulos e assets de TODA a interface. Regra da entrega: nenhum texto fixo, rótulo, nome de imagem ou link é escrito dentro de template ou script — tudo o que aparece na tela vem daqui, de conteudo/*.json (as 20 páginas, o Sobre e a privacidade) ou de dados/vocabulario.json (públicos, temas, cores). O build recusa publicar se encontrar texto de interface fora desses três arquivos (scripts/verifica-literais.js). É este arquivo que o CMS da etapa 9 vai editar. Caminho de asset que ainda não existe aparece na tela como placeholder com o nome esperado; texto que falta redigir vai como [preencher].",
+  "site": {
+    "url": "https://decisivas.com.br"
+  },
   "marca": {
     "nome": "DECISIVAS",
     "logo": "/assets/logo-decisivas-sobre-escuro.svg",
