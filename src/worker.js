@@ -40,8 +40,11 @@ const TEMAS = VOCABULARIO.macronarrativas.map((m) => m.id);
 const POR_RESPOSTA = 5;
 // Perguntas livres por hora, por origem. Botões de pauta não têm limite.
 const PERGUNTAS_POR_HORA = 30;
-// Mínimo de palavras úteis numa pergunta.
-const PALAVRAS_MINIMAS = 3;
+// Mínimo de uma pergunta: uma palavra com 4 letras ou mais. "gás", "luz" ou
+// "mei" sozinhos não dão para escolher trecho; "creche" dá. O aviso de
+// pergunta curta só aparece abaixo disso — contar palavras barrava pergunta
+// legítima de duas ("custo de vida", "escala 6x1").
+const LETRAS_MINIMAS = 4;
 
 // Ordem dos grupos na tela: é a ordem das etiquetas na configuração. `perfil`
 // e `exemplo` não têm etiqueta e por isso não entram em resposta nenhuma.
@@ -378,8 +381,10 @@ async function rotaExplorar(request, env) {
     return respostaJson({ modo: "pergunta", grupos: [], lacuna: EXPLORAR.aviso_fora_do_escopo, rotulo: null });
   }
 
-  const uteis = pergunta.split(/[^\p{L}\p{N}]+/u).filter((p) => p.length > 1);
-  if (uteis.length < PALAVRAS_MINIMAS) {
+  const temPalavraUtil = pergunta
+    .split(/[^\p{L}\p{N}]+/u)
+    .some((p) => p.length >= LETRAS_MINIMAS);
+  if (!temPalavraUtil) {
     return respostaJson({ modo: "pergunta", grupos: [], lacuna: EXPLORAR.aviso_pergunta_curta, rotulo: null });
   }
 

@@ -63,7 +63,7 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 - `docs/04-conformidade.md` — linhas vermelhas legais do projeto
 - `docs/06-operacao.md` — banco, migrações e build
 - `dados/vocabulario.json` — **fonte única** dos vocabulários fechados
-- `dados/DECISIVAS_acervo_v5.xlsx` — o acervo (2.405 linhas); fonte da carga da etapa 3
+- `dados/DECISIVAS_acervo_v6.xlsx` — o acervo (2.405 linhas); o v5, que sustentou a carga da etapa 3, está em `arquivo/`
 - `dados/DECISIVAS_pautas_de_para_v1.xlsx` — as 59 pautas consolidadas
 - `conteudo/` — **o texto das 20 páginas**, um JSON por público, mais `sobre.json`. Escrito e revisado pela equipe; o build monta o HTML
 - `paginas/` — fonte das telas: `index.html` (Início), `caminho.html` (o molde das 20 páginas), `sobre.html`, `privacidade.html`, `resultado.html` (redireciona a rota antiga), mais `estilos.css` e `_redirects`
@@ -82,11 +82,13 @@ Os nomes antigos (`idosos`, `proteção do trabalhador`, `proteção da família
 
 ## Estado atual dos dados
 
-**O acervo v5 está no remoto:** 2.405 trechos, aplicados em 02/09/2026 pelo console, a partir dos blocos de `arquivo/carga-003/`. A verificação devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59`.
+**O acervo v6 está no remoto:** 2.405 trechos. A carga do v5 foi aplicada em 02/09/2026 pelo console, a partir dos blocos de `arquivo/carga-003/`, e a verificação devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59`; em 03/09/2026 o v6 reescreveu 102 textos por `UPDATE`, sem mexer em id nem em etiqueta.
 
 **A migração 004 foi aplicada em 02/09/2026, pelo console.** Removeu `trechos_ate_002` e as duas tabelas de cache. O banco remoto tem hoje as cinco tabelas de `docs/02-schema.sql`; comandos e resultado em `migracao-004.sql` e no registro do `docs/06`.
 
-A fonte do acervo é `dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`, 2.405 linhas, já na taxonomia nova. Consolidado por regras aprovadas em lote, sem revisão linha a linha: tudo que estava nas extrações entrou, exceto o que a regra 4 veda. Conferido contra as restrições do banco: as 2.405 linhas passam, nenhuma violação.
+A fonte do acervo é `dados/DECISIVAS_acervo_v6.xlsx`, aba `acervo`, 2.405 linhas, já na taxonomia nova. Consolidado por regras aprovadas em lote, sem revisão linha a linha: tudo que estava nas extrações entrou, exceto o que a regra 4 veda. Conferido contra as restrições do banco: as 2.405 linhas passam, nenhuma violação.
+
+**O v6 substituiu o v5 em 03/09/2026**, aplicado no banco por `UPDATE`: os mesmos 2.405 ids e a mesma etiquetagem, com **102 textos reescritos** em linguagem comum, sem jargão de método. A marca em `dados/versao-acervo.txt` passou a `2026-09-03-acervo-v6`, o que invalida o cache de perguntas do "Explorar o acervo" — de propósito, porque os trechos mudaram.
 
 As 273 linhas da amostra antiga saíram do banco com a migração 004.
 
