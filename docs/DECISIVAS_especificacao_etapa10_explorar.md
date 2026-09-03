@@ -2,6 +2,14 @@
 
 Versão 1, 02/09/2026. Entra no beta de 04/09. Lê-se com o CONTEXTO v3, que passa a registrar o recurso como ligado.
 
+> **Superada em 03/09/2026 no ponto da paginação.** O botão "Ver mais" do modo
+> pauta, descrito em "Rota" e em "Modo pauta", e a parte do **critério de
+> aceitação 1** que exige que ele traga os cinco seguintes **não valem mais**.
+> A regra vigente é a de `docs/06-operacao.md`: **no máximo 5 trechos por
+> resposta**, nos dois modos, com o **corte aplicado no servidor** e **sem
+> continuação** — não há paginação, deslocamento nem acúmulo na tela. O resto
+> deste documento continua valendo como está.
+
 ## O que é
 
 Dentro de cada página de caminho, o bloco "Explorar o acervo" abre o acervo daquele cruzamento (público × tema) para quem quer ir além do recorte editorial da página. Dois modos:
