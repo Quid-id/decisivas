@@ -40,6 +40,7 @@ function leParciais() {
     rodape: fs.readFileSync("parciais/rodape.html", "utf8").trim(),
     compartilhar: fs.readFileSync("parciais/compartilhar.html", "utf8").trim(),
     explorar: fs.readFileSync("parciais/explorar.html", "utf8").trim(),
+    interacao: fs.readFileSync("parciais/interacao.html", "utf8").trim(),
   };
 }
 

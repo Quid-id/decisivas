@@ -43,12 +43,12 @@
   "home": {
     "titulo": "Pessoas e temas que vão decidir as eleições 2026",
     "texto": "Tudo que funciona e que não funciona para dialogar com quem mais importa. Por isso montamos uma plataforma pra você usar, adaptar e repassar.",
-    "pergunta": "",
-    "rotulo_publico": "Público",
-    "rotulo_tema": "Tema",
+    "aviso_escolha": "escolha um público e um tema.",
+    "aviso_pronto": "pronto. clique em ver caminhos.",
     "botao": "VER CAMINHOS",
     "chamada": "Não improvise. Adapte. Use!",
-    "dica_vazia": "Escolha um público e um tema."
+    "rotulo_publico": "Público",
+    "rotulo_tema": "Tema"
   },
   "caminho": {
     "blocos": {
@@ -68,22 +68,32 @@
     "icone_nao_funciona": "✕",
     "icone_voltar": "←",
     "voltar_destino": "/",
-    "retrato_alternativo": "Retrato do público {publico}"
+    "retrato_alternativo": "Retrato do público {publico}",
+    "resumo_rotulo": "Resumo em cinco pontos",
+    "resumo_abrir": "clique para abrir",
+    "resumo_fechar": "clique para fechar",
+    "icone_clique": "/assets/icone-clique.png",
+    "baralho": {
+      "primeiro": "leia o card de cima e clique na pilha: ele vai para o lado e o próximo aparece.",
+      "meio": "leia o próximo card da pilha e clique para levá-lo ao lado.",
+      "ultimo": "último card: clique para fixá-lo.",
+      "fim": "os três lado a lado.",
+      "rotulo_pilha": "Ver o próximo card"
+    }
   },
   "sobre": {
-    "titulo": "Sobre o projeto",
     "blocos": {
-      "projeto": "O que é o DECISIVAS",
+      "projeto": "O projeto",
       "como_foi_feito": "Como foi feito",
       "publicos": "Os públicos",
       "temas": "Os temas",
-      "aviso_ia": "Inteligência artificial e origem dos dados",
+      "aviso_ia": "Uso de inteligência artificial",
       "quem_faz": "Quem faz"
     }
   },
   "pagina_privacidade": {
-    "titulo": "Política de privacidade",
-    "prefixo_revisado": "Revisado em"
+    "titulo": "Política de Privacidade e Tratamento de Dados",
+    "prefixo_revisado": "Revisada em"
   },
   "redirecionamento": {
     "titulo": "Este endereço mudou",
@@ -99,8 +109,8 @@
     "exemplo_campo": "Ex.: o que a pesquisa mostra sobre este tema",
     "botao": "Quero explorar mais",
     "botao_ver_mais": "Ver mais",
-    "rotulo_pauta": "Trechos do acervo de pesquisa do DECISIVAS, sem edição.",
-    "rotulo_pergunta": "Seleção feita com apoio de inteligência artificial, apenas com trechos do acervo de pesquisa do DECISIVAS. Não indica voto nem menciona candidaturas.",
+    "rotulo_pauta": "Insights do acervo de pesquisa do DECISIVAS.",
+    "rotulo_pergunta": "Insights do acervo de pesquisa do DECISIVAS, selecionados com apoio de inteligência artificial. Não indica voto nem menciona candidaturas.",
     "aviso_sem_resultado": "O acervo não tem trechos sobre isso para este cruzamento. Tente um dos assuntos acima.",
     "aviso_fora_do_escopo": "A plataforma não trata de candidatos, partidos ou governos. Ela ajuda a falar com públicos sobre temas.",
     "aviso_pergunta_curta": "Escreva um pouco mais: o que você quer saber sobre este público e este tema?",
@@ -108,68 +118,50 @@
     "aviso_erro": "Não foi possível consultar o acervo agora. Tente de novo em instantes.",
     "aviso_desligado": "A consulta ao acervo está temporariamente indisponível.",
     "aviso_sem_pautas": "Sem pautas etiquetadas neste cruzamento.",
-    "etiquetas": {
-      "achado": "Achado",
-      "funciona": "O que funciona",
-      "afasta": "O que afasta",
-      "verbatim": "Depoimento",
-      "contexto": "Contexto"
-    },
-    "origens": {
-      "D01": "Dossiê Macronarrativas, Quid, 2026",
-      "D03": "Pesquisa nacional de opinião, novembro de 2025",
-      "D04": "Análise semiótica, jovens, 2026",
-      "D06": "Grupos focais com jovens, 2026",
-      "D07": "Pesquisa nacional de opinião, novembro de 2025",
-      "D09": "Grupos focais com pessoas de 70 anos ou mais, agosto de 2026",
-      "D10": "Análise semiótica, mulheres beneficiárias, 2026",
-      "D11": "Grupos focais com mulheres beneficiárias, 2026",
-      "D12": "Análise semiótica e escuta digital, mulheres trabalhadoras, 2026",
-      "D13": "Grupos focais com mulheres trabalhadoras, 2026"
-    }
+    "etiqueta_unica": "Insights do acervo"
   },
   "compartilhar": {
     "rotulo": "Compartilhar esta página",
     "redes": [
       {
         "id": "whatsapp",
-        "rotulo": "W",
         "nome": "WhatsApp",
+        "icone": "/assets/share-whatsapp.svg",
         "ativo": true,
         "cor_hover": "var(--verde)",
-        "cor_icone_hover": "var(--preto)"
+        "inverte_icone_no_hover": false
       },
       {
         "id": "x",
-        "rotulo": "X",
         "nome": "X",
+        "icone": "/assets/share-x.svg",
         "ativo": true,
         "cor_hover": "var(--preto)",
-        "cor_icone_hover": "var(--off-white)"
+        "inverte_icone_no_hover": true
       },
       {
         "id": "facebook",
-        "rotulo": "f",
         "nome": "Facebook",
+        "icone": "/assets/share-facebook.svg",
         "ativo": true,
         "cor_hover": "var(--azul)",
-        "cor_icone_hover": "var(--off-white)"
+        "inverte_icone_no_hover": true
       },
       {
         "id": "linkedin",
-        "rotulo": "in",
         "nome": "LinkedIn",
+        "icone": "/assets/share-linkedin.svg",
         "ativo": true,
         "cor_hover": "var(--azul-claro)",
-        "cor_icone_hover": "var(--preto)"
+        "inverte_icone_no_hover": false
       },
       {
         "id": "bluesky",
-        "rotulo": "B",
         "nome": "Bluesky",
+        "icone": "/assets/share-bluesky.svg",
         "ativo": true,
         "cor_hover": "var(--roxo)",
-        "cor_icone_hover": "var(--off-white)"
+        "inverte_icone_no_hover": true
       }
     ],
     "copiar": {
@@ -178,10 +170,11 @@
       "confirmacao": "✓",
       "cor_hover": "var(--amarelo)",
       "cor_icone_hover": "var(--preto)"
-    }
+    },
+    "legenda": "compartilhar"
   },
   "privacidade": {
-    "aviso": "Este site não usa cookies de rastreamento nem coleta dados pessoais.",
+    "aviso": "Este site usa cookies do formulário de inscrição do Projeto Brief e não rastreia sua navegação.",
     "rotulo_link": "Política de privacidade",
     "botao": "Entendi",
     "destino": "/privacidade",
@@ -207,34 +200,30 @@
     "titulo_contato": "CONTATO",
     "nota_ia": "O funcionamento da plataforma, a origem dos dados e o uso de inteligência artificial estão descritos em Sobre o projeto.",
     "contato": {
-      "email": "[preencher]",
-      "instagram": "[preencher]",
+      "email": "projetobrief@quid.id",
+      "instagram": "https://www.instagram.com/projetobrief",
       "cidade": "São Paulo · Brasil"
-    },
-    "organizacao": {
-      "rotulo": "ORGANIZAÇÃO",
-      "logo": "/assets/logo-quid.svg",
-      "texto_alternativo": "Quid"
     },
     "realizacao": {
       "rotulo": "REALIZAÇÃO",
       "logo": "/assets/logo-brief.svg",
-      "texto_alternativo": "BRIEF"
+      "texto_alternativo": "brief"
     },
-    "direitos": "© 2026 · Todos os direitos reservados"
+    "direitos": "© 2026 · Todos os direitos reservados",
+    "titulo_receba": "RECEBA OS MATERIAIS"
   },
   "banner": {
     "imagens": [
       {
-        "arquivo": "/assets/banner-01.svg",
+        "arquivo": "/assets/banner-01.webp",
         "texto_alternativo": ""
       },
       {
-        "arquivo": "/assets/banner-02.svg",
+        "arquivo": "/assets/banner-02.webp",
         "texto_alternativo": ""
       },
       {
-        "arquivo": "/assets/banner-03.svg",
+        "arquivo": "/assets/banner-03.webp",
         "texto_alternativo": ""
       }
     ],
@@ -242,6 +231,7 @@
     "nota_provisoria": "faixa provisória. Substituir pelos arquivos banner-* da pasta assets"
   },
   "video_embed": "[preencher: código de incorporação do YouTube em youtube-nocookie.com, só na página Sobre]",
+  "substack_embed": "[preencher: código de incorporação do formulário do Substack do Projeto Brief]",
   "favicon": "/assets/favicon.svg",
   "imagem_compartilhamento": "/assets/compartilhamento.png",
   "pendencias": {

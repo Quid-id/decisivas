@@ -1,0 +1,110 @@
+<!-- Interação da página de caminho (v8): o resumo em cascata, as duas pilhas
+     de cards e a entrada dos cards de "como chegar nele" na rolagem.
+     Nenhuma palavra aqui: os textos da dica vêm de
+     window.CONFIGURACAO.caminho.baralho, e os do resumo, de data-*.
+     Com prefers-reduced-motion, nada anima: o resumo abre, as pilhas já
+     entregam os três cards lado a lado e os cards de "como chegar" aparecem
+     sem transição. -->
+<script>
+  (function () {
+    var TEXTOS = window.CONFIGURACAO.caminho;
+    var semMovimento =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // ---- Resumo em cascata ----
+    var resumo = document.getElementById("resumo-menu");
+    if (resumo) {
+      var botao = resumo.querySelector(".abre");
+      var estado = resumo.querySelector(".estado");
+      function pinta(aberto) {
+        resumo.classList.toggle("aberto", aberto);
+        botao.setAttribute("aria-expanded", String(aberto));
+        estado.textContent = aberto ? TEXTOS.resumo_fechar : TEXTOS.resumo_abrir;
+      }
+      botao.addEventListener("click", function () {
+        pinta(!resumo.classList.contains("aberto"));
+      });
+      // Fechado por padrão; aberto quando a pessoa pediu menos movimento.
+      pinta(semMovimento);
+    }
+
+    // ---- Pilha de cards: o de cima vai para a próxima posição livre ----
+    function pilha(area) {
+      var monte = area.querySelector(".pilha");
+      var vagas = [].slice.call(area.querySelectorAll(".slot")).slice(1);
+      var dica = area.parentNode.querySelector(".dica");
+      // Só o texto muda: o ícone de clique é um <img> ao lado, e trocar o
+      // conteúdo inteiro da dica o apagaria.
+      var textoDaDica = dica.querySelector(".texto-dica");
+      var passo = 0;
+
+      function atualizaDica(restam) {
+        if (restam <= 0) {
+          textoDaDica.textContent = TEXTOS.baralho.fim;
+          dica.classList.add("fim");
+          return;
+        }
+        textoDaDica.textContent =
+          passo === 0
+            ? TEXTOS.baralho.primeiro
+            : restam > 1
+              ? TEXTOS.baralho.meio
+              : TEXTOS.baralho.ultimo;
+      }
+
+      function avanca() {
+        var cards = monte.querySelectorAll(".card");
+        if (cards.length <= 1) {
+          if (cards.length === 1) {
+            cards[0].classList.add("fixo");
+            monte.classList.add("fim");
+          }
+          atualizaDica(0);
+          return;
+        }
+        var alvo = vagas[passo];
+        if (!alvo) return;
+        cards[0].classList.add("fixo", "entra");
+        alvo.appendChild(cards[0]);
+        passo++;
+        atualizaDica(monte.querySelectorAll(".card").length);
+      }
+
+      monte.addEventListener("click", avanca);
+      monte.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          avanca();
+        }
+      });
+      // Sem movimento: entrega os três lado a lado de uma vez.
+      if (semMovimento) {
+        while (monte.querySelectorAll(".card").length > 1) avanca();
+        avanca();
+      } else {
+        atualizaDica(monte.querySelectorAll(".card").length);
+      }
+    }
+    [].forEach.call(document.querySelectorAll(".baralho-area"), pilha);
+
+    // ---- "Como chegar nele": os cards entram da direita na rolagem ----
+    var surge = document.querySelector(".surge");
+    if (surge) {
+      if (semMovimento || !("IntersectionObserver" in window)) {
+        surge.classList.add("visto");
+      } else {
+        new IntersectionObserver(
+          function (entradas, observador) {
+            entradas.forEach(function (entrada) {
+              if (entrada.isIntersecting) {
+                surge.classList.add("visto");
+                observador.disconnect();
+              }
+            });
+          },
+          { threshold: 0.25 }
+        ).observe(surge);
+      }
+    }
+  })();
+</script>

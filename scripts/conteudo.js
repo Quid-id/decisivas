@@ -30,11 +30,22 @@ const LINHAS_DE_RESUMO = 5;
 const PARAGRAFOS_POR_QUE = 2;
 const CARDS_DE_DADOS = 3;
 const CARDS_COMO_CHEGAR = 3;
+// O número em destaque do card cabe em 8 caracteres ("nº 1", "10,4 mi",
+// "1 em 4"). Acima disso ele estoura o card, então o build recusa.
+const MAXIMO_DO_NUMERO = 8;
 
 class ErroDeConteudo extends Error {}
 
 function exige(condicao, caminho, oQue) {
   if (!condicao) throw new ErroDeConteudo(`${caminho}: ${oQue}`);
+}
+
+function exigeCurto(valor, caminho) {
+  exige(
+    String(valor).length <= MAXIMO_DO_NUMERO,
+    caminho,
+    `número em destaque com no máximo ${MAXIMO_DO_NUMERO} caracteres, tem ${String(valor).length}`
+  );
 }
 
 function exigeTexto(valor, caminho) {
@@ -70,7 +81,10 @@ function validaPagina(pagina, caminho) {
     exigeTexto(dado.titulo, `${caminho}.por_que.dados[${i}].titulo`);
     exigeTexto(dado.texto, `${caminho}.por_que.dados[${i}].texto`);
     // `n` é opcional: é o número em destaque, e só o primeiro card o usa.
-    if (dado.n !== undefined) exigeTexto(dado.n, `${caminho}.por_que.dados[${i}].n`);
+    if (dado.n !== undefined) {
+      exigeTexto(dado.n, `${caminho}.por_que.dados[${i}].n`);
+      exigeCurto(dado.n, `${caminho}.por_que.dados[${i}].n`);
+    }
   });
 
   validaCards(pagina.funciona, `${caminho}.funciona`);
@@ -91,6 +105,7 @@ function validaPublico(dados, publico, temas, arquivo) {
   exigeTexto(dados.quem_e.texto, `${arquivo}.quem_e.texto`);
   const destaque = dados.quem_e.destaque ?? {};
   exigeTexto(destaque.n, `${arquivo}.quem_e.destaque.n`);
+  exigeCurto(destaque.n, `${arquivo}.quem_e.destaque.n`);
   exigeTexto(destaque.titulo, `${arquivo}.quem_e.destaque.titulo`);
   exigeTexto(destaque.texto, `${arquivo}.quem_e.destaque.texto`);
 

@@ -148,17 +148,32 @@
   --texto-pp:     0.6875rem; /* 11px — rótulo de IA, créditos */
   --texto-p:      0.8125rem; /* 13px — rótulos, metadados */
   --texto-m:      0.875rem;  /* 14px — legendas, tags */
-  --texto-corpo:  1.0625rem; /* 17px — corpo */
+  --texto-corpo:  19px;      /* corpo — tipografia ampliada da v8 */
   --texto-g:      1.3125rem; /* 21px — títulos de bloco */
   --texto-gg:     1.375rem;  /* 22px — marca na barra e no rodapé */
   --texto-titulo: clamp(1.75rem, 4.4vw, 2.875rem); /* chamada da home */
   --texto-pergunta: clamp(1.875rem, 5vw, 3.25rem);  /* pergunta da home */
-  --texto-h1:      clamp(1.75rem, 4vw, 2.5rem);     /* título do caminho */
-  --texto-linha:   1.25rem;   /* 20px — linha de resumo do caminho */
-  --texto-prosa:   1.125rem;  /* 18px — prosa dos blocos */
-  --texto-card:    1.0625rem; /* 17px — corpo de card */
-  --texto-card-titulo: 1.1875rem; /* 19px — título de card */
-  --texto-numero:  2.5rem;    /* 40px — número em destaque */
+  --texto-h1:      clamp(36px, 4.6vw, 54px);        /* título de página */
+  --texto-linha:   22px;      /* linha de resumo do caminho */
+  --texto-prosa:   19px;      /* prosa dos blocos */
+  --texto-card:    18px;      /* corpo de card */
+  --texto-card-titulo: 22px;  /* título de card */
+  --texto-bloco:   17px;      /* título de bloco, em caixa alta */
+  --texto-menu:    18px;      /* navegação da barra preta */
+  --texto-numero:  44px;      /* número em destaque no card */
+  --texto-chamada: 32px;      /* "Não improvise. Adapte. Use!" na home */
+
+  /* Rodapé: menor que o corpo, com título de coluna miúdo e a marca em 22px
+     — a mesma altura do logotipo do brief ao lado de REALIZAÇÃO. */
+  --texto-rodape:         15px;
+  --texto-rodape-titulo:  12px;
+
+  /* Aviso: a regra é sempre esta, e vive aqui para não se perder no CSS —
+     itálico, minúsculas e 15px. Vale para a dica da home, a dica do baralho e
+     o rótulo do "Explorar o acervo". */
+  --texto-aviso:  15px;
+  --estilo-aviso: italic;
+  --caixa-aviso:  lowercase;
 
   --peso-normal: 400;
   --peso-forte:  700;
@@ -181,19 +196,20 @@
 
   /* ---------- Layout ---------- */
   --largura-conteudo: 1040px;
+  --largura-home:     1160px;   /* a home respira mais: cinco pílulas numa linha */
   --largura-texto:    70ch;
   --altura-banner:       220px;
   --altura-banner-movel: 140px;
-  --altura-barra:        72px;
+  --altura-barra:        84px;
   /* Barra de compartilhamento: tamanho do botão e a folga que ela respeita
      nas duas pontas, para não cobrir o menu nem o rodapé. */
-  /* Altura do logotipo: na barra preta e, maior, no rodapé. A barra cresceu
-     para o logotipo de 40px respirar (--altura-barra). */
-  --altura-marca:        40px;
-  --altura-marca-rodape: 48px;
-  --tamanho-share: 44px;
+  /* Altura do logotipo: 48px na barra de 84px (v8), e 22px no rodapé, onde a
+     marca tem o tamanho do logotipo do brief. */
+  --altura-marca:        48px;
+  --altura-marca-rodape: 22px;
+  --tamanho-share: 46px;
   /* Retrato do público no bloco "Quem é este público": círculo. */
-  --tamanho-retrato: 160px;
+  --tamanho-retrato: 170px;
   --folga-share:   60px;
 
   /* ---------- Foco (acessibilidade) ---------- */

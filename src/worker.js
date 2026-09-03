@@ -46,9 +46,11 @@ const PERGUNTAS_POR_HORA = 30;
 // legítima de duas ("custo de vida", "escala 6x1").
 const LETRAS_MINIMAS = 4;
 
-// Ordem dos grupos na tela: é a ordem das etiquetas na configuração. `perfil`
-// e `exemplo` não têm etiqueta e por isso não entram em resposta nenhuma.
-const TIPOS_NA_ORDEM = Object.keys(EXPLORAR.etiquetas);
+// Os tipos que entram numa resposta, na ordem em que o banco os devolve.
+// `perfil` descreve o público e não pertence a um tema; `exemplo` não tem
+// linha no acervo. A tela não mostra o tipo (v8): a resposta é uma lista
+// única de insights, e a ordem serve para os mais fortes virem primeiro.
+const TIPOS_NA_ORDEM = ["achado", "funciona", "afasta", "verbatim", "contexto"];
 
 function respostaJson(corpo, status = 200) {
   return new Response(JSON.stringify(corpo, null, 2), {
@@ -164,32 +166,21 @@ async function trechosDoCruzamento(env, publico, tema) {
   return r.results ?? [];
 }
 
-// A origem que vai à tela é o nome curto do estudo, pelo prefixo do id
-// (`D01-TR-042-jov` → D01), traduzido pela tabela da configuração. **Nunca o
-// id cru.** Sem entrada na tabela, aparece a pendência com o campo a
-// preencher — nunca um nome inventado (regra 2 do CLAUDE.md).
-function origemDoTrecho(id) {
-  const prefixo = String(id).split("-")[0];
-  return EXPLORAR.origens?.[prefixo] ?? `[preencher] explorar.origens.${prefixo}`;
-}
-
-// Agrupa por etiqueta, na ordem da configuração, e varre a saída: trecho com
-// termo bloqueado sai da resposta e o id vai para o registro.
+// Monta a resposta e varre a saída: trecho com termo bloqueado sai, e o id vai
+// para o registro. A tela mostra **uma lista só** — a etiqueta é a de
+// `explorar.etiqueta_unica`, o tipo do trecho não aparece e a origem não vai à
+// tela (v8). Os ids continuam no registro, que é onde a auditoria olha.
 function agrupa(trechos, termos) {
   const removidos = [];
-  const porTipo = new Map();
+  const itens = [];
   for (const t of trechos) {
     if (termos.length && contemTermo(t.texto, termos)) {
       removidos.push(t.id);
       continue;
     }
-    if (!porTipo.has(t.tipo)) porTipo.set(t.tipo, []);
-    porTipo.get(t.tipo).push({ texto: t.texto, origem: origemDoTrecho(t.id) });
+    itens.push({ texto: t.texto });
   }
-  const grupos = TIPOS_NA_ORDEM.filter((tipo) => porTipo.has(tipo)).map((tipo) => ({
-    etiqueta: EXPLORAR.etiquetas[tipo],
-    itens: porTipo.get(tipo),
-  }));
+  const grupos = itens.length ? [{ etiqueta: EXPLORAR.etiqueta_unica, itens }] : [];
   return { grupos, removidos };
 }
 

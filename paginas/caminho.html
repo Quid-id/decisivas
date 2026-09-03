@@ -23,15 +23,19 @@
   <h1 class="titulo-caminho">{{TITULO_CAMINHO}}</h1>
   <p class="linha-caminho">{{LINHA}}</p>
 
-  <!-- Os seis blocos de conteúdo. Cada um é montado inteiro pelo build, com o
+  <!-- O resumo abre a página como um menu em cascata, fechado (v8). -->
+{{RESUMO_MENU}}
+
+  <!-- Os blocos de conteúdo. Cada um é montado inteiro pelo build, com o
        rótulo de dados/configuracao.json: bloco sem nenhum item não é
-       renderizado, e a página segue nos que existem. -->
+       renderizado, e a página segue nos que existem. "O que funciona" e "o que
+       não funciona" vêm como pilha de cards; "como chegar nele" entra da
+       direita na rolagem. -->
 {{BLOCO_POR_QUE}}
 {{BLOCO_FUNCIONA}}
 {{BLOCO_NAO_FUNCIONA}}
 {{BLOCO_QUEM_E}}
 {{BLOCO_COMO_CHEGAR}}
-{{BLOCO_RESUMO}}
 
   <!-- 9. Explorar o acervo: parcial próprio, ligado (etapa 10) -->
 {{EXPLORAR}}
@@ -39,6 +43,7 @@
 </div></main>
 
 {{COMPARTILHAR}}
+{{INTERACAO}}
 {{RODAPE}}
 </body>
 </html>

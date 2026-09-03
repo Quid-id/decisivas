@@ -161,16 +161,43 @@ function rodaBanner(configuracao) {
 function logoParceiro(configuracao, bloco) {
   return existeAsset(bloco.logo)
     ? `<span class="logo"><img src="${escapa(bloco.logo)}" alt="${escapa(bloco.texto_alternativo)}"></span>`
-    : `<span class="logo">${assetPendente(configuracao, bloco.logo)}</span>`;
+    : `<span class="logo logo-ausente">${assetPendente(configuracao, bloco.logo)}</span>`;
 }
 
-// Contato do rodapé: link quando existe, pendência quando falta.
-function contato(configuracao, valor, campo, endereco) {
+// O formulário de inscrição do Projeto Brief, no rodapé: o código de
+// incorporação do Substack, de configuracao.json. É a ÚNICA exceção à regra de
+// nenhum script de terceiro (regra 5 do CLAUDE.md), declarada no aviso de
+// privacidade e na política. Enquanto o código não chegar, aparece a pendência.
+function substack(configuracao) {
+  if (ehPendente(configuracao.substack_embed)) {
+    return textoDaPendencia(configuracao, configuracao.substack_embed, "dados/configuracao.json", "substack_embed");
+  }
+  return configuracao.substack_embed;
+}
+
+// Contato do rodapé: link quando existe, pendência quando falta. O valor pode
+// vir como endereço completo (o Instagram vem assim) ou como o próprio dado
+// (o e-mail): `endereco` monta o href, e `rotulo` decide o que aparece.
+function contato(configuracao, valor, campo, endereco, rotulo) {
   if (ehPendente(valor)) {
     const texto = textoDaPendencia(configuracao, valor, "dados/configuracao.json", campo);
     return `<span class="tagline">${texto}</span>`;
   }
-  return `<a href="${escapa(endereco(valor))}" rel="noopener noreferrer">${escapa(valor)}</a>`;
+  const visivel = rotulo ? rotulo(valor) : valor;
+  return `<a href="${escapa(endereco(valor))}" rel="noopener noreferrer">${escapa(visivel)}</a>`;
+}
+
+// O Instagram vem na configuração como endereço completo. O href é ele mesmo,
+// e na tela aparece o arroba — derivado do próprio endereço, não escrito aqui.
+function enderecoDeInstagram(valor) {
+  return String(valor).startsWith("http")
+    ? String(valor)
+    : `https://instagram.com/${String(valor).replace(/^@/, "")}`;
+}
+
+function arrobaDeInstagram(valor) {
+  const conta = String(valor).replace(/\/+$/, "").split("/").pop().replace(/^@/, "");
+  return `@${conta}`;
 }
 
 // Botões de rede da barra lateral. Rótulo, nome e cor de hover de cada rede
@@ -179,12 +206,17 @@ function contato(configuracao, valor, campo, endereco) {
 function redes(configuracao) {
   return configuracao.compartilhar.redes
     .filter((rede) => rede.ativo)
-    .map(
-      (rede) =>
+    .map((rede) => {
+      // O ícone é imagem de assets/. Sobre fundo escuro ele precisa inverter
+      // para continuar visível, e quem diz quais invertem é a configuração.
+      const filtro = rede.inverte_icone_no_hover ? "; --filtro-hover: invert(1)" : "";
+      return (
         `  <a class="botao-redondo" data-rede="${escapa(rede.id)}" href="#" target="_blank" rel="noopener noreferrer" ` +
-        `style="--hover: ${rede.cor_hover}; --hover-icone: ${rede.cor_icone_hover}" ` +
-        `title="${escapa(rede.nome)}" aria-label="${escapa(rede.nome)}">${escapa(rede.rotulo)}</a>`
-    )
+        `style="--hover: ${rede.cor_hover}${filtro}" ` +
+        `title="${escapa(rede.nome)}" aria-label="${escapa(rede.nome)}">` +
+        `<img src="${escapa(rede.icone)}" alt="" width="22" height="22"></a>`
+      );
+    })
     .join("\n");
 }
 
@@ -211,7 +243,7 @@ function cabecalho(parciais, configuracao, atual) {
   });
 }
 
-function rodape(parciais, configuracao) {
+function rodape(parciais, configuracao, { receba }) {
   const r = configuracao.rodape;
   return troca(parciais.rodape, {
     AVISO_PRIVACIDADE: escapa(configuracao.privacidade.aviso),
@@ -232,11 +264,13 @@ function rodape(parciais, configuracao) {
       configuracao,
       r.contato.instagram,
       "rodape.contato.instagram",
-      (v) => `https://instagram.com/${String(v).replace(/^@/, "")}`
+      enderecoDeInstagram,
+      arrobaDeInstagram
     ),
     CONTATO_CIDADE: escapa(r.contato.cidade),
-    ROTULO_ORGANIZACAO: escapa(r.organizacao.rotulo),
-    LOGO_ORGANIZACAO: logoParceiro(configuracao, r.organizacao),
+    TITULO_RECEBA: escapa(r.titulo_receba),
+    TEXTO_RECEBA: escapa(receba),
+    SUBSTACK: substack(configuracao),
     ROTULO_REALIZACAO: escapa(r.realizacao.rotulo),
     LOGO_REALIZACAO: logoParceiro(configuracao, r.realizacao),
     DIREITOS: escapa(r.direitos),
@@ -247,6 +281,7 @@ function compartilhar(parciais, configuracao) {
   const c = configuracao.compartilhar;
   return troca(parciais.compartilhar, {
     ROTULO_COMPARTILHAR: escapa(c.rotulo),
+    LEGENDA_COMPARTILHAR: escapa(c.legenda),
     DESTINO_VOLTAR: escapa(configuracao.caminho.voltar_destino),
     ROTULO_VOLTAR: escapa(configuracao.caminho.voltar),
     ICONE_VOLTAR: escapa(configuracao.caminho.icone_voltar),
@@ -265,7 +300,7 @@ function compartilhar(parciais, configuracao) {
 function voltar(configuracao) {
   const c = configuracao.caminho;
   return (
-    `  <a class="botao-redondo voltar voltar-fixo" href="${escapa(c.voltar_destino)}" ` +
+    `  <a class="botao-redondo voltar voltar-fixo" id="voltar-fixo" href="${escapa(c.voltar_destino)}" ` +
     `title="${escapa(c.voltar)}" aria-label="${escapa(c.voltar)}">${escapa(c.icone_voltar)}</a>`
   );
 }
