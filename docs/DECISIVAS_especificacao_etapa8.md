@@ -2,6 +2,14 @@
 
 Versão 1, 02/09/2026. Substitui, a partir da etapa 8, a especificação anterior (etapas 0 a 7). Lê-se junto com o CONTEXTO_DECISIVAS.md versão 3, que prevalece em conflito.
 
+> **Superada em 03/09/2026 em um ponto: a seção "Quem faz".** Ela saiu da
+> página Sobre por inteiro — o bloco no molde, o campo `quem_faz` de
+> `conteudo/sobre.json`, o rótulo na configuração e a pendência que gerava no
+> build. A menção à seção na estrutura da página Sobre e a parte do **critério
+> de aceitação** que a admitia como `[preencher]` **não valem mais**. A página
+> termina em "Uso de inteligência artificial". O resto deste documento continua
+> valendo como está.
+
 ## O que mudou e por quê
 
 As páginas geradas pelo modelo no acesso saíram com texto genérico. Decisão de 02/09/2026: as 20 páginas passam a ser texto fixo, escrito pela equipe a partir do acervo e validado pelo jurídico. O modelo deixa de escrever página. O acervo e o banco ficam, como base de um recurso futuro, "Explorar o acervo", que devolve trechos da pesquisa e não redige.
