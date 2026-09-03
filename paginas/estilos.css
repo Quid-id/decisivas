@@ -429,9 +429,10 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .resultado .ver-mais:hover { background: var(--rosa); color: var(--sobre-rosa); }
 
 /* ---------- Barra lateral: voltar e compartilhar ----------
-   Mesma peça, mesma regra de aparecer e sumir: o voltar é o primeiro botão da
-   coluna, e em telas até 900 px a coluna vira faixa horizontal no pé, com o
-   voltar à esquerda dos ícones de rede. */
+   Duas peças, uma regra: a coluna de ícones à direita e o botão de voltar na
+   calha à esquerda aparecem e somem juntos, quando o banner saiu da tela e o
+   rodapé ainda não entrou (o script marca os dois). Abaixo de 1160 px as duas
+   ficam ocultas, como no protótipo v8: não há faixa horizontal no pé. */
 .barra-lateral {
   position: fixed; right: var(--espaco-4); top: 50%; transform: translateY(-50%);
   display: flex; flex-direction: column; gap: var(--espaco-2); z-index: 10;
@@ -462,10 +463,7 @@ section.bloco { margin: 0 0 var(--espaco-6); }
   color: var(--cor-texto-suave);
 }
 
-/* Em telas largas o voltar é um botão fixo na calha à esquerda do conteúdo, e
-   entra e sai pela MESMA regra da barra de compartilhamento (v5, mantida na
-   v8): o script marca os dois juntos. O da faixa fica escondido nessa
-   largura, para não haver dois. */
+/* O voltar é um botão fixo na calha à esquerda do conteúdo, centrado nela. */
 .botao-redondo.voltar-fixo {
   position: fixed; z-index: 15;
   top: calc(var(--altura-barra) + var(--espaco-6));
@@ -476,21 +474,13 @@ section.bloco { margin: 0 0 var(--espaco-6); }
   opacity: 0; pointer-events: none; transition: opacity .25s;
 }
 .botao-redondo.voltar-fixo.visivel { opacity: 1; pointer-events: auto; }
-.barra-lateral .voltar.na-faixa { display: none; }
-/* Entre 901 e 1140 px não há margem sobrando ao lado da coluna de conteúdo:
-   o botão encosta na borda e o conteúdo abre espaço para ele. */
-@media (min-width: 901px) and (max-width: 1160px) {
-  main.caminho > .larg { padding-left: calc(var(--tamanho-share) + var(--espaco-4)); }
-}
-@media (max-width: 900px) {
-  .barra-lateral {
-    top: auto; bottom: var(--espaco-3); right: var(--espaco-3); left: var(--espaco-3);
-    flex-direction: row; justify-content: center; transform: none;
-  }
-  /* Na faixa horizontal, o voltar volta a aparecer, à esquerda e um pouco
-     separado dos ícones; a legenda e o botão fixo saem de cena. */
-  .barra-lateral .voltar.na-faixa { display: grid; margin-right: var(--espaco-3); }
-  .botao-redondo.voltar-fixo, .legenda-share { display: none; }
+
+/* Abaixo de 1160 px as duas somem (v8). Não há calha para o voltar nem
+   largura para a coluna de ícones sem cobrir o conteúdo, e a página inteira
+   continua acessível: o compartilhamento é o endereço da própria página, e o
+   voltar, a marca da barra. */
+@media (max-width: 1160px) {
+  .barra-lateral, .botao-redondo.voltar-fixo { display: none; }
 }
 
 /* ---------- Aviso de privacidade ---------- */
@@ -507,8 +497,10 @@ section.bloco { margin: 0 0 var(--espaco-6); }
   border-radius: var(--raio-pilula); padding: var(--espaco-1) var(--espaco-3);
   cursor: pointer; white-space: nowrap;
 }
+/* Em telas estreitas o aviso ocupa a largura e fica no pé: não há mais faixa
+   horizontal de compartilhamento embaixo dele para desviar. */
 @media (max-width: 900px) {
-  .aviso-privacidade { left: var(--espaco-2); right: var(--espaco-2); bottom: calc(var(--tamanho-share) + var(--espaco-5)); max-width: none; }
+  .aviso-privacidade { left: var(--espaco-2); right: var(--espaco-2); bottom: var(--espaco-2); max-width: none; }
 }
 
 /* ---------- Páginas de texto (Sobre, Privacidade) ---------- */

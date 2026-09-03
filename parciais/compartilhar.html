@@ -3,14 +3,12 @@
      endereço a compartilhar é o da própria página, lido no navegador, então
      não existe domínio escrito no build.
 
-     Regra de aparecer e sumir (v5, mantida na v8): a barra entra quando o
-     banner e a barra de menu saíram da tela e sai quando o rodapé começa a
-     entrar. O botão de voltar, que é um elemento à parte à esquerda, segue
-     exatamente a mesma regra. Em telas até 900 px a barra vira uma faixa
-     horizontal no pé, e é lá que o voltar aparece. -->
+     Regra de aparecer e sumir: a barra entra quando o banner e a barra de
+     menu saíram da tela e sai quando o rodapé começa a entrar. O botão de
+     voltar, que é um elemento à parte à esquerda, segue exatamente a mesma
+     regra. Abaixo de 1160 px as duas ficam ocultas (protótipo v8). -->
 <aside class="barra-lateral" id="barra-lateral" aria-label="{{ROTULO_COMPARTILHAR}}">
   <span class="legenda-share" aria-hidden="true">{{LEGENDA_COMPARTILHAR}}</span>
-  <a class="botao-redondo voltar na-faixa" href="{{DESTINO_VOLTAR}}" title="{{ROTULO_VOLTAR}}" aria-label="{{ROTULO_VOLTAR}}">{{ICONE_VOLTAR}}</a>
 {{REDES}}
   <button type="button" class="botao-redondo" data-rede="copiar" id="copiar-link" data-confirmacao="{{CONFIRMACAO_COPIAR}}" style="--hover: {{COR_HOVER_COPIAR}}; --hover-icone: {{COR_ICONE_HOVER_COPIAR}}" title="{{NOME_COPIAR}}" aria-label="{{NOME_COPIAR}}">{{ROTULO_COPIAR}}</button>
 </aside>
