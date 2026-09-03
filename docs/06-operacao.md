@@ -48,7 +48,7 @@ apague a pasta `.wrangler/` e rode o comando de novo.
 node scripts/carga-acervo.js
 ```
 
-O script lê `dados/DECISIVAS_acervo_v5.xlsx` (aba `acervo`) e
+O script lê `dados/DECISIVAS_acervo_v6.xlsx` (aba `acervo`) e
 `dados/DECISIVAS_pautas_de_para_v1.xlsx` (aba `pautas_de_para`, só para
 conferir a chave estrangeira), valida cada linha contra as **restrições da
 migração 003** e grava os blocos em `carga-acervo/`. O que é verificado, com o
@@ -123,10 +123,18 @@ Nunca corte no meio de um comando.
 
 | Acervo | Blocos | Linhas | Remoto |
 |---|---|---|---|
-| v5 (`dados/DECISIVAS_acervo_v5.xlsx`, aba `acervo`) | `arquivo/carga-003/01` a `09` | 2.405 trechos | **Aplicada em 02/09/2026, pelo console.** O bloco 09 devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59, paginas 0, formatos 0` — igual ao esperado e ao que os nove blocos já tinham devolvido na réplica local do schema pós-003 |
+| **v6** (`dados/DECISIVAS_acervo_v6.xlsx`, aba `acervo`) | reescrita por `UPDATE`, não por carga nova | 2.405 trechos, **102 textos reescritos** | **Aplicado em 03/09/2026, pelo console.** Substitui o v5: os mesmos 2.405 ids, as mesmas colunas, nenhuma linha entrando ou saindo — só o campo `texto` de 102 trechos, reescrito em linguagem comum, sem jargão de método. Por isso foi `UPDATE` linha a linha, e não `DELETE` mais carga: `id`, `publico`, `macronarrativa`, `pauta`, `tipo` e `forca` não mudaram, e nada precisou ser revalidado contra as restrições |
+| v5 (`arquivo/DECISIVAS_acervo_v5.xlsx`, aba `acervo`) | `arquivo/carga-003/01` a `09` | 2.405 trechos | **Aplicada em 02/09/2026, pelo console.** O bloco 09 devolveu `trechos 2405, cruzamentos 20, perfil 91, achados_forte 94, pautas_usadas 59, paginas 0, formatos 0` — igual ao esperado e ao que os nove blocos já tinham devolvido na réplica local do schema pós-003. **Superada pelo v6 em 03/09/2026**; a planilha foi para `arquivo/`, porque é ela que sustenta esta linha do registro |
 
 A linha só vira "aplicada" com a saída do bloco `09` do remoto em mãos, como no
 registro de migrações — a regra de quem aplica é a mesma, mais abaixo.
+
+**Reescrita de texto não é carga nova.** Quando a planilha nova traz os mesmos
+ids e só muda o campo `texto` — foi o caso do v6 —, o caminho é `UPDATE` linha
+a linha, e não apagar e recarregar: a etiquetagem (`publico`, `macronarrativa`,
+`pauta`, `tipo`, `forca`) continua a mesma, as restrições do banco não têm o
+que reprovar, e o histórico de qual acervo esteve no ar fica preservado. A
+conferência é a contagem de linhas antes e depois, que tem de ser igual.
 
 Com o acervo v5 no ar, a migração 004 ficou liberada: as 273 linhas da amostra
 antiga não são mais a única cópia de nada, e nenhuma consulta do código as
@@ -143,14 +151,20 @@ npx wrangler d1 execute decisivas --local --command="SELECT COUNT(*) AS trechos 
 
 ### Depois de CADA carga: versão do acervo
 
-**Atualize `dados/versao-acervo.txt`** com uma marca nova (ex.:
-`2026-09-15-carga-oficial-1`) **no mesmo commit dos blocos de carga**. É o que
-diz, no repositório, qual acervo está no banco.
+**Atualize `dados/versao-acervo.txt`** com uma marca nova **no mesmo commit dos
+blocos de carga** — hoje está `2026-09-03-acervo-v6`. É o que diz, no
+repositório, qual acervo está no banco. Vale também para reescrita por
+`UPDATE`: o texto mudou, então a marca muda.
 
-Nada mais depende da carga desde a etapa 8A: as páginas são texto fixo de
-`conteudo/`, não saem do acervo em tempo de acesso, e não há cache a regenerar.
-O acervo sustenta a escrita e a revisão das páginas, e volta a ser lido em tempo
-real quando o "Explorar o acervo" for ligado (etapa 10).
+E isso tem uma consequência desde a etapa 10: **a marca é a validade do cache
+de perguntas**. Uma linha de `consultas` só é reaproveitada se a
+`versao_acervo` guardada for igual à atual, então mudar a marca invalida o
+cache inteiro e a próxima pergunta de cada cruzamento volta a chamar o modelo —
+que é exatamente o certo, porque os trechos mudaram.
+
+O resto não depende da carga: as páginas são texto fixo de `conteudo/` e não
+saem do acervo em tempo de acesso. O acervo sustenta a escrita e a revisão das
+páginas, e é lido em tempo real pelo "Explorar o acervo".
 
 ## Migrações de banco
 
@@ -383,7 +397,7 @@ SELECT (SELECT COUNT(*) FROM pautas) AS pautas, (SELECT COUNT(*) FROM pragma_tab
 O bloco 2 foi conferido em 02/09/2026 com `openpyxl` contra
 `dados/DECISIVAS_pautas_de_para_v1.xlsx`: as 59 `pauta_consolidada` e os 59
 `macronarrativa_padrao` batem com o arquivo, sem sobra nem falta, e as 59
-pautas usadas em `dados/DECISIVAS_acervo_v5.xlsx` existem todas na tabela, o
+pautas usadas em `dados/DECISIVAS_acervo_v6.xlsx` existem todas na tabela, o
 que fecha a chave estrangeira. Para reemitir os blocos em arquivo, sem
 transcrever nada: `node scripts/extrai-blocos-migracao.js 003`.
 
@@ -510,8 +524,9 @@ tela é sempre lido de `trechos`, palavra por palavra.
   sem gravar nada** — nem o texto, nem a linha de registro.
 - **Saída:** os textos devolvidos passam pela mesma lista. Trecho com
   ocorrência sai da resposta, e o id vai para o registro em `removidos`.
-- **Pergunta curta:** menos de 3 palavras úteis responde
-  `explorar.aviso_pergunta_curta`, sem modelo.
+- **Pergunta curta:** pergunta sem nenhuma palavra de 4 letras ou mais responde
+  `explorar.aviso_pergunta_curta`, sem modelo. O critério é a palavra, e não a
+  contagem: "custo de vida" e "escala 6x1" passam; "gás" e "luz" sozinhos, não.
 - **Limite:** 30 perguntas livres por hora por origem, contadas na memória do
   Worker sob o hash da origem com sal do dia — **o endereço não é gravado**, e
   a chave de hoje não serve para reconhecer ninguém amanhã. Botão de pauta não
@@ -610,7 +625,7 @@ gerador e entra no molde por um marcador (`{{BLOCO_FUNCIONA}}` e os outros
 cinco), que é o que permite a um bloco simplesmente não existir.
 
 A seção "Explorar o acervo" precisa dizer quantos trechos existem no
-cruzamento e quais pautas há ali: isso vem de `dados/DECISIVAS_acervo_v5.xlsx`
+cruzamento e quais pautas há ali: isso vem de `dados/DECISIVAS_acervo_v6.xlsx`
 no build (`scripts/acervo.js`), a mesma planilha da carga — nunca de número
 escrito à mão. **Os botões de pauta são as pautas com 3 ou mais trechos no
 cruzamento, no máximo oito, as de mais trechos primeiro**, e `comunicação e

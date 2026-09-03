@@ -2,12 +2,12 @@
 //
 // A seção "Explorar o acervo" de cada caminho precisa dizer quantos trechos o
 // acervo tem naquele cruzamento e quais pautas existem ali. Isso vem do próprio
-// acervo (`dados/DECISIVAS_acervo_v5.xlsx`), não de número escrito à mão: o
+// acervo (`dados/DECISIVAS_acervo_v6.xlsx`), não de número escrito à mão: o
 // banco não é alcançável no build, e a planilha é a mesma fonte que a carga usa.
 
 const ExcelJS = require("exceljs");
 
-const ARQUIVO = "dados/DECISIVAS_acervo_v5.xlsx";
+const ARQUIVO = "dados/DECISIVAS_acervo_v6.xlsx";
 const ABA = "acervo";
 // Uma pauta só vira botão com 3 ou mais trechos no cruzamento (etapa 4, e
 // mantido na 10): com um ou dois, o botão entrega quase nada.

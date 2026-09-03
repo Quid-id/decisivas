@@ -49,6 +49,13 @@ saiu depois traz a data na própria linha.
 | `janela-de-video.html` | a janela do vídeo de abertura do Início, com a marcação e o estilo como estavam. Retirada em 02/09/2026: o vídeo de apresentação passou a viver só na página Sobre, pelo `video_embed` da configuração |
 | `caixa-de-lacuna.html` | a caixa bege que declarava a lacuna abaixo do bloco, com a marcação e o estilo como estavam. Retirada em 02/09/2026: o bloco passou a mostrar os cards que existem — 3, 2 ou 1 — e a não ser renderizado quando não há nenhum. O campo `lacuna` segue nos JSON, ignorado pelo build |
 
+## Planilhas de acervo superadas
+
+| Item | O que era |
+|---|---|
+| `DECISIVAS_acervo_v5.xlsx` | o acervo que foi ao ar na carga de 02/09/2026, 2.405 trechos. Superado em 03/09/2026 pelo v6, que reescreveu 102 trechos em linguagem comum, sem jargão de método — mesmos ids, mesmas colunas, mesmas 2.405 linhas. Fica aqui porque o registro de cargas do `docs/06` cita a carga que ele sustentou |
+| `DECISIVAS_acervo_v4.xlsx` | a versão anterior à consolidação da taxonomia nova, nunca carregada no banco. Saiu de uso na etapa 3 e estava em `dados/` desde então |
+
 ## Cargas e migrações já aplicadas
 
 | Item | O que era |

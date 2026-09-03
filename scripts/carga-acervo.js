@@ -1,6 +1,6 @@
 // DECISIVAS — carga do acervo no D1 (etapa 3).
 //
-// Lê dados/DECISIVAS_acervo_v5.xlsx, valida cada linha contra as restrições da
+// Lê dados/DECISIVAS_acervo_v6.xlsx, valida cada linha contra as restrições da
 // migração 003, e grava os comandos em blocos .sql numerados em carga-acervo/,
 // prontos para colar no console do painel do Cloudflare.
 //
@@ -12,7 +12,7 @@
 //   node scripts/carga-acervo.js      # valida, relata e grava carga-acervo/
 //
 // Opções por variável de ambiente:
-//   ACERVO=caminho.xlsx     outra planilha (padrão: dados/DECISIVAS_acervo_v5.xlsx)
+//   ACERVO=caminho.xlsx     outra planilha (padrão: dados/DECISIVAS_acervo_v6.xlsx)
 //   SAIDA=pasta             outra pasta de saída (padrão: carga-acervo)
 //   KB_POR_BLOCO=90         alvo de tamanho por comando INSERT
 //
@@ -32,7 +32,7 @@ const ExcelJS = require("exceljs");
 
 const VOCABULARIO = require("../dados/vocabulario.json");
 
-const ACERVO = process.env.ACERVO ?? "dados/DECISIVAS_acervo_v5.xlsx";
+const ACERVO = process.env.ACERVO ?? "dados/DECISIVAS_acervo_v6.xlsx";
 const PAUTAS = "dados/DECISIVAS_pautas_de_para_v1.xlsx";
 // A pasta da carga aplicada em 02/09/2026 foi para arquivo/carga-003/; uma
 // carga nova escreve aqui, com o nome do script.
