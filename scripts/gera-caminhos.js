@@ -261,8 +261,6 @@ function montaSobre(comum, configuracao, sobre, vocabulario, publicos) {
     TEMAS: listaDeTemas,
     ROTULO_AVISO_IA: escapa(blocos.aviso_ia),
     AVISO_IA: paragrafo(configuracao, sobre.aviso_ia, ONDE, "aviso_ia"),
-    ROTULO_QUEM_FAZ: escapa(blocos.quem_faz),
-    QUEM_FAZ: paragrafo(configuracao, sobre.quem_faz, ONDE, "quem_faz"),
   });
 }
 

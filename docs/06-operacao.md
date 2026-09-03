@@ -802,13 +802,12 @@ O build termina imprimindo o que falta redigir e que asset falta, um por linha,
 para a equipe não precisar abrir tela para descobrir:
 
 ```
-pendências na tela (6):
+pendências na tela (5):
   - dados/configuracao.json → email
   - dados/configuracao.json → instagram
   - /assets/logo-quid.svg
   - /assets/logo-brief.svg
   - dados/configuracao.json → video_embed
-  - conteudo/sobre.json → quem_faz
 ```
 
 ### Assets

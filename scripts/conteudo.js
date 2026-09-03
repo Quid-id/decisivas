@@ -133,7 +133,7 @@ function validaPublico(dados, publico, temas, arquivo) {
 }
 
 function validaSobre(sobre) {
-  for (const campo of ["projeto", "como_foi_feito", "publicos_intro", "aviso_ia", "quem_faz", "privacidade"]) {
+  for (const campo of ["projeto", "como_foi_feito", "publicos_intro", "aviso_ia", "privacidade"]) {
     exigeTexto(sobre[campo], `sobre.json.${campo}`);
   }
   exige(sobre.temas && typeof sobre.temas === "object", "sobre.json.temas", "objeto obrigatório");

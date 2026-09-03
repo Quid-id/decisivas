@@ -95,7 +95,7 @@ A fonte do acervo é `dados/DECISIVAS_acervo_v6.xlsx`, aba `acervo`, 2.405 linha
 
 As 273 linhas da amostra antiga saíram do banco com a migração 004.
 
-**O texto das 20 páginas está em `conteudo/` e já monta as páginas**, em revisão pela equipe e pelo jurídico. Falta redigir: "quem faz" no Sobre, contato do rodapé e o código de incorporação do vídeo (`video_embed`) — tudo marcado `[preencher]`. O vídeo de apresentação vive **só na página Sobre**: não há janela de abertura no Início. Nenhum arquivo traz `revisado_em`, então as páginas mostram "texto em revisão" no lugar da data.
+**O texto das 20 páginas está em `conteudo/` e já monta as páginas**, em revisão pela equipe e pelo jurídico. Falta redigir: contato do rodapé e o código de incorporação do vídeo (`video_embed`) — os dois marcados `[preencher]`. A seção "quem faz" saiu do Sobre em 03/09/2026, com o campo `quem_faz` de `conteudo/sobre.json`. O vídeo de apresentação vive **só na página Sobre**: não há janela de abertura no Início. Nenhum arquivo traz `revisado_em`, então as páginas mostram "texto em revisão" no lugar da data.
 
 **Os assets da identidade estão no lugar:** logotipos (inclusive o do brief, no rodapé), favicon, retratos duotone dos quatro públicos, ícones de compartilhamento e o ícone de clique da pilha de cards. As três faixas do banner são as artes finais em `banner-0*.webp` — as composições provisórias em SVG foram para `arquivo/banner-provisorio/`.
 
