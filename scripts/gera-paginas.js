@@ -31,6 +31,7 @@ const monta = require("./interface");
 const geraCaminhos = require("./gera-caminhos");
 const verificaLiterais = require("./verifica-literais");
 const verificaConteudo = require("./verifica-conteudo");
+const conteudo = require("./conteudo");
 
 const SAIDA = "public";
 const ASSETS = "assets";
@@ -87,7 +88,9 @@ async function main() {
     parciais,
     cabeca: (meta) => monta.cabeca(parciais, configuracao, meta),
     cabecalho: (atual) => monta.cabecalho(parciais, configuracao, atual),
-    rodape: monta.rodape(parciais, configuracao),
+    // O texto do bloco "Receba os materiais" é conteúdo, e vem de
+    // conteudo/sobre.json — não da configuração.
+    rodape: monta.rodape(parciais, configuracao, { receba: conteudo.carrega(vocabulario).sobre.receba }),
     compartilhar: monta.compartilhar(parciais, configuracao),
     voltar: monta.voltar(configuracao),
     rodaBanner: monta.rodaBanner(configuracao),

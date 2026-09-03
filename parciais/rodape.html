@@ -1,10 +1,9 @@
-<!-- Aviso de privacidade: informativo, não pedido de consentimento — o site
-     não usa cookie nem coleta dado pessoal, então não há o que consentir.
-     Aparece só no primeiro acesso: ao clicar em "Entendi", o navegador guarda
-     em localStorage a data em que o aviso foi visto, e com essa marca o aviso
-     não volta. Nenhum cookie, e a marca não sai do aparelho de quem navega
-     (regra 5 do CLAUDE.md). Nasce escondido e o script mostra quando não há
-     marca, para o aviso não piscar na tela de quem já o viu. -->
+<!-- Aviso de privacidade: informativo. O site não rastreia navegação; os
+     cookies que existem são do formulário de inscrição do Projeto Brief, no
+     rodapé, e o texto do aviso diz isso. Aparece só no primeiro acesso: ao
+     clicar em "Entendi", o navegador guarda em localStorage a data em que o
+     aviso foi visto, e com essa marca ele não volta. Nasce escondido e o
+     script mostra quando não há marca, para não piscar. -->
 <div class="aviso-privacidade" id="aviso-privacidade" data-marca="{{MARCA_NAVEGADOR}}" hidden>
   <span>{{AVISO_PRIVACIDADE}} <a href="{{DESTINO_PRIVACIDADE}}">{{ROTULO_PRIVACIDADE}}</a></span>
   <button type="button" id="fechar-privacidade">{{BOTAO_PRIVACIDADE}}</button>
@@ -31,12 +30,18 @@
         <li class="tagline">{{CONTATO_CIDADE}}</li>
       </ul>
     </div>
+    <!-- Receba os materiais: o texto vem de conteudo/sobre.json e o formulário
+         é o embed do Substack, de configuracao.json. É a ÚNICA exceção à regra
+         de nenhum script de terceiro no site (regra 5 do CLAUDE.md), e por
+         isso está declarada no aviso de privacidade e na política. -->
+    <div>
+      <h2>{{TITULO_RECEBA}}</h2>
+      <p class="tagline">{{TEXTO_RECEBA}}</p>
+      <div class="substack">{{SUBSTACK}}</div>
+    </div>
   </div>
   <div class="base">
-    <div class="creditos">
-      <span class="credito"><span>{{ROTULO_ORGANIZACAO}}</span>{{LOGO_ORGANIZACAO}}</span>
-      <span class="credito"><span>{{ROTULO_REALIZACAO}}</span>{{LOGO_REALIZACAO}}</span>
-    </div>
+    <span class="credito"><span>{{ROTULO_REALIZACAO}}</span>{{LOGO_REALIZACAO}}</span>
     <span>{{DIREITOS}}</span>
   </div>
 </div></footer>
@@ -46,8 +51,7 @@
     var chave = aviso.dataset.marca;
 
     // localStorage pode estar bloqueado (janela privada, configuração do
-    // navegador). Bloqueado, o aviso aparece e o clique não guarda nada: o
-    // aviso é informativo, e mostrá-lo de novo não quebra nada.
+    // navegador). Bloqueado, o aviso aparece e o clique não guarda nada.
     function leu() {
       try {
         return Boolean(window.localStorage.getItem(chave));

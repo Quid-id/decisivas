@@ -89,40 +89,47 @@ html { scroll-behavior: smooth; }
 .marca img { display: block; height: var(--altura-marca); width: auto; }
 .marca.assinatura img { height: var(--altura-marca-rodape); }
 .barra nav a {
-  color: var(--off-white); text-decoration: none; font-size: var(--texto-m);
+  color: var(--off-white); text-decoration: none; font-size: var(--texto-menu);
   margin-left: var(--espaco-4); border-bottom: 1px solid transparent; padding-bottom: var(--espaco-1);
 }
 .barra nav a:hover, .barra nav a[aria-current="page"] { border-bottom-color: var(--rosa); }
 
 main { padding: var(--espaco-6) 0 var(--espaco-7); }
 
-/* ---------- Início ----------
-   Quatro textos, todos de configuracao.json (home): o título, o texto de
-   apoio, a pergunta que abre as escolhas e a chamada final. O título é a
-   tipografia de destaque; a leitura fica na fonte de corpo. */
+/* ---------- Início (v8) ----------
+   A abertura (título e texto) tem a mesma largura, o aviso em itálico vem
+   logo acima da primeira fileira, e as três fileiras — públicos, temas, botão
+   — têm o mesmo espaçamento. A chamada fica centralizada no que sobra até o
+   rodapé. Não há rótulo visível de público nem de tema: eles existem só para
+   o leitor de tela (.sr). */
+main.home { padding-bottom: 0; }
+.home-col {
+  display: flex; flex-direction: column;
+  min-height: calc(100vh - var(--altura-barra) - var(--altura-banner) - var(--espaco-6));
+}
+.home .larg { max-width: var(--largura-home); }
+.abertura { max-width: 980px; margin-bottom: var(--espaco-6); }
 .titulo-home {
   font-family: var(--tipo-destaque);
-  font-size: var(--texto-pergunta); line-height: 1.08;
-  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-4); max-width: 26ch;
+  font-size: var(--texto-pergunta); line-height: 1.05;
+  font-weight: var(--peso-forte); margin: 0 0 var(--espaco-4);
 }
+/* A apresentação tem a largura do título, e o navegador equilibra a última
+   linha para não sobrar palavra sozinha. */
 .texto-home {
-  font-size: var(--texto-prosa); line-height: var(--entrelinha-normal);
-  margin: 0 0 var(--espaco-6); max-width: 58ch;
-}
-.pergunta {
-  font-size: var(--texto-g); font-weight: var(--peso-forte);
-  margin: 0 0 var(--espaco-2); max-width: 30ch;
+  font-size: 20px; line-height: var(--entrelinha-normal);
+  margin: 0; text-wrap: pretty;
 }
 .chamada-home {
-  font-family: var(--tipo-destaque); font-size: var(--texto-g);
-  font-weight: var(--peso-forte); margin: var(--espaco-6) 0 0;
+  font-family: var(--tipo-destaque); font-size: var(--texto-chamada);
+  font-weight: var(--peso-forte); margin: 0;
 }
-.etapa { margin-bottom: var(--espaco-4); }
-.etapa h2 {
-  font-size: var(--texto-p); letter-spacing: .1em; color: var(--cor-texto-suave);
-  font-weight: var(--peso-normal); margin: var(--espaco-5) 0 var(--espaco-3); text-transform: uppercase;
-}
-.opcoes { display: flex; flex-wrap: wrap; gap: var(--espaco-2); }
+.fecho { flex: 1; display: flex; align-items: center; padding: var(--espaco-5) 0; }
+.etapa { margin: 0 0 var(--espaco-5); }
+/* As cinco pílulas de tema cabem em uma linha em 1280; abaixo de 1000 px elas
+   quebram. */
+.opcoes { display: flex; flex-wrap: nowrap; gap: var(--espaco-3); padding: 4px; }
+@media (max-width: 1000px) { .opcoes { flex-wrap: wrap; } }
 /* Pílula de público: pintada na cor dele desde o repouso, como no protótipo v5.
    A cor vem de dados/vocabulario.json, aplicada em --cor pelo script. */
 .opcoes button {
@@ -130,6 +137,7 @@ main { padding: var(--espaco-6) 0 var(--espaco-7); }
   background: var(--cor, var(--branco)); color: var(--cor-texto-pilula, var(--cor-texto));
   border: var(--borda-grossa) solid var(--cor-borda-forte); border-radius: var(--raio-pilula);
   padding: var(--espaco-3) var(--espaco-4); cursor: pointer; transition: transform .08s;
+  white-space: nowrap; font-size: 16px;
 }
 .opcoes button:hover { transform: translateY(-2px); }
 .opcoes button[aria-pressed="true"] { outline: var(--borda-grossa) solid var(--cor-borda-forte); outline-offset: 3px; }
@@ -146,7 +154,13 @@ main { padding: var(--espaco-6) 0 var(--espaco-7); }
 }
 .caminhos:hover { transform: translate(-1px, -1px); box-shadow: var(--sombra-dura-g); }
 .caminhos[disabled] { opacity: .45; box-shadow: none; cursor: not-allowed; transform: none; }
-.escolha { color: var(--cor-texto-suave); font-size: var(--texto-m); }
+/* Aviso: a regra vive em tokens (itálico, minúsculas, 15px) e vale para a
+   dica da home, a dica do baralho e o rótulo do Explorar. */
+.aviso-tela, .dica, .rotulo-acervo, .aviso-acervo {
+  font-size: var(--texto-aviso); font-style: var(--estilo-aviso);
+  text-transform: var(--caixa-aviso); color: var(--cor-texto-suave);
+}
+.aviso-tela { margin: 0 0 var(--espaco-3); }
 
 /* ---------- Página de caminho ---------- */
 /* A cor do público chega no style do <main>, escrita pelo build a partir de
@@ -178,17 +192,101 @@ h1.titulo-caminho {
 section.bloco { margin: 0 0 var(--espaco-6); }
 .bloco h2 {
   font-family: var(--tipo-destaque); font-weight: var(--peso-forte);
-  font-size: var(--texto-m); letter-spacing: .08em; text-transform: uppercase;
+  font-size: var(--texto-bloco); letter-spacing: .08em; text-transform: uppercase;
   margin: 0 0 var(--espaco-4); display: flex; align-items: center; gap: var(--espaco-3);
 }
-.bloco h2::after { content: ""; flex: 1; height: 2px; background: var(--preto); }
+.bloco h2::after { content: ""; flex: 1; height: 3px; background: var(--preto); }
+
+/* ---------- Resumo em cascata, no topo da página (v8) ----------
+   Fechado por padrão. Abre com a lista descendo e os itens entrando um a um;
+   com prefers-reduced-motion o script já o entrega aberto, e as transições
+   estão desligadas no fim desta folha. */
+.resumo-menu {
+  background: var(--preto); color: var(--off-white);
+  border-radius: var(--raio-card-g); margin: 0 0 var(--espaco-6); overflow: hidden;
+}
+.resumo-menu .abre {
+  width: 100%; font: inherit; background: transparent; color: var(--off-white);
+  border: 0; padding: var(--espaco-4) var(--espaco-5); cursor: pointer;
+  display: flex; align-items: center; gap: var(--espaco-3); text-align: left;
+}
+.resumo-menu .rotulo-resumo {
+  font-family: var(--tipo-destaque); font-size: var(--texto-p);
+  letter-spacing: .08em; text-transform: uppercase; flex: 1;
+}
+.resumo-menu .estado {
+  font-size: var(--texto-aviso); font-style: var(--estilo-aviso);
+  text-transform: var(--caixa-aviso); opacity: .75;
+}
+.resumo-menu .seta { font-size: var(--texto-g); transition: transform .3s; }
+.resumo-menu.aberto .seta { transform: rotate(180deg); }
+.resumo-menu ol {
+  margin: 0; padding: 0 var(--espaco-5); list-style: none;
+  max-height: 0; overflow: hidden; transition: max-height .45s ease, padding .3s;
+}
+.resumo-menu.aberto ol { max-height: 480px; padding: 0 var(--espaco-5) var(--espaco-4); }
+.resumo-menu li {
+  opacity: 0; transform: translateY(-8px); transition: opacity .35s, transform .35s;
+  padding: var(--espaco-2) 0; border-top: 1px solid rgba(247, 247, 237, 0.13);
+  font-size: var(--texto-card); display: flex; gap: var(--espaco-3);
+}
+.resumo-menu.aberto li { opacity: 1; transform: none; }
+.resumo-menu.aberto li:nth-child(2) { transition-delay: .06s; }
+.resumo-menu.aberto li:nth-child(3) { transition-delay: .12s; }
+.resumo-menu.aberto li:nth-child(4) { transition-delay: .18s; }
+.resumo-menu.aberto li:nth-child(5) { transition-delay: .24s; }
+.resumo-menu .num {
+  font-family: var(--tipo-destaque); font-size: var(--texto-p); font-weight: var(--peso-forte);
+  background: var(--cor-publico, var(--rosa)); color: var(--preto);
+  border-radius: 50%; min-width: 26px; height: 26px; display: grid; place-items: center;
+  flex: none; margin-top: 2px;
+}
+
+/* ---------- Pilha de cards em "o que funciona" e "o que não funciona" ----------
+   A pilha ocupa a primeira coluna; a cada clique o card de cima vai para a
+   próxima posição livre à direita, até os três ficarem lado a lado. */
+.baralho-area { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--espaco-4); align-items: start; }
+@media (max-width: 760px) { .baralho-area { grid-template-columns: 1fr; } }
+/* A pilha empilha os cards na MESMA célula de uma grade de uma célula: com
+   isso ela tem a altura do card mais alto, seja ele o de cima ou um de baixo,
+   e a dica logo abaixo nunca é coberta — o que uma altura fixa não garantia.
+   O espaço no pé é o deslocamento do terceiro card. */
+.pilha { display: grid; cursor: pointer; padding-bottom: 24px; }
+.pilha .card {
+  grid-area: 1 / 1;
+  transition: transform .5s cubic-bezier(.2, .8, .2, 1), opacity .35s;
+}
+.pilha .card:nth-child(1) { transform: rotate(-2deg); z-index: 3; }
+.pilha .card:nth-child(2) { transform: translate(10px, 10px) rotate(1.5deg); z-index: 2; }
+.pilha .card:nth-child(3) { transform: translate(20px, 20px) rotate(4deg); z-index: 1; }
+.pilha.fim, .pilha:empty { min-height: 0; cursor: default; }
+.card.fixo { position: static !important; transform: none !important; }
+.slot .card.entra { animation: entra .5s cubic-bezier(.2, .8, .2, 1); }
+@keyframes entra {
+  from { opacity: 0; transform: translateX(-60px) rotate(-3deg); }
+  to { opacity: 1; transform: none; }
+}
+/* A dica abaixo da pilha: ícone de clique, texto em itálico, e as duas coisas
+   somem quando os três cards estão lado a lado. */
+.dica { display: flex; align-items: center; gap: var(--espaco-2); margin: var(--espaco-3) 0 0; }
+.dica .icone-clique { display: block; }
+.dica.fim { display: none; }
+
+/* ---------- "Como chegar nele": os cards entram da direita na rolagem ---------- */
+.surge .card { opacity: 0; transform: translateX(60px); transition: opacity .6s ease, transform .6s cubic-bezier(.2, .8, .2, 1); }
+.surge .card:nth-child(2) { transition-delay: .18s; }
+.surge .card:nth-child(3) { transition-delay: .36s; }
+.surge.visto .card { opacity: 1; transform: none; }
 
 .grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--espaco-4); }
 /* "Quem é este público" ganha uma coluna à esquerda para o retrato: retrato,
    card de número e card de texto na mesma linha. */
 .grade.com-retrato { grid-template-columns: var(--tamanho-retrato) repeat(3, 1fr); }
+/* Os quatro públicos do Sobre, em uma linha (v8). */
+.grade.quatro { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { .grade.quatro { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 760px) {
-  .grade, .grade.com-retrato { grid-template-columns: 1fr; }
+  .grade, .grade.com-retrato, .grade.quatro { grid-template-columns: 1fr; }
 }
 
 /* Retrato do público: círculo, cortado no centro. O arquivo vem de
@@ -299,6 +397,7 @@ section.bloco { margin: 0 0 var(--espaco-6); }
    origem em tipo menor. Nada aqui é escrito no CSS nem no script: o texto é o
    do acervo e as etiquetas vêm da configuração. */
 .resultado { margin-top: var(--espaco-4); }
+.resultado .trecho { border-left: 4px solid var(--cor-publico, var(--preto)); }
 .resultado .etiqueta {
   font-size: var(--texto-p); letter-spacing: .1em; text-transform: uppercase;
   color: var(--cor-texto-suave); font-weight: var(--peso-normal);
@@ -352,23 +451,31 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .botao-redondo:hover {
   background: var(--hover, var(--rosa)); color: var(--hover-icone, var(--sobre-rosa));
 }
+.botao-redondo img { display: block; }
+.botao-redondo:hover img { filter: var(--filtro-hover, none); }
 /* O voltar é redondo como os demais, com a flecha maior e o hover em rosa. */
 .botao-redondo.voltar { font-size: var(--texto-card-titulo); line-height: 1; }
+/* Legenda vertical acima dos ícones (v8). */
+.legenda-share {
+  writing-mode: vertical-rl; transform: rotate(180deg); margin: 0 auto var(--espaco-1);
+  font-size: var(--texto-pp); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--cor-texto-suave);
+}
 
-/* Em telas largas, o voltar é um botão fixo à esquerda do título da página,
-   na altura das pílulas do cabeçalho, visível desde o topo e independente da
-   barra de compartilhamento — ele não entra nem sai com ela. O da barra fica
-   escondido nessa largura, para não haver dois. */
+/* Em telas largas o voltar é um botão fixo na calha à esquerda do conteúdo, e
+   entra e sai pela MESMA regra da barra de compartilhamento (v5, mantida na
+   v8): o script marca os dois juntos. O da faixa fica escondido nessa
+   largura, para não haver dois. */
 .botao-redondo.voltar-fixo {
   position: fixed; z-index: 15;
-  top: calc(var(--altura-banner) + var(--altura-barra) + var(--espaco-5) - var(--espaco-1));
-  /* Centrado na calha entre a borda da janela e a coluna de conteúdo: a calha
-     mede (100vw - largura da coluna) / 2, e o centro dela é a metade disso. */
+  top: calc(var(--altura-barra) + var(--espaco-6));
   left: max(
     var(--espaco-2),
     calc((100vw - var(--largura-conteudo)) / 4 - var(--tamanho-share) / 2)
   );
+  opacity: 0; pointer-events: none; transition: opacity .25s;
 }
+.botao-redondo.voltar-fixo.visivel { opacity: 1; pointer-events: auto; }
 .barra-lateral .voltar.na-faixa { display: none; }
 /* Entre 901 e 1140 px não há margem sobrando ao lado da coluna de conteúdo:
    o botão encosta na borda e o conteúdo abre espaço para ele. */
@@ -381,9 +488,9 @@ section.bloco { margin: 0 0 var(--espaco-6); }
     flex-direction: row; justify-content: center; transform: none;
   }
   /* Na faixa horizontal, o voltar volta a aparecer, à esquerda e um pouco
-     separado dos ícones; o botão fixo sai de cena. */
+     separado dos ícones; a legenda e o botão fixo saem de cena. */
   .barra-lateral .voltar.na-faixa { display: grid; margin-right: var(--espaco-3); }
-  .botao-redondo.voltar-fixo { display: none; }
+  .botao-redondo.voltar-fixo, .legenda-share { display: none; }
 }
 
 /* ---------- Aviso de privacidade ---------- */
@@ -405,9 +512,16 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 }
 
 /* ---------- Páginas de texto (Sobre, Privacidade) ---------- */
-.texto { max-width: var(--largura-texto); }
+/* Nas páginas de texto, a leitura tem largura de leitura — mas os cards dos
+   públicos e o vídeo ocupam a coluna inteira. */
+.texto { max-width: none; }
+.texto p, .texto h2, .texto h3, .texto .preencher { max-width: var(--largura-texto); }
 .texto h1 { font-size: var(--texto-titulo); line-height: var(--entrelinha-apertada); margin: 0 0 var(--espaco-4); }
 .texto h2 { font-size: var(--texto-g); margin: var(--espaco-5) 0 var(--espaco-3); }
+/* A política de privacidade vem em nove seções, cada uma com o título que a
+   equipe escreveu com "##" em conteudo/sobre.json. */
+.texto h2 + p { margin-top: 0; }
+.texto p { font-size: var(--texto-prosa); max-width: var(--largura-texto); }
 .texto h3 { font-size: var(--texto-corpo); margin: var(--espaco-4) 0 var(--espaco-1); }
 .preencher {
   border: var(--borda-tracejada); padding: var(--espaco-3);
@@ -422,13 +536,26 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .video iframe { width: 100%; height: 100%; border: 0; display: block; }
 
 
-/* ---------- Rodapé ---------- */
-footer { background: var(--preto); color: var(--off-white); padding: var(--espaco-7) 0 var(--espaco-5); }
-.grade-rodape { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--espaco-6); }
+/* ---------- Rodapé (v8) ----------
+   Quatro colunas: marca, navegação, contato e o formulário de inscrição.
+   Tipografia menor que a do corpo, com título de coluna miúdo. */
+footer {
+  background: var(--preto); color: var(--off-white);
+  padding: var(--espaco-7) 0 var(--espaco-5); font-size: var(--texto-rodape);
+}
+.grade-rodape { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1.4fr; gap: var(--espaco-5); }
+@media (max-width: 900px) { .grade-rodape { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) { .grade-rodape { grid-template-columns: 1fr; gap: var(--espaco-5); } }
-footer h2 { font-size: var(--texto-p); letter-spacing: .12em; color: var(--cor-texto-fraco); margin: 0 0 var(--espaco-4); font-weight: var(--peso-normal); }
+footer h2 { font-size: var(--texto-rodape-titulo); letter-spacing: .12em; color: var(--cor-texto-fraco); margin: 0 0 var(--espaco-4); font-weight: var(--peso-normal); }
 footer ul { list-style: none; margin: 0; padding: 0; }
-footer li { margin-bottom: var(--espaco-3); }
+footer li { margin-bottom: var(--espaco-3); font-size: var(--texto-rodape); }
+/* O formulário do Substack, única exceção à regra de script de terceiro. */
+.substack {
+  margin-top: var(--espaco-3); border: 1px solid rgba(247, 247, 237, 0.27);
+  border-radius: var(--raio-campo); padding: var(--espaco-3);
+  font-size: var(--texto-aviso); color: var(--cor-texto-fraco);
+}
+.substack iframe { width: 100%; border: 0; display: block; }
 footer a { color: var(--off-white); text-decoration: none; border-bottom: 1px solid var(--off-white); padding-bottom: var(--espaco-1); }
 footer a:hover { border-bottom-color: var(--rosa); }
 /* A marca no rodapé é logotipo, não link de leitura: sem o sublinhado. */
@@ -437,6 +564,8 @@ footer .marca { border-bottom: 0; }
   font-family: var(--tipo-destaque); font-size: var(--texto-gg);
   font-weight: var(--peso-forte); letter-spacing: .02em; margin: 0 0 var(--espaco-2);
 }
+/* O logotipo do brief ao lado de REALIZAÇÃO tem a altura da marca do rodapé. */
+.credito .logo img { height: var(--altura-marca-rodape) !important; }
 .tagline { color: var(--cor-texto-fraco); margin: 0; max-width: 34ch; }
 .fixa-ia { color: var(--cor-texto-fraco); font-size: var(--texto-p); max-width: 60ch; margin-top: var(--espaco-3); font-style: italic; }
 .base {
@@ -446,5 +575,18 @@ footer .marca { border-bottom: 0; }
 }
 .creditos { display: flex; flex-wrap: wrap; gap: var(--espaco-5); align-items: center; }
 .credito { display: flex; align-items: center; gap: var(--espaco-2); }
-.credito .logo { border: var(--borda-tracejada); padding: var(--espaco-2) var(--espaco-3); color: var(--cor-texto-fraco); font-size: var(--texto-p); }
+.credito .logo { display: block; }
+.credito .logo-ausente { border: var(--borda-tracejada); padding: var(--espaco-2) var(--espaco-3); color: var(--cor-texto-fraco); font-size: var(--texto-p); }
 .credito .logo img { height: 24px; display: block; }
+
+/* ---------- Quem pediu menos movimento não recebe movimento ----------
+   Vale para a cascata do resumo, a pilha de cards, a entrada dos cards de
+   "como chegar nele" e a troca do banner. O script também entrega o resumo
+   aberto e os três cards lado a lado, para nada depender de animação. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important; scroll-behavior: auto !important;
+  }
+  .pilha .card { transform: none !important; }
+}

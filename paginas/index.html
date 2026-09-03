@@ -8,26 +8,34 @@
 <body>
 {{CABECALHO}}
 
-<main><div class="larg">
-  <h1 class="titulo-home" id="titulo-home"></h1>
-  <p class="texto-home" id="texto-home"></p>
-  <p class="pergunta" id="pergunta"></p>
+<!-- Início (v8): abertura com título e apresentação da mesma largura, o aviso
+     em itálico logo acima da primeira fileira, três fileiras com o mesmo
+     espaçamento — públicos, temas, botão — e a chamada centralizada no que
+     sobra até o rodapé. Os rótulos de público e de tema existem só para o
+     leitor de tela: a tela não os mostra. -->
+<main class="home"><div class="larg home-col">
+  <div class="abertura">
+    <h1 class="titulo-home" id="titulo-home"></h1>
+    <p class="texto-home" id="texto-home"></p>
+  </div>
+
+  <p class="aviso-tela" id="aviso-escolha"></p>
 
   <div class="etapa">
-    <h2 id="rotulo-publico"></h2>
+    <h2 class="sr" id="rotulo-publico"></h2>
     <div class="opcoes" id="publicos" role="group" aria-labelledby="rotulo-publico"></div>
   </div>
 
   <div class="etapa">
-    <h2 id="rotulo-tema"></h2>
+    <h2 class="sr" id="rotulo-tema"></h2>
     <div class="opcoes" id="temas" role="group" aria-labelledby="rotulo-tema"></div>
   </div>
 
-  <div class="acao">
+  <div class="etapa">
     <button class="caminhos" id="btn-caminhos" disabled></button>
-    <span class="escolha" id="escolha"></span>
   </div>
-  <p class="chamada-home" id="chamada-home"></p>
+
+  <div class="fecho"><p class="chamada-home" id="chamada-home"></p></div>
 </div></main>
 
 {{RODAPE}}
@@ -69,13 +77,14 @@
     }
   }
 
+  // O aviso acima da primeira fileira é o que guia a escolha: pede os dois e,
+  // quando os dois estão escolhidos, diz que é para clicar.
   function atualizaAcao() {
     const pronto = Boolean(selecao.publico && selecao.tema);
     document.getElementById("btn-caminhos").disabled = !pronto;
-    const nomeDe = (lista, id) => (lista.find((v) => v.id === id) ?? {}).nome ?? "";
-    document.getElementById("escolha").textContent = pronto
-      ? `${nomeDe(PUBLICOS, selecao.publico)} · ${nomeDe(TEMAS, selecao.tema)}`
-      : HOME.dica_vazia;
+    document.getElementById("aviso-escolha").textContent = pronto
+      ? HOME.aviso_pronto
+      : HOME.aviso_escolha;
   }
 
   // O caminho é uma página estática, gerada no build a partir de conteudo/:
@@ -90,11 +99,6 @@
 
   document.getElementById("titulo-home").textContent = HOME.titulo;
   document.getElementById("texto-home").textContent = HOME.texto;
-  // A pergunta é opcional: vazia na configuração, o elemento sai da tela em
-  // vez de virar um parágrafo em branco.
-  const pergunta = document.getElementById("pergunta");
-  if (HOME.pergunta) pergunta.textContent = HOME.pergunta;
-  else pergunta.remove();
   document.getElementById("rotulo-publico").textContent = HOME.rotulo_publico;
   document.getElementById("rotulo-tema").textContent = HOME.rotulo_tema;
   document.getElementById("btn-caminhos").textContent = HOME.botao;

@@ -8,7 +8,7 @@
 
 ## 1. O que é
 
-DECISIVAS é uma plataforma pública e gratuita da Quid para o período eleitoral de 2026. A pessoa escolhe **um público** e **um tema** e recebe uma página fixa com o que a pesquisa mostra sobre essa conversa: por que ela importa, o que funciona, o que não funciona, quem é esse público, como chegar nele e um resumo.
+DECISIVAS é uma plataforma pública e gratuita do **Projeto Brief** para o período eleitoral de 2026. A pessoa escolhe **um público** e **um tema** e recebe uma página fixa com o que a pesquisa mostra sobre essa conversa: por que ela importa, o que funciona, o que não funciona, quem é esse público, como chegar nele e um resumo.
 
 Quem usa: comunicadoras comunitárias, lideranças locais, organizações e gente que precisa falar com esses públicos sem ter uma equipe de pesquisa atrás.
 
@@ -56,7 +56,7 @@ O identificador `60+` no banco muda para `70+` na migração 006, depois do beta
 
 ## 3. Como funciona
 
-**Conteúdo fixo.** As 20 páginas vivem em `conteudo/*.json`, um arquivo por público. Foram escritas pela equipe a partir do acervo e da justificativa de públicos e macronarrativas da Quid, revisadas e validadas pelo jurídico. O build monta o HTML. Não há modelo de linguagem no acesso.
+**Conteúdo fixo.** As 20 páginas vivem em `conteudo/*.json`, um arquivo por público. Foram escritas pela equipe a partir do acervo e da justificativa de públicos e macronarrativas do Projeto Brief, revisadas e validadas pelo jurídico. O build monta o HTML. Não há modelo de linguagem no acesso.
 
 **Acervo no banco.** Os trechos ficam no D1 (`trechos`, `pautas`). Servem de base para escrever e revisar as páginas e para o recurso Explorar o acervo.
 
@@ -87,9 +87,13 @@ Quando o acervo não sustenta um bloco, a página **mostra o que existe e cala s
 
 **O acervo fica.** É a base auditável de tudo o que está escrito e do recurso Explorar.
 
+**A tela é a da referência v8**, que substitui a v5 em tudo: tipografia ampliada (corpo 19, card 18, título de card 22, bloco 17 em caixa alta), home sem rótulos de público e tema e com o aviso que muda quando os dois estão escolhidos, resumo em cascata no topo da página de caminho, "o que funciona" e "o que não funciona" como pilha de cards que a pessoa abre com um clique, e "como chegar nele" entrando na rolagem. Quem pede menos movimento (`prefers-reduced-motion`) recebe tudo aberto e parado.
+
 **Explorar o acervo devolve trechos, não prosa.** O que quebrou foi o modelo redigindo. Escolher e ordenar trechos é seguro; escrever não é. Ligado na etapa 10, dentro de cada página de caminho, em dois modos: botões de pauta, que consultam o banco direto, sem modelo; e pergunta livre, em que o modelo recebe a pergunta e a lista de trechos daquele cruzamento e responde **só com uma lista de números**. Qualquer outra forma de resposta é descartada e a tela diz que não há resultado — o modelo não tem canal para escrever numa página. A pergunta passa pela lista de termos bloqueados antes de qualquer coisa, e os trechos devolvidos passam por ela depois; há limite por hora, e o registro nunca guarda quem perguntou.
 
-**Sem cookie, sem rastreamento, sem script de terceiro.** Fonte tipográfica servida pelo site. Vídeo do YouTube em modo sem cookie, e **só na página Sobre**: a janela de abertura no Início saiu, porque atrapalhava a primeira escolha e o vídeo explica o projeto, que é assunto do Sobre. Compartilhamento por link simples. Por isso o aviso de privacidade é informativo, não um pedido de consentimento — e ele aparece só no primeiro acesso: ao clicar em "Entendi", o navegador guarda a marca de que o aviso foi visto (`localStorage`, com a data). Essa marca é a **única** coisa que o site guarda no aparelho de quem navega; não é cookie, não vai a servidor nenhum, e a política de privacidade declara isso em uma frase.
+**Uma exceção, e só uma, à regra de script de terceiro: o formulário de inscrição.** O bloco "Receba os materiais", no rodapé, é o embed do Substack do Projeto Brief — o único script de fora em todo o site. Ele grava cookies próprios para quem se inscreve, o aviso de privacidade diz isso na primeira frase e a política detalha. Navegar pelas páginas não passa por ele.
+
+**Sem cookie de rastreamento, sem script de terceiro fora disso.** Fonte tipográfica servida pelo site. Vídeo do YouTube em modo sem cookie, e **só na página Sobre**: a janela de abertura no Início saiu, porque atrapalhava a primeira escolha e o vídeo explica o projeto, que é assunto do Sobre. Compartilhamento por link simples. Por isso o aviso de privacidade é informativo, não um pedido de consentimento — e ele aparece só no primeiro acesso: ao clicar em "Entendi", o navegador guarda a marca de que o aviso foi visto (`localStorage`, com a data). Essa marca é a **única** coisa que o site guarda no aparelho de quem navega; não é cookie, não vai a servidor nenhum, e a política de privacidade declara isso em uma frase.
 
 **Texto e asset de interface são conteúdo, não código.** Nenhum texto fixo, rótulo, endereço ou nome de imagem é escrito dentro de template ou script: tudo o que aparece na tela vem de `dados/configuracao.json`, `conteudo/*.json` ou `dados/vocabulario.json`. O build confere e recusa publicar se achar palavra de fora (`scripts/verifica-literais.js`). É o que permite ao CMS da etapa 9 editar a interface inteira, e não só o texto das páginas.
 
@@ -127,7 +131,7 @@ O repositório é a fonte de verdade; o Claude Code lê arquivos, não conversas
 
 **Próximas etapas:** 8A limpeza e migração 004; 8B páginas fixas em cards, compartilhamento, privacidade, responsivo; 8C verificação e publicação — as três entregues. A etapa **10, Explorar o acervo, entra no beta**: rota `POST /api/explorar` sob `AGENT_ENABLED`, cache de perguntas na tabela `consultas` (migração 005, a aplicar no remoto antes do deploy) e o modelo restrito a escolher trechos. A verificação de conteúdo roda no build: estrutura dos JSON, varredura de `BLOCKED_TERMS` sobre todo o texto de `conteudo/` e da configuração (zero ocorrências, e o build falha se achar) e a lista de pendências impressa no fim. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (70+).
 
-**Pendente de conteúdo:** "quem faz" no Sobre, contato do rodapé, código de incorporação do vídeo. Os assets da identidade chegaram em 02/09/2026 — logotipos, favicon, três faixas de banner e os quatro retratos duotone dos públicos; faltam só os logotipos da Quid e do BRIEF em off-white.
+**Pendente de conteúdo:** "quem faz" no Sobre, o código de incorporação do vídeo e o do formulário do Substack (`substack_embed`) — três pendências, marcadas `[preencher]` e listadas no fim do build. Os assets da identidade estão todos no lugar, inclusive as três artes finais do banner em `.webp` e o logotipo do brief no rodapé. A Quid saiu da interface: o rodapé traz REALIZAÇÃO com o brief, e os textos falam do Projeto Brief.
 
 **Datas:** beta em 04/09/2026, lançamento em 14/09/2026.
 

@@ -1,8 +1,9 @@
-<!-- Explorar o acervo (etapa 10). Ligado no beta. Dois modos: os botões de
-     pauta consultam o banco direto, sem modelo; a pergunta livre passa pelo
-     modelo, que só ESCOLHE trechos — nunca escreve. Todo texto vem de
-     dados/configuracao.json (rótulos, avisos e etiquetas) ou da resposta da
-     rota, que os lê da mesma fonte. Nenhuma palavra escrita aqui. -->
+<!-- Explorar o acervo (etapa 10, tela da v8). Dois modos: os botões de pauta
+     consultam o banco direto, sem modelo; a pergunta livre passa pelo modelo,
+     que só ESCOLHE trechos — nunca escreve. A resposta é uma lista única de
+     insights, sem etiqueta de tipo e sem linha de origem. Todo texto vem de
+     dados/configuracao.json ou da resposta da rota, que os lê da mesma fonte.
+     Nenhuma palavra escrita aqui. -->
 <section class="bloco explorar" id="explorar" data-publico="{{ID_PUBLICO}}" data-tema="{{ID_TEMA}}" aria-labelledby="titulo-explorar">
   <h2 id="titulo-explorar">{{TITULO_EXPLORAR}}</h2>
   <p class="apoio-explorar">{{TEXTO_EXPLORAR}}</p>
@@ -61,10 +62,8 @@
           grupos[grupo.etiqueta] = itens;
         }
         grupo.itens.forEach(function (item) {
-          var caixa = elemento("div", "trecho");
-          caixa.appendChild(elemento("p", null, item.texto));
-          caixa.appendChild(elemento("p", "origem", item.origem));
-          itens.appendChild(caixa);
+          // Um insight é o texto do acervo, e só. Sem etiqueta, sem origem.
+          itens.appendChild(elemento("div", "trecho", item.texto));
         });
       });
     }

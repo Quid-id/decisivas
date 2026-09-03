@@ -1,13 +1,15 @@
-<!-- Barra da direita: voltar ao início e compartilhar. Os rótulos, os nomes e
-     as cores de hover de cada rede vêm de configuracao.json (compartilhar); o
+<!-- Barra da direita: legenda, ícones de rede e copiar link. Os nomes, os
+     ícones e as cores de hover vêm de configuracao.json (compartilhar); o
      endereço a compartilhar é o da própria página, lido no navegador, então
-     não existe domínio escrito no build. A barra aparece quando o banner e a
-     barra de menu saíram da tela, e some quando o rodapé começa a entrar. Em
-     telas até 900 px ela vira uma faixa horizontal no pé, e é só nessa
-     largura que o voltar aparece aqui, à esquerda dos ícones: em telas largas
-     quem manda é o botão fixo ao lado do título, que existe desde o topo da
-     página e não depende desta barra. -->
+     não existe domínio escrito no build.
+
+     Regra de aparecer e sumir (v5, mantida na v8): a barra entra quando o
+     banner e a barra de menu saíram da tela e sai quando o rodapé começa a
+     entrar. O botão de voltar, que é um elemento à parte à esquerda, segue
+     exatamente a mesma regra. Em telas até 900 px a barra vira uma faixa
+     horizontal no pé, e é lá que o voltar aparece. -->
 <aside class="barra-lateral" id="barra-lateral" aria-label="{{ROTULO_COMPARTILHAR}}">
+  <span class="legenda-share" aria-hidden="true">{{LEGENDA_COMPARTILHAR}}</span>
   <a class="botao-redondo voltar na-faixa" href="{{DESTINO_VOLTAR}}" title="{{ROTULO_VOLTAR}}" aria-label="{{ROTULO_VOLTAR}}">{{ICONE_VOLTAR}}</a>
 {{REDES}}
   <button type="button" class="botao-redondo" data-rede="copiar" id="copiar-link" data-confirmacao="{{CONFIRMACAO_COPIAR}}" style="--hover: {{COR_HOVER_COPIAR}}; --hover-icone: {{COR_ICONE_HOVER_COPIAR}}" title="{{NOME_COPIAR}}" aria-label="{{NOME_COPIAR}}">{{ROTULO_COPIAR}}</button>
@@ -15,6 +17,7 @@
 <script>
   (function () {
     var barra = document.getElementById("barra-lateral");
+    var voltar = document.getElementById("voltar-fixo");
     var endereco = window.location.href.split("#")[0];
     var titulo = document.title.split(" · ")[0];
     var u = encodeURIComponent(endereco);
@@ -31,12 +34,11 @@
     });
 
     // A mesma folga nas duas pontas. O rodapé é procurado a cada medição, e
-    // não uma vez só: este script vem ANTES do rodapé no HTML.
+    // não uma vez só: este script vem ANTES do rodapé no HTML. A altura da
+    // barra preta vem do token, para acompanhar quando ela muda.
     var folga = 60;
-    // A altura da barra preta vem do token, e não repetida aqui: ela mudou
-    // quando o logotipo cresceu, e este cálculo tem de acompanhar.
     var alturaBarraDeMenu =
-      parseInt(getComputedStyle(document.documentElement).getPropertyValue("--altura-barra"), 10) || 60;
+      parseInt(getComputedStyle(document.documentElement).getPropertyValue("--altura-barra"), 10) || 84;
     function posiciona() {
       var banner = document.getElementById("banner");
       var rodape = document.querySelector("footer");
@@ -44,7 +46,9 @@
       var vh = window.innerHeight;
       var fimDoBanner = banner ? banner.getBoundingClientRect().bottom : 0;
       var inicioDoRodape = rodape ? rodape.getBoundingClientRect().top : vh * 2;
-      barra.classList.toggle("visivel", fimDoBanner + folga < 0 && inicioDoRodape - folga > vh);
+      var visivel = fimDoBanner + folga < 0 && inicioDoRodape - folga > vh;
+      barra.classList.toggle("visivel", visivel);
+      if (voltar) voltar.classList.toggle("visivel", visivel);
       barra.style.top =
         window.innerWidth > 900 ? Math.max(vh / 2, alturaBarraDeMenu + 24 + altura / 2) + "px" : "";
     }

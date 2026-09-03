@@ -56,6 +56,12 @@ saiu depois traz a data na própria linha.
 | `DECISIVAS_acervo_v5.xlsx` | o acervo que foi ao ar na carga de 02/09/2026, 2.405 trechos. Superado em 03/09/2026 pelo v6, que reescreveu 102 trechos em linguagem comum, sem jargão de método — mesmos ids, mesmas colunas, mesmas 2.405 linhas. Fica aqui porque o registro de cargas do `docs/06` cita a carga que ele sustentou |
 | `DECISIVAS_acervo_v4.xlsx` | a versão anterior à consolidação da taxonomia nova, nunca carregada no banco. Saiu de uso na etapa 3 e estava em `dados/` desde então |
 
+## Artes provisórias substituídas
+
+| Item | O que era |
+|---|---|
+| `banner-provisorio/banner-01.svg` a `03.svg` | as três composições provisórias da faixa do topo, feitas com os padrões da identidade em 02/09/2026. Substituídas em 03/09/2026 pelas artes finais em `assets/banner-0*.webp` |
+
 ## Cargas e migrações já aplicadas
 
 | Item | O que era |

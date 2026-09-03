@@ -65,6 +65,24 @@ function grade(cards, classe, icone) {
   return `    <div class="grade">\n${cardsDeLista(cards, classe, icone)}\n    </div>`;
 }
 
+// "O que funciona" e "o que não funciona" viram uma pilha na primeira coluna
+// (v8): a pessoa lê o card de cima, clica, e ele vai para a próxima posição
+// livre à direita, até os três ficarem lado a lado. A dica abaixo tem o ícone
+// de clique e muda por passo; some no fim. Com prefers-reduced-motion, o
+// script entrega os três de uma vez, sem clique.
+function pilhaDeCards(cards, classe, icone, configuracao) {
+  if (!cards || !cards.length) return "";
+  const c = configuracao.caminho;
+  const vagas = cards.slice(1).map(() => `      <div class="slot"></div>`).join("\n");
+  return (
+    `    <div class="baralho-area">\n      <div class="slot">\n` +
+    `        <div class="pilha" role="button" tabindex="0" aria-label="${escapa(c.baralho.rotulo_pilha)}">\n` +
+    `${cardsDeLista(cards, classe, icone)}\n        </div>\n      </div>\n${vagas}\n    </div>\n` +
+    `    <p class="dica"><img class="icone-clique" src="${escapa(c.icone_clique)}" alt="" width="22" height="22">` +
+    `<span class="texto-dica">${escapa(c.baralho.primeiro)}</span></p>`
+  );
+}
+
 // Um bloco da página: o rótulo, com a régua, e o que vier dentro. **Bloco sem
 // nenhum item não é renderizado** — a página mostra os cards que existem,
 // sejam 3, 2 ou 1, e some com o bloco quando não há nenhum. Não há caixa de
@@ -88,9 +106,25 @@ function blocoQuemE(quemE, cor, oRetrato) {
   return `    <div class="grade${oRetrato ? " com-retrato" : ""}">\n${linhas}\n    </div>`;
 }
 
-function blocoResumo(linhas) {
-  const itens = linhas.map((l) => `<li>${escapa(l)}</li>`).join("");
-  return `    <div class="resumo"><ul>${itens}</ul></div>`;
+// O resumo abre a página como um menu em cascata, fechado (v8): o rótulo, o
+// estado ("clique para abrir") e os cinco pontos numerados. O texto do estado
+// é trocado pelo script, com os dois valores da configuração.
+function menuDeResumo(linhas, configuracao) {
+  const c = configuracao.caminho;
+  const itens = linhas
+    .map((linha, i) => `      <li><span class="num">${i + 1}</span>${escapa(linha)}</li>`)
+    .join("\n");
+  return `  <section class="resumo-menu" id="resumo-menu">
+    <button type="button" class="abre" aria-expanded="false" aria-controls="resumo-lista">
+      <span class="rotulo-resumo">${escapa(c.resumo_rotulo)}</span>
+      <span class="estado">${escapa(c.resumo_abrir)}</span>
+      <span class="seta" aria-hidden="true">⌄</span>
+    </button>
+    <ol id="resumo-lista">
+${itens}
+    </ol>
+  </section>
+`;
 }
 
 // Botões de pauta do "Explorar o acervo": os nomes são o vocabulário fechado
@@ -147,21 +181,25 @@ function montaCaminho(modelo, comum, configuracao, { publico, tema, dados, pagin
       : escapa(configuracao.caminho.texto_em_revisao),
     TITULO_CAMINHO: escapa(pagina.titulo || titulo),
     LINHA: escapa(pagina.linha),
+    RESUMO_MENU: menuDeResumo(pagina.resumo, configuracao),
     BLOCO_POR_QUE: bloco(blocos.por_que, blocoPorQue(pagina, cor)),
     BLOCO_FUNCIONA: bloco(
       blocos.funciona,
-      grade(pagina.funciona, "funciona", configuracao.caminho.icone_funciona)
+      pilhaDeCards(pagina.funciona, "funciona", configuracao.caminho.icone_funciona, configuracao)
     ),
     BLOCO_NAO_FUNCIONA: bloco(
       blocos.nao_funciona,
-      grade(pagina.nao_funciona, "evita", configuracao.caminho.icone_nao_funciona)
+      pilhaDeCards(pagina.nao_funciona, "evita", configuracao.caminho.icone_nao_funciona, configuracao)
     ),
     BLOCO_QUEM_E: bloco(
       blocos.quem_e,
       blocoQuemE(dados.quem_e, cor, monta.retrato(configuracao, publico, dados.nome))
     ),
-    BLOCO_COMO_CHEGAR: bloco(blocos.como_chegar, grade(dados.como_chegar, "publico", null)),
-    BLOCO_RESUMO: bloco(blocos.resumo, blocoResumo(pagina.resumo)),
+    BLOCO_COMO_CHEGAR: bloco(
+      blocos.como_chegar,
+      `    <div class="grade surge">\n${cardsDeLista(dados.como_chegar, "publico", null)}\n    </div>`
+    ),
+    INTERACAO: comum.parciais.interacao,
     EXPLORAR: monta.explorar(comum.parciais, configuracao, {
       idPublico: publico.id,
       idTema: tema.id,
@@ -185,12 +223,23 @@ function montaSobre(comum, configuracao, sobre, vocabulario, publicos) {
   const blocos = configuracao.sobre.blocos;
   const ONDE = "conteudo/sobre.json";
 
-  const listaDePublicos = vocabulario.publicos
-    .map((p) => {
-      const dados = publicos[p.id];
-      return `    <h3>${escapa(dados.nome)}</h3>\n    <p>${escapa(dados.quem_e.texto)}</p>`;
-    })
-    .join("\n");
+  // Os quatro públicos em uma linha de cards (v8), cada um na sua cor: o
+  // número em destaque e o título vêm do `quem_e.destaque` do próprio público,
+  // que é o texto curto que a equipe já escreveu.
+  const listaDePublicos =
+    `    <div class="grade quatro">\n` +
+    vocabulario.publicos
+      .map((p) => {
+        const dados = publicos[p.id];
+        const d = dados.quem_e.destaque;
+        return (
+          `      <div class="card numero" style="--cor: ${p.cor}; --cor-texto-pilula: ${p.texto}">` +
+          `<h3>${escapa(dados.nome)}</h3><div class="n">${escapa(d.n)}</div>` +
+          `<p>${escapa(d.titulo)}</p></div>`
+        );
+      })
+      .join("\n") +
+    `\n    </div>`;
   const listaDeTemas = vocabulario.macronarrativas
     .map((t) => `    <h3>${escapa(t.nome)}</h3>\n    <p>${escapa(sobre.temas[t.id])}</p>`)
     .join("\n");
@@ -199,7 +248,6 @@ function montaSobre(comum, configuracao, sobre, vocabulario, publicos) {
     CABECA: comum.cabeca(configuracao.meta.sobre),
     CABECALHO: comum.cabecalho("/sobre") + "\n" + comum.rodaBanner,
     RODAPE: comum.rodape,
-    TITULO_SOBRE: escapa(configuracao.sobre.titulo),
     // O vídeo de apresentação vive só aqui, pelo video_embed da configuração.
     VIDEO: monta.video(configuracao),
     ROTULO_PROJETO: escapa(blocos.projeto),
@@ -220,20 +268,27 @@ function montaSobre(comum, configuracao, sobre, vocabulario, publicos) {
 
 function montaPrivacidade(comum, configuracao, sobre) {
   const modelo = fs.readFileSync("paginas/privacidade.html", "utf8");
-  // O texto vem em um parágrafo por linha em branco, como foi escrito.
+  // O texto vem de conteudo/sobre.json em blocos separados por linha em
+  // branco. Bloco que começa com "## " é título de seção (são nove); o resto
+  // é parágrafo. Nenhuma outra marcação é interpretada: o que a equipe escreve
+  // é texto, e é assim que chega à tela.
   const paragrafos = String(sobre.privacidade)
     .split(/\n{2,}/)
     .map((p) => p.trim())
     .filter(Boolean)
-    .map((p) => `<p>${escapa(p)}</p>`)
+    .map((p) =>
+      p.startsWith("## ")
+        ? `<h2>${escapa(p.slice(3).trim())}</h2>`
+        : `<p>${escapa(p)}</p>`
+    )
     .join("\n    ");
   return troca(modelo, {
     CABECA: comum.cabeca(configuracao.meta.privacidade),
     CABECALHO: comum.cabecalho(configuracao.privacidade.destino) + "\n" + comum.rodaBanner,
     RODAPE: comum.rodape,
     TITULO_PRIVACIDADE: escapa(configuracao.pagina_privacidade.titulo),
-    REVISADO_EM: sobre.revisado_em
-      ? `${escapa(configuracao.pagina_privacidade.prefixo_revisado)} ${escapa(sobre.revisado_em)}`
+    REVISADO_EM: sobre.privacidade_revisada_em
+      ? `${escapa(configuracao.pagina_privacidade.prefixo_revisado)} ${escapa(sobre.privacidade_revisada_em)}`
       : escapa(configuracao.caminho.texto_em_revisao),
     PRIVACIDADE: paragrafos,
   });

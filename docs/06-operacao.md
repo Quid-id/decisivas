@@ -494,10 +494,11 @@ Worker só entrega o site estático.
 | Paginação | "Ver mais" traz os cinco seguintes, por deslocamento | não tem; a pessoa refina a pergunta |
 | Rótulo na tela | `explorar.rotulo_pauta` | `explorar.rotulo_pergunta`, que declara o uso de IA (regra 7) |
 
-Nos dois, **cinco trechos por resposta**, agrupados por etiqueta na ordem de
-`explorar.etiquetas` (Achado, com os `forte` primeiro, O que funciona, O que
-afasta, Depoimento, Contexto). `perfil` e `exemplo` não têm etiqueta e não
-entram em resposta nenhuma.
+Nos dois, **cinco trechos por resposta**, em **uma lista só** — a etiqueta de
+`explorar.etiqueta_unica` ("Insights do acervo"). O tipo do trecho não aparece
+na tela e a origem do estudo também não (v8): os `achado` de força `forte` vêm
+primeiro, e os ids continuam no registro, que é onde a auditoria olha. `perfil`
+e `exemplo` não entram em resposta nenhuma.
 
 ### O que o modelo pode e o que não pode
 
@@ -614,6 +615,11 @@ tipo `conteudo/70mais.json.paginas["trabalho digno"].resumo: deveria ter de 5 a
 
 `revisado_em` é opcional em cada arquivo. Sem ele, o cabeçalho da página diz
 "texto em revisão" em vez de uma data.
+
+**O número em destaque do card cabe em 8 caracteres** ("nº 1", "10,4 mi",
+"1 em 4"): acima disso o build falha nomeando o campo, porque o número estoura
+o card. Vale para o primeiro card de dados e para o destaque de "quem é este
+público".
 
 **Bloco vazio não é renderizado.** "O que funciona" e "o que não funciona"
 aceitam de 0 a 3 cards: a página mostra os que existem e, sem nenhum, o bloco
@@ -810,11 +816,20 @@ de cada público, que fica em `dados/vocabulario.json` (campo `retrato`), junto
 do nome, da cor e do slug — é atributo do público, e a fonte única dele é o
 vocabulário. Trocar uma imagem é trocar um caminho nesses dois arquivos.
 
-O pacote da designer entrou em 02/09/2026: logotipos, favicon, três faixas de
-banner (2560 × 440, em rotação) e os quatro retratos duotone (800 × 800),
-usados no bloco "Quem é este público" como círculo de 160 px. Sem nenhum
-`banner-*`, o cabeçalho volta à faixa provisória de linhas coloridas. Faltam só
-os logotipos da Quid e do BRIEF em off-white, que seguem como placeholder.
+O pacote da designer entrou em 02/09/2026 e as artes finais do banner em
+03/09/2026: logotipos (inclusive o do brief, no rodapé), favicon, três faixas
+de banner em `.webp`, os quatro retratos duotone (800 × 800, círculo de 170 px
+no bloco "Quem é este público"), os cinco ícones de compartilhamento e o ícone
+de clique da pilha de cards. As composições provisórias em SVG foram para
+`arquivo/banner-provisorio/`. Sem nenhum `banner-*` na configuração, o
+cabeçalho volta à faixa provisória de linhas coloridas do build.
+
+**O formulário de inscrição do rodapé é a única exceção à regra de nenhum
+script de terceiro**: o embed do Substack do Projeto Brief, em
+`substack_embed`. Ele grava cookies próprios para quem se inscreve, o aviso de
+privacidade diz isso na primeira frase e a política, montada das nove seções
+`##` de `conteudo/sobre.json`, detalha. Enquanto o código não chegar, aparece a
+pendência no lugar do formulário.
 
 ### O aviso de privacidade, e a única coisa guardada no navegador
 
