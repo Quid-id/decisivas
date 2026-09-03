@@ -1,9 +1,10 @@
 <!-- Explorar o acervo (etapa 10, tela da v8). Dois modos: os botões de pauta
      consultam o banco direto, sem modelo; a pergunta livre passa pelo modelo,
      que só ESCOLHE trechos — nunca escreve. A resposta é uma lista única de
-     insights, sem etiqueta de tipo e sem linha de origem. Todo texto vem de
-     dados/configuracao.json ou da resposta da rota, que os lê da mesma fonte.
-     Nenhuma palavra escrita aqui. -->
+     insights, sem etiqueta de tipo e sem linha de origem, e é sempre UMA
+     resposta: até cinco trechos, sem continuação e sem acumular na tela. Todo
+     texto vem de dados/configuracao.json ou da resposta da rota, que os lê da
+     mesma fonte. Nenhuma palavra escrita aqui. -->
 <section class="bloco explorar" id="explorar" data-publico="{{ID_PUBLICO}}" data-tema="{{ID_TEMA}}" aria-labelledby="titulo-explorar">
   <h2 id="titulo-explorar">{{TITULO_EXPLORAR}}</h2>
   <p class="apoio-explorar">{{TEXTO_EXPLORAR}}</p>
@@ -48,19 +49,13 @@
       saida.hidden = false;
     }
 
-    // Os grupos já na tela, por etiqueta: é o que permite ao "Ver mais"
-    // acrescentar itens no grupo certo em vez de repetir o título.
-    var grupos = {};
-
+    // Cada consulta escreve o resultado inteiro de novo: a tela mostra uma
+    // resposta por vez, nunca duas somadas.
     function mostraGrupos(lista) {
       lista.forEach(function (grupo) {
-        var itens = grupos[grupo.etiqueta];
-        if (!itens) {
-          saida.appendChild(elemento("h3", "etiqueta", grupo.etiqueta));
-          itens = elemento("div", "trechos");
-          saida.appendChild(itens);
-          grupos[grupo.etiqueta] = itens;
-        }
+        saida.appendChild(elemento("h3", "etiqueta", grupo.etiqueta));
+        var itens = elemento("div", "trechos");
+        saida.appendChild(itens);
         grupo.itens.forEach(function (item) {
           // Um insight é o texto do acervo, e só. Sem etiqueta, sem origem.
           itens.appendChild(elemento("div", "trecho", item.texto));
@@ -68,17 +63,8 @@
       });
     }
 
-    function mostraRodape(dados, refaz) {
+    function mostraRodape(dados) {
       if (dados.lacuna) saida.appendChild(elemento("p", "aviso-acervo", dados.lacuna));
-      if (dados.proximo !== null && dados.proximo !== undefined) {
-        var mais = elemento("button", "ver-mais", TEXTOS.botao_ver_mais);
-        mais.type = "button";
-        mais.addEventListener("click", function () {
-          ocupado(mais, true);
-          refaz(dados.proximo, mais);
-        });
-        saida.appendChild(mais);
-      }
       if (dados.rotulo) saida.appendChild(elemento("p", "rotulo-acervo", dados.rotulo));
     }
 
@@ -95,25 +81,12 @@
       return dados;
     }
 
-    function apaga(rodapes) {
-      [].forEach.call(saida.querySelectorAll(".ver-mais, .rotulo-acervo, .aviso-acervo"), function (e) {
-        e.remove();
-      });
-    }
-
-    async function pedePauta(pauta, deslocamento, botao) {
+    async function pedePauta(pauta, botao) {
       try {
-        if (!deslocamento) {
-          grupos = {};
-          limpa();
-        } else {
-          apaga();
-        }
-        var dados = await consulta({ publico: publico, tema: tema, pauta: pauta, deslocamento: deslocamento });
+        limpa();
+        var dados = await consulta({ publico: publico, tema: tema, pauta: pauta });
         mostraGrupos(dados.grupos || []);
-        mostraRodape(dados, function (proximo, b) {
-          pedePauta(pauta, proximo, b);
-        });
+        mostraRodape(dados);
       } catch (e) {
         falha();
       } finally {
@@ -124,11 +97,10 @@
     async function pedePergunta() {
       ocupado(enviar, true);
       try {
-        grupos = {};
         limpa();
         var dados = await consulta({ publico: publico, tema: tema, pergunta: campo.value });
         mostraGrupos(dados.grupos || []);
-        mostraRodape(dados, function () {});
+        mostraRodape(dados);
       } catch (e) {
         falha();
       } finally {
@@ -139,14 +111,13 @@
     // Falha de rede: a mensagem é a da configuração, nunca texto técnico.
     function falha() {
       limpa();
-      grupos = {};
       saida.appendChild(elemento("p", "aviso-acervo", TEXTOS.aviso_erro));
     }
 
     [].forEach.call(bloco.querySelectorAll(".atalhos button"), function (botao) {
       botao.addEventListener("click", function () {
         ocupado(botao, true);
-        pedePauta(botao.dataset.pauta, 0, botao);
+        pedePauta(botao.dataset.pauta, botao);
       });
     });
 

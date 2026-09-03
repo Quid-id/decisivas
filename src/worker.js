@@ -7,7 +7,7 @@
 // O que esta rota faz, e o que ela NÃO faz:
 //
 //   modo pauta     consulta o D1 e devolve trechos do cruzamento com aquela
-//                  pauta, cinco por vez. Sem modelo, sem cache, sem custo.
+//                  pauta. Sem modelo, sem cache, sem custo.
 //   modo pergunta  o modelo lê a pergunta e a lista de trechos do cruzamento e
 //                  devolve SÓ uma lista de números — os trechos que responder.
 //                  Não redige, não resume, não completa. O texto que vai à
@@ -36,7 +36,10 @@ const EXPLORAR = CONFIGURACAO.explorar;
 const PUBLICOS = VOCABULARIO.publicos.map((p) => p.id);
 const TEMAS = VOCABULARIO.macronarrativas.map((m) => m.id);
 
-// Quantos trechos por resposta, nos dois modos (especificação da etapa 10).
+// Teto de trechos por resposta, nos dois modos, aplicado no servidor: é o
+// LIMIT da consulta por pauta, o teto que interpreta-ids.js respeita e o corte
+// final antes de responder. Não existe paginação nem continuação — uma
+// consulta, uma resposta, no máximo estes cinco.
 const POR_RESPOSTA = 5;
 // Perguntas livres por hora, por origem. Botões de pauta não têm limite.
 const PERGUNTAS_POR_HORA = 30;
@@ -139,7 +142,7 @@ async function dentroDoLimite(request) {
 // ---------------------------------------------------------------------------
 
 // `forte` primeiro, e a ordem das etiquetas depois: é a ordem em que a tela
-// mostra, e também a ordem em que a paginação por deslocamento caminha.
+// mostra, e é ela que decide quais cinco trechos entram na resposta.
 const ORDEM_SQL = `
   ORDER BY CASE WHEN forca = 'forte' THEN 0 ELSE 1 END,
            CASE tipo ${TIPOS_NA_ORDEM.map((t, i) => `WHEN '${t}' THEN ${i}`).join(" ")} ELSE 99 END,
@@ -147,15 +150,15 @@ const ORDEM_SQL = `
 
 const TIPOS_ACEITOS = `tipo IN (${TIPOS_NA_ORDEM.map(() => "?").join(", ")})`;
 
-async function trechosDaPauta(env, publico, tema, pauta, deslocamento) {
+async function trechosDaPauta(env, publico, tema, pauta) {
   const sql =
     `SELECT id, texto, tipo, forca FROM trechos
       WHERE publico = ? AND macronarrativa = ? AND pauta = ? AND ${TIPOS_ACEITOS}
-      ${ORDEM_SQL} LIMIT ? OFFSET ?`;
+      ${ORDEM_SQL} LIMIT ?`;
   const r = await env.DB.prepare(sql)
-    .bind(publico, tema, pauta, ...TIPOS_NA_ORDEM, POR_RESPOSTA, deslocamento)
+    .bind(publico, tema, pauta, ...TIPOS_NA_ORDEM, POR_RESPOSTA)
     .all();
-  return r.results ?? [];
+  return (r.results ?? []).slice(0, POR_RESPOSTA);
 }
 
 async function trechosDoCruzamento(env, publico, tema) {
@@ -335,10 +338,9 @@ async function rotaExplorar(request, env) {
   // ---- Modo pauta: consulta direta ao banco, sem modelo ----
   if (typeof corpo.pauta === "string" && corpo.pauta.trim()) {
     const pauta = corpo.pauta.trim();
-    const deslocamento = Number.isInteger(corpo.deslocamento) && corpo.deslocamento > 0 ? corpo.deslocamento : 0;
     let trechos;
     try {
-      trechos = await trechosDaPauta(env, publico, tema, pauta, deslocamento);
+      trechos = await trechosDaPauta(env, publico, tema, pauta);
     } catch (e) {
       console.error("consulta por pauta falhou:", e.message);
       return erro("interno", EXPLORAR.aviso_erro, 500);
@@ -351,9 +353,6 @@ async function rotaExplorar(request, env) {
       grupos,
       lacuna: grupos.length ? null : EXPLORAR.aviso_sem_resultado,
       rotulo: grupos.length ? EXPLORAR.rotulo_pauta : null,
-      // Deslocamento seguinte, para o "Ver mais". Nulo quando a página veio
-      // incompleta: não há mais o que buscar.
-      proximo: trechos.length === POR_RESPOSTA ? deslocamento + POR_RESPOSTA : null,
     });
   }
 
@@ -410,9 +409,17 @@ async function rotaExplorar(request, env) {
     await gravaNoCache(env, publico, tema, pergunta, ids, modeloEmUso(env));
   }
 
-  const escolhidos = ids.map((id) => trechos.find((t) => t.id === id)).filter(Boolean);
+  // Corte no servidor, e não confiança no que veio antes: o modelo já respeita
+  // o teto por interpreta-ids.js, mas linha antiga de cache poderia trazer
+  // mais. Aqui a resposta é cortada em POR_RESPOSTA antes de qualquer coisa,
+  // e o registro guarda os ids que de fato foram entregues.
+  const escolhidos = ids
+    .map((id) => trechos.find((t) => t.id === id))
+    .filter(Boolean)
+    .slice(0, POR_RESPOSTA);
+  const entregues = escolhidos.map((t) => t.id);
   const { grupos, removidos } = agrupa(escolhidos, termos);
-  await registra(env, { publico, tema, modo: "pergunta", alvo: pergunta, ids, origem, removidos });
+  await registra(env, { publico, tema, modo: "pergunta", alvo: pergunta, ids: entregues, origem, removidos });
 
   return respostaJson({
     modo: "pergunta",

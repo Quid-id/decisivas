@@ -491,8 +491,19 @@ Worker só entrega o site estático.
 | O que faz | consulta o D1: trechos do cruzamento com aquela pauta | o modelo lê a pergunta e a lista de trechos do cruzamento e **escolhe** quais respondem |
 | Modelo | não chama | chama uma vez por pergunta nova |
 | Cache | não tem (a consulta é barata) | tabela `consultas`, por pergunta normalizada |
-| Paginação | "Ver mais" traz os cinco seguintes, por deslocamento | não tem; a pessoa refina a pergunta |
+| Continuação | não tem: a resposta são os cinco primeiros da ordem | não tem; a pessoa refina a pergunta |
 | Rótulo na tela | `explorar.rotulo_pauta` | `explorar.rotulo_pergunta`, que declara o uso de IA (regra 7) |
+
+**Não há paginação em modo nenhum.** O "Ver mais" do modo pauta, previsto na
+especificação da etapa 10 e entregue no commit `7a39eda`, saiu em 03/09/2026 por
+decisão do projeto: uma consulta, uma resposta. Com ele saíram o parâmetro
+`deslocamento` da rota, o `OFFSET` da consulta por pauta e o campo `proximo` da
+resposta. O teto de cinco é aplicado **no servidor**, em três pontos: o `LIMIT`
+da consulta por pauta, o teto que `src/interpreta-ids.js` respeita ao ler a
+escolha do modelo, e um corte final em `POR_RESPOSTA` antes de montar a
+resposta do modo pergunta — este último para que linha de cache antiga com mais
+de cinco ids não passe. Nenhum parâmetro do corpo da requisição altera esse
+teto.
 
 Nos dois, **cinco trechos por resposta**, em **uma lista só** — a etiqueta de
 `explorar.etiqueta_unica` ("Insights do acervo"). O tipo do trecho não aparece

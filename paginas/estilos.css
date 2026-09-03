@@ -420,13 +420,6 @@ section.bloco { margin: 0 0 var(--espaco-6); }
   margin: var(--espaco-4) 0 0; font-size: var(--texto-p); font-style: italic;
   color: var(--cor-texto-suave); max-width: var(--largura-texto);
 }
-.resultado .ver-mais {
-  font: inherit; font-weight: var(--peso-forte); font-size: var(--texto-m);
-  margin-top: var(--espaco-4); cursor: pointer;
-  border: var(--borda-cartao) solid var(--cor-borda-forte); border-radius: var(--raio-pilula);
-  background: transparent; padding: var(--espaco-2) var(--espaco-4);
-}
-.resultado .ver-mais:hover { background: var(--rosa); color: var(--sobre-rosa); }
 
 /* ---------- Barra lateral: voltar e compartilhar ----------
    Duas peças, uma regra: a coluna de ícones à direita e o botão de voltar na
