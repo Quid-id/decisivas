@@ -112,7 +112,7 @@ Três larguras testadas: 390, 820, 1280. Em 390: cards em coluna única, menu co
 
 ### Público 70+
 
-Nome na tela e slug `70-mais`. O identificador `60+` no banco permanece até a migração 005, depois do beta; `vocabulario.json` faz a ponte (`id: "60+"`, `slug: "70-mais"`, `nome: "70+"`).
+Nome na tela e slug `70-mais`. O identificador `60+` no banco permanece até a migração 006, depois do beta (renumerada: a 005 é o cache de perguntas da etapa 10); `vocabulario.json` faz a ponte (`id: "60+"`, `slug: "70-mais"`, `nome: "70+"`).
 
 Critério de aceitação: 20 páginas geradas do JSON, sem `[preencher]` fora de "quem faz", contato, assinatura e id do vídeo; nenhuma chamada a modelo em nenhuma rota; barra de compartilhamento respeitando cabeçalho e rodapé; três larguras conferidas com captura; Lighthouse de acessibilidade sem erro de contraste nos cards pintados.
 

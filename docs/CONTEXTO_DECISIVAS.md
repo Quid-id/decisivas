@@ -46,7 +46,7 @@ Ficam fora também: avaliação ou aprovação de governo ou gestão específica
 | `mulheres beneficiárias` | Mulheres beneficiárias | laranja | Até 2 salários mínimos, inclusive CLT. Renda, cuidado e proteção social |
 | `mulheres de 2 a 5 salários mínimos` | Mulheres de 2 a 5 SM | roxo | Microempreendedoras e trabalhadoras de renda média. Trabalho, renda e cuidado |
 
-O identificador `60+` no banco muda para `70+` na migração 005, depois do beta. A regra de renda que separa os dois públicos femininos é interna e não vai para a tela.
+O identificador `60+` no banco muda para `70+` na migração 006, depois do beta (a 005 é o cache de perguntas da etapa 10). A regra de renda que separa os dois públicos femininos é interna e não vai para a tela.
 
 ### Os cinco temas
 
@@ -87,7 +87,7 @@ Quando o acervo não sustenta um bloco, a página **mostra o que existe e cala s
 
 **O acervo fica.** É a base auditável de tudo o que está escrito e do recurso Explorar.
 
-**Explorar o acervo devolve trechos, não prosa.** O que quebrou foi o modelo redigindo. Escolher e ordenar trechos é seguro; escrever não é.
+**Explorar o acervo devolve trechos, não prosa.** O que quebrou foi o modelo redigindo. Escolher e ordenar trechos é seguro; escrever não é. Ligado na etapa 10, dentro de cada página de caminho, em dois modos: botões de pauta, que consultam o banco direto, sem modelo; e pergunta livre, em que o modelo recebe a pergunta e a lista de trechos daquele cruzamento e responde **só com uma lista de números**. Qualquer outra forma de resposta é descartada e a tela diz que não há resultado — o modelo não tem canal para escrever numa página. A pergunta passa pela lista de termos bloqueados antes de qualquer coisa, e os trechos devolvidos passam por ela depois; há limite por hora, e o registro nunca guarda quem perguntou.
 
 **Sem cookie, sem rastreamento, sem script de terceiro.** Fonte tipográfica servida pelo site. Vídeo do YouTube em modo sem cookie, e **só na página Sobre**: a janela de abertura no Início saiu, porque atrapalhava a primeira escolha e o vídeo explica o projeto, que é assunto do Sobre. Compartilhamento por link simples. Por isso o aviso de privacidade é informativo, não um pedido de consentimento — e ele aparece só no primeiro acesso: ao clicar em "Entendi", o navegador guarda a marca de que o aviso foi visto (`localStorage`, com a data). Essa marca é a **única** coisa que o site guarda no aparelho de quem navega; não é cookie, não vai a servidor nenhum, e a política de privacidade declara isso em uma frase.
 
@@ -125,7 +125,7 @@ O repositório é a fonte de verdade; o Claude Code lê arquivos, não conversas
 
 **Em produção de conteúdo:** as 20 páginas escritas (`DECISIVAS_20_paginas_v1.docx`), em revisão pela equipe e pelo jurídico.
 
-**Próximas etapas:** 8A limpeza e migração 004; 8B páginas fixas em cards, compartilhamento, privacidade, responsivo; 8C verificação e publicação — as três entregues. A verificação de conteúdo roda no build: estrutura dos JSON, varredura de `BLOCKED_TERMS` sobre todo o texto de `conteudo/` e da configuração (zero ocorrências, e o build falha se achar) e a lista de pendências impressa no fim. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (70+).
+**Próximas etapas:** 8A limpeza e migração 004; 8B páginas fixas em cards, compartilhamento, privacidade, responsivo; 8C verificação e publicação — as três entregues. A etapa **10, Explorar o acervo, entra no beta**: rota `POST /api/explorar` sob `AGENT_ENABLED`, cache de perguntas na tabela `consultas` (migração 005, a aplicar no remoto antes do deploy) e o modelo restrito a escolher trechos. A verificação de conteúdo roda no build: estrutura dos JSON, varredura de `BLOCKED_TERMS` sobre todo o texto de `conteudo/` e da configuração (zero ocorrências, e o build falha se achar) e a lista de pendências impressa no fim. Depois do beta: 9 CMS, 10 Explorar o acervo, 11 migração 005 (70+).
 
 **Pendente de conteúdo:** "quem faz" no Sobre, contato do rodapé, código de incorporação do vídeo. Os assets da identidade chegaram em 02/09/2026 — logotipos, favicon, três faixas de banner e os quatro retratos duotone dos públicos; faltam só os logotipos da Quid e do BRIEF em off-white.
 

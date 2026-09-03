@@ -82,6 +82,9 @@ async function main() {
   // O rodapé e a barra lateral são iguais em toda tela: montados uma vez.
   // O cabeçalho depende da página que está aberta, por causa do aria-current.
   const comum = {
+    // Os parciais seguem no pacote: o bloco Explorar é montado por caminho,
+    // com o público, o tema e as pautas daquela página.
+    parciais,
     cabeca: (meta) => monta.cabeca(parciais, configuracao, meta),
     cabecalho: (atual) => monta.cabecalho(parciais, configuracao, atual),
     rodape: monta.rodape(parciais, configuracao),
@@ -183,8 +186,9 @@ async function main() {
   }
 
   // O que falta redigir ou falta de asset, listado no fim para a equipe ver
-  // sem precisar abrir tela.
-  const pendencias = pendentes();
+  // sem precisar abrir tela. Junta o que apareceu numa tela com o que está
+  // marcado nas fontes e só aparece em tempo de execução.
+  const pendencias = [...new Set([...pendentes(), ...verificaConteudo.pendenciasNaFonte()])];
   if (pendencias.length) {
     console.log(`pendências na tela (${pendencias.length}):`);
     for (const pendencia of pendencias) console.log(`  - ${pendencia}`);

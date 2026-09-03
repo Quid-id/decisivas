@@ -92,20 +92,41 @@
     "botao": "Ir para o início"
   },
   "explorar": {
+    "_leia_me": "O bloco Explorar o acervo, ligado no beta (etapa 10). Dois modos: botões de pauta, que consultam o banco direto, sem modelo; e pergunta livre, em que o modelo ESCOLHE trechos do acervo e devolve só uma lista de números — nunca escreve texto. Todo texto que aparece na tela está aqui.",
     "titulo": "Explorar o acervo",
     "texto": "Esta página é um recorte. O acervo tem {trechos} trechos sobre este cruzamento, {achados} deles achados de pesquisa. Escolha um assunto ou escreva o que procura: a resposta traz só trechos da pesquisa, com a origem de cada um.",
     "rotulo_campo": "O que você procura no acervo",
     "exemplo_campo": "Ex.: o que a pesquisa mostra sobre este tema",
     "botao": "Quero explorar mais",
-    "aviso_desligado": "Este recurso chega em breve. No beta, a página traz o recorte já revisado; explorar o acervo inteiro vem depois.",
-    "aviso_ia": "Seleção feita com apoio de inteligência artificial, apenas com trechos do acervo de pesquisa do DECISIVAS. Não indica voto nem menciona candidaturas.",
+    "botao_ver_mais": "Ver mais",
+    "rotulo_pauta": "Trechos do acervo de pesquisa do DECISIVAS, sem edição.",
+    "rotulo_pergunta": "Seleção feita com apoio de inteligência artificial, apenas com trechos do acervo de pesquisa do DECISIVAS. Não indica voto nem menciona candidaturas.",
+    "aviso_sem_resultado": "O acervo não tem trechos sobre isso para este cruzamento. Tente um dos assuntos acima.",
+    "aviso_fora_do_escopo": "A plataforma não trata de candidatos, partidos ou governos. Ela ajuda a falar com públicos sobre temas.",
+    "aviso_pergunta_curta": "Escreva um pouco mais: o que você quer saber sobre este público e este tema?",
+    "aviso_limite": "Você fez muitas perguntas em pouco tempo. Aguarde alguns minutos ou use os assuntos acima.",
+    "aviso_erro": "Não foi possível consultar o acervo agora. Tente de novo em instantes.",
+    "aviso_desligado": "A consulta ao acervo está temporariamente indisponível.",
+    "aviso_sem_pautas": "Sem pautas etiquetadas neste cruzamento.",
     "etiquetas": {
       "achado": "Achado",
-      "verbatim": "Depoimento",
       "funciona": "O que funciona",
-      "afasta": "O que afasta"
+      "afasta": "O que afasta",
+      "verbatim": "Depoimento",
+      "contexto": "Contexto"
     },
-    "aviso_sem_pautas": "Sem pautas etiquetadas neste cruzamento."
+    "origens": {
+      "D01": "Dossiê Macronarrativas, Quid, 2026",
+      "D03": "Pesquisa nacional de opinião, novembro de 2025",
+      "D04": "Análise semiótica, jovens, 2026",
+      "D06": "Grupos focais com jovens, 2026",
+      "D07": "Pesquisa nacional de opinião, novembro de 2025",
+      "D09": "Grupos focais com pessoas de 70 anos ou mais, agosto de 2026",
+      "D10": "Análise semiótica, mulheres beneficiárias, 2026",
+      "D11": "Grupos focais com mulheres beneficiárias, 2026",
+      "D12": "Análise semiótica e escuta digital, mulheres trabalhadoras, 2026",
+      "D13": "Grupos focais com mulheres trabalhadoras, 2026"
+    }
   },
   "compartilhar": {
     "rotulo": "Compartilhar esta página",

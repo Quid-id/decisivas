@@ -1,0 +1,159 @@
+<!-- Explorar o acervo (etapa 10). Ligado no beta. Dois modos: os botões de
+     pauta consultam o banco direto, sem modelo; a pergunta livre passa pelo
+     modelo, que só ESCOLHE trechos — nunca escreve. Todo texto vem de
+     dados/configuracao.json (rótulos, avisos e etiquetas) ou da resposta da
+     rota, que os lê da mesma fonte. Nenhuma palavra escrita aqui. -->
+<section class="bloco explorar" id="explorar" data-publico="{{ID_PUBLICO}}" data-tema="{{ID_TEMA}}" aria-labelledby="titulo-explorar">
+  <h2 id="titulo-explorar">{{TITULO_EXPLORAR}}</h2>
+  <p class="apoio-explorar">{{TEXTO_EXPLORAR}}</p>
+  <div class="atalhos">
+{{PAUTAS}}
+  </div>
+  <div class="campo">
+    <label class="sr" for="pergunta-acervo">{{ROTULO_CAMPO_EXPLORAR}}</label>
+    <input id="pergunta-acervo" placeholder="{{EXEMPLO_CAMPO_EXPLORAR}}" autocomplete="off">
+    <button type="button" id="explorar-enviar">{{BOTAO_EXPLORAR}}</button>
+  </div>
+  <div class="resultado" id="explorar-resultado" aria-live="polite" hidden></div>
+</section>
+<script>
+  (function () {
+    var TEXTOS = window.CONFIGURACAO.explorar;
+    var bloco = document.getElementById("explorar");
+    var campo = document.getElementById("pergunta-acervo");
+    var enviar = document.getElementById("explorar-enviar");
+    var saida = document.getElementById("explorar-resultado");
+    var publico = bloco.dataset.publico;
+    var tema = bloco.dataset.tema;
+
+    // Estado de carregando: o botão fica ocupado e desabilitado. Sem trocar
+    // rótulo, porque rótulo é texto e texto vive na configuração.
+    function ocupado(botao, sim) {
+      botao.disabled = sim;
+      if (sim) botao.setAttribute("aria-busy", "true");
+      else botao.removeAttribute("aria-busy");
+    }
+
+    function elemento(tag, classe, texto) {
+      var e = document.createElement(tag);
+      if (classe) e.className = classe;
+      // textContent, nunca innerHTML: o que entra aqui é texto do acervo.
+      if (texto !== undefined && texto !== null) e.textContent = texto;
+      return e;
+    }
+
+    function limpa() {
+      saida.textContent = "";
+      saida.hidden = false;
+    }
+
+    // Os grupos já na tela, por etiqueta: é o que permite ao "Ver mais"
+    // acrescentar itens no grupo certo em vez de repetir o título.
+    var grupos = {};
+
+    function mostraGrupos(lista) {
+      lista.forEach(function (grupo) {
+        var itens = grupos[grupo.etiqueta];
+        if (!itens) {
+          saida.appendChild(elemento("h3", "etiqueta", grupo.etiqueta));
+          itens = elemento("div", "trechos");
+          saida.appendChild(itens);
+          grupos[grupo.etiqueta] = itens;
+        }
+        grupo.itens.forEach(function (item) {
+          var caixa = elemento("div", "trecho");
+          caixa.appendChild(elemento("p", null, item.texto));
+          caixa.appendChild(elemento("p", "origem", item.origem));
+          itens.appendChild(caixa);
+        });
+      });
+    }
+
+    function mostraRodape(dados, refaz) {
+      if (dados.lacuna) saida.appendChild(elemento("p", "aviso-acervo", dados.lacuna));
+      if (dados.proximo !== null && dados.proximo !== undefined) {
+        var mais = elemento("button", "ver-mais", TEXTOS.botao_ver_mais);
+        mais.type = "button";
+        mais.addEventListener("click", function () {
+          ocupado(mais, true);
+          refaz(dados.proximo, mais);
+        });
+        saida.appendChild(mais);
+      }
+      if (dados.rotulo) saida.appendChild(elemento("p", "rotulo-acervo", dados.rotulo));
+    }
+
+    async function consulta(corpo) {
+      var r = await fetch("/api/explorar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo),
+      });
+      var dados = await r.json();
+      // A rota devolve o aviso pronto, da configuração, tanto no sucesso
+      // quanto no erro: aqui nunca se escreve mensagem.
+      if (dados.erro) return { grupos: [], lacuna: dados.aviso, rotulo: null };
+      return dados;
+    }
+
+    function apaga(rodapes) {
+      [].forEach.call(saida.querySelectorAll(".ver-mais, .rotulo-acervo, .aviso-acervo"), function (e) {
+        e.remove();
+      });
+    }
+
+    async function pedePauta(pauta, deslocamento, botao) {
+      try {
+        if (!deslocamento) {
+          grupos = {};
+          limpa();
+        } else {
+          apaga();
+        }
+        var dados = await consulta({ publico: publico, tema: tema, pauta: pauta, deslocamento: deslocamento });
+        mostraGrupos(dados.grupos || []);
+        mostraRodape(dados, function (proximo, b) {
+          pedePauta(pauta, proximo, b);
+        });
+      } catch (e) {
+        falha();
+      } finally {
+        if (botao) ocupado(botao, false);
+      }
+    }
+
+    async function pedePergunta() {
+      ocupado(enviar, true);
+      try {
+        grupos = {};
+        limpa();
+        var dados = await consulta({ publico: publico, tema: tema, pergunta: campo.value });
+        mostraGrupos(dados.grupos || []);
+        mostraRodape(dados, function () {});
+      } catch (e) {
+        falha();
+      } finally {
+        ocupado(enviar, false);
+      }
+    }
+
+    // Falha de rede: a mensagem é a da configuração, nunca texto técnico.
+    function falha() {
+      limpa();
+      grupos = {};
+      saida.appendChild(elemento("p", "aviso-acervo", TEXTOS.aviso_erro));
+    }
+
+    [].forEach.call(bloco.querySelectorAll(".atalhos button"), function (botao) {
+      botao.addEventListener("click", function () {
+        ocupado(botao, true);
+        pedePauta(botao.dataset.pauta, 0, botao);
+      });
+    });
+
+    enviar.addEventListener("click", pedePergunta);
+    campo.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") pedePergunta();
+    });
+  })();
+</script>

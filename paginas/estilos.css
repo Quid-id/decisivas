@@ -264,7 +264,7 @@ section.bloco { margin: 0 0 var(--espaco-6); }
 .resumo ul { margin: 0; padding-left: var(--espaco-4); }
 .resumo li { margin: var(--espaco-2) 0; font-size: var(--texto-prosa); }
 
-/* ---------- Explorar o acervo (desligado no beta) ---------- */
+/* ---------- Explorar o acervo (etapa 10, ligado) ---------- */
 .explorar {
   background: var(--cor-superficie); border: var(--borda-grossa) solid var(--cor-borda-forte);
   border-radius: var(--raio-card-g); padding: var(--espaco-4); box-shadow: var(--sombra-dura-g);
@@ -288,9 +288,46 @@ section.bloco { margin: 0 0 var(--espaco-6); }
   background: var(--cor-acao-campo); color: var(--sobre-amarelo);
   border-radius: var(--raio-campo); padding: 0 var(--espaco-4);
 }
-/* Desligado no beta: os controles aparecem, e não fazem nada. */
-.explorar[data-ligado="nao"] button, .explorar[data-ligado="nao"] input { opacity: .5; cursor: not-allowed; }
-.explorar .em-breve { font-size: var(--texto-m); color: var(--cor-texto-suave); margin: var(--espaco-3) 0 0; font-style: italic; }
+.atalhos button, .campo button { cursor: pointer; }
+.atalhos button:hover, .campo button:hover { background: var(--rosa); color: var(--sobre-rosa); }
+/* Estado de carregando: o botão fica ocupado, sem trocar rótulo — rótulo é
+   texto, e texto vive na configuração. */
+[aria-busy="true"] { opacity: .55; cursor: progress; }
+.explorar button[disabled] { cursor: default; }
+
+/* O resultado: um título por etiqueta e os trechos abaixo, cada um com a
+   origem em tipo menor. Nada aqui é escrito no CSS nem no script: o texto é o
+   do acervo e as etiquetas vêm da configuração. */
+.resultado { margin-top: var(--espaco-4); }
+.resultado .etiqueta {
+  font-size: var(--texto-p); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--cor-texto-suave); font-weight: var(--peso-normal);
+  margin: var(--espaco-4) 0 var(--espaco-2);
+}
+.resultado .trechos { display: grid; gap: var(--espaco-3); }
+.resultado .trecho {
+  background: var(--cor-fundo); border: var(--borda-cartao) solid var(--cor-borda-forte);
+  border-radius: var(--raio-card); padding: var(--espaco-3) var(--espaco-4);
+}
+.resultado .trecho p { margin: 0; font-size: var(--texto-card); line-height: 1.5; }
+.resultado .trecho .origem {
+  margin-top: var(--espaco-2); font-size: var(--texto-p); color: var(--cor-texto-suave);
+}
+.resultado .aviso-acervo {
+  margin: var(--espaco-4) 0 0; font-size: var(--texto-m); color: var(--cor-texto-suave);
+}
+/* Rótulo de IA e de origem do acervo, no fim do resultado (regra 7). */
+.resultado .rotulo-acervo {
+  margin: var(--espaco-4) 0 0; font-size: var(--texto-p); font-style: italic;
+  color: var(--cor-texto-suave); max-width: var(--largura-texto);
+}
+.resultado .ver-mais {
+  font: inherit; font-weight: var(--peso-forte); font-size: var(--texto-m);
+  margin-top: var(--espaco-4); cursor: pointer;
+  border: var(--borda-cartao) solid var(--cor-borda-forte); border-radius: var(--raio-pilula);
+  background: transparent; padding: var(--espaco-2) var(--espaco-4);
+}
+.resultado .ver-mais:hover { background: var(--rosa); color: var(--sobre-rosa); }
 
 /* ---------- Barra lateral: voltar e compartilhar ----------
    Mesma peça, mesma regra de aparecer e sumir: o voltar é o primeiro botão da

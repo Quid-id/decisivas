@@ -26,9 +26,9 @@ directory = "./public"
 binding = "ASSETS"
 run_worker_first = ["/api/*"]
 
-# Banco D1 com o acervo etiquetado (schema em docs/02-schema.sql). O Worker
-# não consulta o banco nesta etapa: o binding fica para o "Explorar o acervo"
-# (etapa 10), que é o único a voltar a lê-lo.
+# Banco D1 com o acervo etiquetado (schema em docs/02-schema.sql). Quem o
+# consulta é a rota /api/explorar: os trechos do cruzamento, o cache de
+# perguntas (tabela `consultas`, migração 005) e o registro.
 [[d1_databases]]
 binding = "DB"
 database_name = "decisivas"
@@ -37,14 +37,22 @@ database_id = "adaab799-bffa-4f43-88eb-1cf9607e732c"
 # Variáveis de ambiente NÃO secretas. Segredos (OPENROUTER_API_KEY etc.)
 # nunca entram aqui: local em .dev.vars, produção no painel do Cloudflare.
 [vars]
-# Interruptor de desligamento. Depois da etapa 8A ele governa uma coisa só: a
-# rota /api/explorar, o "Explorar o acervo", que a 8B cria desligada. As
-# páginas são estáticas e não passam por ele.
+# Interruptor de desligamento. Governa uma coisa só: a rota /api/explorar, o
+# "Explorar o acervo". As páginas são estáticas e não passam por ele.
 AGENT_ENABLED = "true"
 
+# O modelo do modo pergunta, fixo, sem roteamento. Ele não redige: recebe a
+# pergunta e a lista de trechos do cruzamento e devolve só uma lista de
+# números (prompts/explorar.txt).
+MODEL_ID = "openai/gpt-5.6-sol"
+
 # Saíram na etapa 8A, com a geração de página por modelo:
-# MODEL_ID              — não há chamada a modelo em nenhuma rota; volta na 10
-# CACHE_ENABLED         — as tabelas de cache saíram na migração 004
+# CACHE_ENABLED         — as tabelas de cache saíram na migração 004; o cache
+#                         de perguntas da etapa 10 é sempre ligado
 # ACERVO_ATUALIZADO_EM  — a data que a página mostra é a da revisão do texto,
 #                         que vem de conteudo/; a versão do acervo continua em
 #                         dados/versao-acervo.txt
+#
+# SIMULAR_MODELO é instrumento de desenvolvimento e NÃO entra aqui: fica em
+# .dev.vars, fora do versionamento. Com ele, a rota escolhe trechos por
+# palavra, sem rede e sem chave, para exercitar o caminho inteiro.

@@ -94,26 +94,28 @@ function blocoResumo(linhas) {
 }
 
 // Botões de pauta do "Explorar o acervo": os nomes são o vocabulário fechado
-// das 59 pautas, lido do acervo — não são texto escrito aqui.
+// das 59 pautas, lido do acervo — não são texto escrito aqui. O nome também
+// entra em data-pauta, porque é o que o script manda para a rota.
 function botoesDePauta(pautas, configuracao) {
   if (!pautas.length) {
     return `      <span class="meta">${escapa(configuracao.explorar.aviso_sem_pautas)}</span>`;
   }
   return pautas
-    .map((pauta) => `      <button type="button" disabled>${escapa(pauta)}</button>`)
+    .map(
+      (pauta) =>
+        `      <button type="button" data-pauta="${escapa(pauta)}">${escapa(pauta)}</button>`
+    )
     .join("\n");
 }
 
 // O texto do "Explorar o acervo" traz o tamanho do acervo neste cruzamento.
 // Os dois números entram nos lugares marcados na configuração.
-function textoDoExplorar(configuracao, resumoDoCruzamento) {
+function textoDoExplorarSemEscapar(configuracao, resumoDoCruzamento) {
   const trechos = resumoDoCruzamento ? resumoDoCruzamento.trechos : 0;
   const achados = resumoDoCruzamento ? resumoDoCruzamento.achados : 0;
-  return escapa(
-    configuracao.explorar.texto
-      .replace("{trechos}", String(trechos))
-      .replace("{achados}", String(achados))
-  );
+  return configuracao.explorar.texto
+    .replace("{trechos}", String(trechos))
+    .replace("{achados}", String(achados));
 }
 
 // ---------------------------------------------------------------------------
@@ -160,13 +162,12 @@ function montaCaminho(modelo, comum, configuracao, { publico, tema, dados, pagin
     ),
     BLOCO_COMO_CHEGAR: bloco(blocos.como_chegar, grade(dados.como_chegar, "publico", null)),
     BLOCO_RESUMO: bloco(blocos.resumo, blocoResumo(pagina.resumo)),
-    TITULO_EXPLORAR: escapa(configuracao.explorar.titulo),
-    TEXTO_EXPLORAR: textoDoExplorar(configuracao, resumoDoCruzamento),
-    PAUTAS: botoesDePauta(resumoDoCruzamento ? resumoDoCruzamento.pautas : [], configuracao),
-    ROTULO_CAMPO_EXPLORAR: escapa(configuracao.explorar.rotulo_campo),
-    EXEMPLO_CAMPO_EXPLORAR: escapa(configuracao.explorar.exemplo_campo),
-    BOTAO_EXPLORAR: escapa(configuracao.explorar.botao),
-    AVISO_EXPLORAR: escapa(configuracao.explorar.aviso_desligado),
+    EXPLORAR: monta.explorar(comum.parciais, configuracao, {
+      idPublico: publico.id,
+      idTema: tema.id,
+      texto: textoDoExplorarSemEscapar(configuracao, resumoDoCruzamento),
+      pautas: botoesDePauta(resumoDoCruzamento ? resumoDoCruzamento.pautas : [], configuracao),
+    }),
   });
 }
 

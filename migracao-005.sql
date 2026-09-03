@@ -1,0 +1,3 @@
+SELECT (SELECT COUNT(*) FROM trechos) AS trechos, (SELECT COUNT(*) FROM pautas) AS pautas, (SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'consultas') AS consultas_ja_existe;
+CREATE TABLE consultas (publico TEXT NOT NULL, macronarrativa TEXT NOT NULL, pergunta TEXT NOT NULL, ids TEXT NOT NULL, versao_acervo TEXT NOT NULL, modelo TEXT NOT NULL, criado_em TEXT NOT NULL DEFAULT (datetime('now')), PRIMARY KEY (publico, macronarrativa, pergunta));
+SELECT (SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'consultas') AS consultas, (SELECT COUNT(*) FROM consultas) AS linhas, (SELECT COUNT(*) FROM trechos) AS trechos, (SELECT COUNT(*) FROM pautas) AS pautas;

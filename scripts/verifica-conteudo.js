@@ -239,6 +239,25 @@ function varre() {
 
 // ---------------------------------------------------------------------------
 
+// O que falta redigir nas FONTES, e não só o que já apareceu numa tela: aviso
+// que só existe em tempo de execução (limite, erro, pergunta curta) e o mapa de
+// origens do acervo nunca passam pelo build, e ficariam invisíveis na lista de
+// pendências. Aqui eles aparecem, com arquivo e campo.
+function pendenciasNaFonte() {
+  const achadas = [];
+  for (const arquivo of arquivosVarridos()) {
+    const campos = [];
+    textos(JSON.parse(fs.readFileSync(arquivo, "utf8")), "", campos);
+    for (const { campo, texto } of campos) {
+      // `pendencias` guarda o FORMATO do aviso de pendência, não uma
+      // pendência: o "[preencher]" dele é o prefixo que a tela usa.
+      if (campo.startsWith("pendencias")) continue;
+      if (String(texto).trim().startsWith("[preencher")) achadas.push(`${arquivo} → ${campo}`);
+    }
+  }
+  return achadas;
+}
+
 function verifica({ vocabulario }) {
   console.log(`ambiente do build: ${ambienteDoBuild()}`);
 
@@ -270,7 +289,15 @@ function verifica({ vocabulario }) {
   return { paginas, ...resultado };
 }
 
-module.exports = { verifica, varre, ehSigla, listaDeTermos, ambienteDoBuild, ehBuildQuePublica };
+module.exports = {
+  verifica,
+  varre,
+  ehSigla,
+  listaDeTermos,
+  ambienteDoBuild,
+  ehBuildQuePublica,
+  pendenciasNaFonte,
+};
 
 if (require.main === module) {
   const vocabulario = JSON.parse(fs.readFileSync("dados/vocabulario.json", "utf8"));

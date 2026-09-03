@@ -1,7 +1,7 @@
 -- DECISIVAS — schema do banco D1
 -- D1 é SQLite gerenciado pelo Cloudflare. Este arquivo descreve o estado do
--- banco DEPOIS da migração 004 (etapa 8A). Aplicar em banco vazio produz
--- exatamente o mesmo schema que as migrações 001 a 004 produzem num banco
+-- banco DEPOIS da migração 005 (etapa 10). Aplicar em banco vazio produz
+-- exatamente o mesmo schema que as migrações 001 a 005 produzem num banco
 -- existente. As listas fechadas abaixo espelham dados/vocabulario.json, que é
 -- a fonte única lida pelos scripts e pelo build.
 --
@@ -102,20 +102,36 @@ CREATE INDEX idx_trechos_match ON trechos (publico, macronarrativa);
 CREATE INDEX idx_trechos_midia ON trechos (publico, pauta);
 
 -- Registro do que a plataforma entregou. Sem IP, sem identidade.
--- Depois da etapa 8A nada escreve aqui: as páginas são estáticas. A tabela
--- fica para o "Explorar o acervo" (etapa 10), que volta a registrar pergunta
--- e resposta, sem identificar quem perguntou.
+-- Quem escreve aqui é a rota /api/explorar (etapa 10): uma linha por consulta,
+-- com o modo, o alvo (pauta ou pergunta normalizada) e os ids devolvidos.
+-- Pergunta barrada pela lista de termos não gera linha nenhuma.
 CREATE TABLE registros (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   criado_em     TEXT NOT NULL DEFAULT (datetime('now')),
-  rota          TEXT NOT NULL,              -- 'match' ou 'formato'
+  rota          TEXT NOT NULL,              -- 'explorar' (era 'match' ou 'formato' até a 8A)
   publico       TEXT,
   macronarrativa TEXT,
-  formato       TEXT,                       -- só na rota formato
+  formato       TEXT,                       -- na etapa 10 guarda o modo: 'pauta' ou 'pergunta'
   ids_trechos   TEXT,                       -- lista dos ids usados, separada por vírgula
-  modelo        TEXT,                       -- qual modelo respondeu (MODEL_ID)
-  origem        TEXT,                       -- 'geracao' (modelo/lacuna por código) ou 'cache'
-  resposta      TEXT NOT NULL               -- o texto integral entregue
+  modelo        TEXT,                       -- qual modelo respondeu (MODEL_ID); nulo no modo pauta
+  origem        TEXT,                       -- 'banco', 'modelo' ou 'cache'
+  resposta      TEXT NOT NULL               -- JSON com modo, alvo, ids e removidos pela varredura
+);
+
+-- Cache das perguntas livres do "Explorar o acervo" (migração 005, etapa 10).
+-- Guarda IDS do acervo, nunca texto de resposta: o texto que vai à tela é
+-- sempre lido de `trechos` na hora. A validade é a versão do acervo — carga
+-- nova invalida o que estava guardado. A pergunta é a normalizada (minúsculas,
+-- sem acento, espaços simples), e não identifica quem perguntou.
+CREATE TABLE consultas (
+  publico        TEXT NOT NULL,
+  macronarrativa TEXT NOT NULL,
+  pergunta       TEXT NOT NULL,
+  ids            TEXT NOT NULL,             -- ids escolhidos, separados por vírgula; vazio = sem resultado
+  versao_acervo  TEXT NOT NULL,             -- dados/versao-acervo.txt na hora da consulta
+  modelo         TEXT NOT NULL,             -- MODEL_ID que escolheu, ou 'simulacao' em desenvolvimento
+  criado_em      TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (publico, macronarrativa, pergunta)
 );
 
 -- ---------------------------------------------------------------------------
